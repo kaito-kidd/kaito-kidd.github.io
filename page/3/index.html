@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kaito&#39;s Blog">
+<meta property="og:url" content="http://kaito-kidd.com/page/3/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Kaito">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/page/3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/08/23/computer-system-cpu-cache/" class="post-title-link" itemprop="url">计算机系统基础（七）高速缓存Cache</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-23 17:24:38" itemprop="dateCreated datePublished" datetime="2018-08-23T17:24:38+08:00">2018-08-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/23/computer-system-cpu-cache/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（七）高速缓存Cache" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/23/computer-system-cpu-cache/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/23/computer-system-cpu-cache/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>从这篇文章开始，我们开始讲解存储器相关的知识。存储器在计算机中处于非常重要的位置，其中内存最为重要，其涉及到的内容主要包含高速缓存Cache和虚拟内存两大块，这篇文章先来看高速缓存Cache的基本原理。</p>
+</blockquote>
+<h1 id="存储器层次化结构"><a href="#存储器层次化结构" class="headerlink" title="存储器层次化结构"></a>存储器层次化结构</h1><p>存储器有很多种类，我们常见的有内存、磁盘，还有平时看不到的集成在CPU内部的寄存器、高速缓存等。</p>
+<p>正常来说，存储器的容量和性能应该伴随着CPU的速度和性能提升而提升，以匹配CPU的数据处理。但随着时间的推移，CPU和存储器在性能上的发展差异越来越大，存储器在性能增长越来越跟不上CPU性能发展的需要。</p>
+<p>那怎么办呢？</p>
+<p>为了缩小存储器和CPU之间的性能差距，通常在计算机内部采用层次化的存储器体系结构，以此来发挥出存储器的综合性能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/08/23/computer-system-cpu-cache/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/15/character-expression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/08/15/character-expression/" class="post-title-link" itemprop="url">计算机系统基础（六）字符的表示</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-15 13:59:28" itemprop="dateCreated datePublished" datetime="2018-08-15T13:59:28+08:00">2018-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/15/character-expression/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（六）字符的表示" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/15/character-expression/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/15/character-expression/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>之前的文章讲完了数字在计算机内部的表示方式，那英文、中文字符在计算机内部是如何表示的呢？这篇文章我们来看字符的表示方式。</p>
+</blockquote>
+<h1 id="西文字符"><a href="#西文字符" class="headerlink" title="西文字符"></a>西文字符</h1><p>西文字符主要由拉丁字母、数字、标点符号及一些特殊符号组成，它们统称为<strong>字符</strong>，所有字符的集合叫做<strong>字符集</strong>。</p>
+<p>但字符不能直接在计算机内部处理，必须对字符进行数字化编码，转换成二进制0/1序列，因此构成了字符和数字化编码对应的代码表，简称<strong>码表</strong>，码表中的字符与代码一一对应。</p>
+<p>世界各国都有自己的语言，即各国都有自己的字符，每个国家的字符组合起来也就产生了多种字符集。</p>
+<p>由于计算机是美国人发明的，所以对于英文字符，美国人制定了一个字符和二进制对应的码表，这个码表就是<strong>ASCII码</strong>，即美国标准信息交换码（American Standard Code for Information Interchange）。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/08/15/character-expression/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/14/decimal-expression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/08/14/decimal-expression/" class="post-title-link" itemprop="url">计算机系统基础（五）十进制数的表示</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-14 16:01:43" itemprop="dateCreated datePublished" datetime="2018-08-14T16:01:43+08:00">2018-08-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/14/decimal-expression/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（五）十进制数的表示" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/14/decimal-expression/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/14/decimal-expression/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>我们知道计算机中数字都是使用的二进制表示和运算，对于我们熟悉的十进制数字，可以通过数值进制公式进行转换后计算和显示。</p>
+<p>但除了这种编码方式之外，计算机有时为了显示和计算方便，对十进制还定义了新的编码方式：ASCII码字符表示、BCD码表示。这篇文章我们来了解一下这2种编码方式的特点。</p>
+</blockquote>
+<h1 id="ASCCI码字符表示"><a href="#ASCCI码字符表示" class="headerlink" title="ASCCI码字符表示"></a>ASCCI码字符表示</h1><p>如果只是对十进制数进行打印或显示，那么可以把十进制数看成字符串，直接用ASCII码表示，0<del>9分别对应ASCII码的30H</del>39H，这种表示方式，1位十进制用8位二进制数表示。</p>
+<p>用ASCII码表示的十进制又分为<strong>前分隔数字串</strong>和<strong>后嵌入数字串</strong>。</p>
+<h2 id="前分隔数字串"><a href="#前分隔数字串" class="headerlink" title="前分隔数字串"></a>前分隔数字串</h2><p>前分隔数字串将符号位单独用一个字节表示，放在数字串之前。</p>
+<p>正号（+）用ASCII码2B(H)表示，符号（-）用2D(H)表示。</p>
+<p>例如十进制数+236用前分隔数字串表示为<code>0010 1011 0011 0010 0011 0011 0011 0110</code>，对应的十六进制为<code>2B 32 33 36</code>，在内存中占用4个字节。</p>
+<p>十进制数-2369用前分隔数字串表示为<code>0010 1101 0011 0010 0011 0011 0011 0110 0011 1001</code>，对应的十六进制为<code>2D 32 33 36 39</code>，在内存中占用5个字节。</p>
+<p>可见，十进制数每增加一位，就要多一个字节表示对应数字。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/08/14/decimal-expression/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/08/computer-system-float-point/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/08/08/computer-system-float-point/" class="post-title-link" itemprop="url">计算机系统基础（四）浮点数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-08 15:46:33" itemprop="dateCreated datePublished" datetime="2018-08-08T15:46:33+08:00">2018-08-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/08/computer-system-float-point/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（四）浮点数" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/08/computer-system-float-point/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/08/computer-system-float-point/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在上一篇文章中，我们主要介绍了在计算机中使用定点数表示数字的方式。</p>
+<p>简单回顾一下，简单来说，用定点数表示数字时，会约定小数点的位置固定不变，整数部分和小数部分分别转换为二进制，就是定点数的结果。</p>
+<p>但用定点数表示小数时，存在数值范围、精度范围有限的缺点，所以在计算机中，我们一般使用「浮点数」来表示小数。</p>
+<p>这篇文章，我们就来详细看一下浮点数到底是如何表示小数的，以及浮点数的的范围和精度有多大。</p>
+<h1 id="什么是浮点数？"><a href="#什么是浮点数？" class="headerlink" title="什么是浮点数？"></a>什么是浮点数？</h1><p>首先，我们需要理解什么是浮点数？</p>
+<p>之前我们学习了定点数，其中「定点」指的是约定小数点位置固定不变。那浮点数的「浮点」就是指，其小数点的位置是可以是<strong>漂浮不定</strong>的。</p>
+<p>这怎么理解呢？</p>
+<p>其实，浮点数是采用科学计数法的方式来表示的，例如十进制小数 8.345，用科学计数法表示，可以有多种方式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">8.345 &#x3D; 8.345 * 10^0</span><br><span class="line">8.345 &#x3D; 83.45 * 10^-1</span><br><span class="line">8.345 &#x3D; 834.5 * 10^-2</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>看到了吗？用这种科学计数法的方式表示小数时，小数点的位置就变得「漂浮不定」了，这就是相对于定点数，浮点数名字的由来。</p>
+<p>使用同样的规则，对于二进制数，我们也可以用科学计数法表示，也就是说把基数 10 换成 2 即可。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/08/08/computer-system-float-point/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/07/23/computer-system-fixed-point/" class="post-title-link" itemprop="url">计算机系统基础（三）定点数</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-23 09:52:27" itemprop="dateCreated datePublished" datetime="2018-07-23T09:52:27+08:00">2018-07-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/23/computer-system-fixed-point/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（三）定点数" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/23/computer-system-fixed-point/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/23/computer-system-fixed-point/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在现实生活中，我们经常使用整数和小数，不知道你有没有思考过，这些数字在计算机中是如何存储的？</p>
+<p>我们学习计算机知识时，经常听到「定点数」和「浮点数」，它们之间有什么区别？</p>
+<p>平时说到整数，我们就说它是一个定点数，说到小数，就说它是一个浮点数，这种说法是正确的吗？</p>
+<p>这篇文章，我们先来看一下，「定点数」究竟与整数和小数有什么关系。</p>
+<h1 id="什么是定点数？"><a href="#什么是定点数？" class="headerlink" title="什么是定点数？"></a>什么是定点数？</h1><p>要想理解什么是「定点数」，首先，我们需要理解「定点」究竟是什么意思？</p>
+<p>我们都知道，数字既包括整数，又包括小数，而小数的精度范围要比整数大得多，所以如果我们想在计算机中，既能表示整数，也能表示小数，关键就在于这个<strong>小数点</strong>如何表示？</p>
+<p>于是人们想出一种方法，即<strong>约定计算机中小数点的位置</strong>，且这个位置固定不变，小数点前、后的数字，分别用二进制表示，然后组合起来就可以把这个数字在计算机中存储起来，这种表示方式叫做「定点」表示法，用这种方法表示的数字叫做「定点数」。</p>
+<p>也就是说「定」是指固定的意思，「点」是指小数点，<strong>小数点位置固定</strong>即定点数名字的由来。</p>
+<h1 id="定点数如何表示数字？"><a href="#定点数如何表示数字？" class="headerlink" title="定点数如何表示数字？"></a>定点数如何表示数字？</h1><p>既然定点数只是表示数字的一种方式，那试想，它可以表示整数吗？可以表示小数吗？</p>
+<p>答案是肯定的。</p>
+<p>定点数如果要表示整数或小数，分为以下三种情况：</p>
+<ol>
+<li>纯整数：例如整数100，小数点其实在最后一位，所以忽略不写</li>
+<li>纯小数：例如：0.123，小数点固定在最高位</li>
+<li>整数+小数：例如1.24、10.34，小数点在指定某个位置</li>
+</ol>
+<p>对于前两种情况，纯整数和纯小数，因为小数点固定在最低位和最高位，所以它们用定点数表示时，原理是相同的，只需要把整数部分、小数部分，按照十进制转二进制的规则，分别转换即可。</p>
+<p>而对于整数 + 小数的情况，用定点表示时，需要<strong>约定</strong>小数点的位置，才能在计算机中表示。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/07/23/computer-system-fixed-point/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" class="post-title-link" itemprop="url">计算机系统基础（二）数值进制和进制转换</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-17 09:58:52" itemprop="dateCreated datePublished" datetime="2018-07-17T09:58:52+08:00">2018-07-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（二）数值进制和进制转换" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="信息的二进制编码"><a href="#信息的二进制编码" class="headerlink" title="信息的二进制编码"></a>信息的二进制编码</h1><p>在计算机内部，所有信息都是采用二进制进行编码和计算的，有没有想过，为什么采用这种方式？</p>
+<p>其原因在于二进制只有两种状态，制造一个只有两个稳定状态的物理器件要比多个稳定状态的物理期间容易得多，使用高、低电位或脉冲有、无表示都很方便，能够很可靠的表示“0”和“1”。</p>
+<p>如果都采用二进制计算，那么我们平时使用的数字、符号甚至图片和视频，都应该通过某种方式转换成二进制，<br>才能得以让计算机运算。这种转换方式称为“编码”。</p>
+<p>我们人类角度看到的数据到计算机内部的数据转换如下：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531793546.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>这篇文章，我们先来分析数值型数据的进制与转换规则。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/12/computer-system-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/07/12/computer-system-summary/" class="post-title-link" itemprop="url">计算机系统基础（一）概览</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-12 12:10:17" itemprop="dateCreated datePublished" datetime="2018-07-12T12:10:17+08:00">2018-07-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/12/computer-system-summary/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（一）概览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/12/computer-system-summary/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/12/computer-system-summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>如果你想对计算机的组成和系统结构有个系统的了解，推荐你看一本书，叫做《深入理解计算机系统》。这本书也是计算机界的经典书籍，如果能吃透这本书里的内容，你会对计算机系统和软件开发有一个全新的认识。</p>
+</blockquote>
+<blockquote>
+<p>由于这本书不太容易学习，有很多程序员买了这本书，但可能读了一两个章节发现太过枯燥理解不了，便放下珍藏了。</p>
+<p>我和你一样，每次拿起这本书都刻意让自己学下去，但都败下阵来。</p>
+<p>后来在知乎发现有人指导如何阅读这本书时，有网友推荐了国人写的教材，与《深入理解计算机系统》内容非常类似，但更易读。</p>
+<p>这本书的作者叫袁春风，她是南京大学计算机系的教授，写过2本书《计算机组成与系统结构》（2010年出版)、《计算机系统基础》(2014年出版)，两者内容差不多，第二本更像是第一本的升级版。</p>
+<p>在阅读这2本书时，发现还是比较容易理解的，这个系列整理出了相关知识点，加深记忆以备忘。</p>
+</blockquote>
+<h1 id="计算机的功能和特性"><a href="#计算机的功能和特性" class="headerlink" title="计算机的功能和特性"></a>计算机的功能和特性</h1><p>我们现在使用计算机能做的事情非常多，能够看网页、听音乐、看视频、社交聊天，这背后其实都是对信息的处理。</p>
+<p>计算机背后是如何工作的呢？我们先来看计算机的一个简单定义：</p>
+<p>计算机是一种能自动化对数字信息进行运算和逻辑处理的高速处理装置，计算机处理的对象都是数字化信息。</p>
+<p>计算机的基本功能包括以下3个方面：</p>
+<ul>
+<li>数据处理：计算机最基本的功能，可以计算加减乘除等运算，也可以处理文字、数字、音乐、视频信息。</li>
+<li>数据存储：计算机能够自动工作的最基本保证，数据和程序事先被存储好，在需要时被取出自动执行。</li>
+<li>数据传送：计算机内部各功能部件之间的数据传输，以达到信息交换，计算机外部连接使得信息得以传输到另一台计算机，从而构建出了计算机网络。</li>
+</ul>
+<p>有了这些基本功能，计算机中肯定需要有对数据处理、数据存储、数据传送相对应的功能部件，它们分别是<strong>：算术逻辑运算器、存储器、总线和IO接口</strong>。</p>
+<p>计算机主要的核心部件都采用高速电子元器件制造，处理速度极快，这就为运算速度提供了基础保证。</p>
+<p>计算机可以处理各种信息，应用也极其广泛，只要现实世界中某个问题能找到相应的算法，就能编写成程序通过计算机执行算出结果，这为计算机的准确性和智能化提供了重要的基础。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/07/12/computer-system-summary/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/30/ascii-gb18030-unicode-utf8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/30/ascii-gb18030-unicode-utf8/" class="post-title-link" itemprop="url">字符集和字符编码：ASCII、GB18030、Unicode、UTF-8</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-30 16:00:35" itemprop="dateCreated datePublished" datetime="2018-05-30T16:00:35+08:00">2018-05-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">字符编码</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/30/ascii-gb18030-unicode-utf8/" class="post-meta-item leancloud_visitors" data-flag-title="字符集和字符编码：ASCII、GB18030、Unicode、UTF-8" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/30/ascii-gb18030-unicode-utf8/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/30/ascii-gb18030-unicode-utf8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>只要你是做软件开发的，就肯定听说过ASCII、Unicode、UTF-8、GBK这些字符编码，而且字符编码时刻与我们开发相关联。</p>
+<p>它们之间到底有什么区别？为什么会有这么多字符编码？这篇文章我们来看一下它们之间的的关系以及区别。</p>
+</blockquote>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><p>在开始之前，作为程序员，我希望大家能够先理清楚两个概念：<strong>字符集、字符编码</strong>。</p>
+<p>很多人搞不清楚这两者的关系与区别，以至于对于字符编码方面的知识了解不深，甚至混乱。</p>
+<h2 id="字符集"><a href="#字符集" class="headerlink" title="字符集"></a>字符集</h2><p>平时我们生活中使用的文字、标点符号、图形符号、数字，这些可以统称为<strong>字符</strong>。</p>
+<p>由非常多个字符组合后产生的集合，这个集合称为<strong>字符集</strong>。</p>
+<p>也就是说，我们可以人为的根据某个规则归纳一些我们使用的文字、符号，这些文字、符号的集合就称为一个字符集，并且可以根据不同的规则划分不同的字符集。</p>
+<h2 id="字符编码"><a href="#字符编码" class="headerlink" title="字符编码"></a>字符编码</h2><p>那字符编码是什么？</p>
+<p>我们知道计算机内部使用的是二进制运算，如果要想让计算机识别我们人类的文字、符号、数字，就需要一个转换规则，把我们人类使用的这些字符转换成计算机认识的二进制，也就是0和1。</p>
+<p>这个转换的规则就称为<strong>字符编码</strong>。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/30/ascii-gb18030-unicode-utf8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/21/python-advance-yield/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/21/python-advance-yield/" class="post-title-link" itemprop="url">Python技术进阶——如何正确使用yield？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-21 12:20:28" itemprop="dateCreated datePublished" datetime="2018-05-21T12:20:28+08:00">2018-05-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/21/python-advance-yield/" class="post-meta-item leancloud_visitors" data-flag-title="Python技术进阶——如何正确使用yield？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/21/python-advance-yield/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/21/python-advance-yield/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，<code>yield</code> 关键字的使用其实较为频繁，例如大集合的生成，简化代码结构、协程与并发都会用到它。</p>
+<p>但是，你是否真正了解 <code>yield</code> 的运行过程呢？</p>
+<p>这篇文章，我们就来看一下 <code>yield</code> 的运行流程，以及在开发中哪些场景适合使用 <code>yield</code>。</p>
+<h1 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h1><p>如果在一个方法内，包含了 <code>yield</code> 关键字，那么这个函数就是一个「生成器」。</p>
+<p>生成器其实就是一个特殊的迭代器，它可以像迭代器那样，迭代输出方法内的每个元素。</p>
+<p>如果你还不清楚「迭代器」是什么，可以参考我写的这篇文章：<a href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">Python进阶——迭代器和可迭代对象有什么区别？</a>。</p>
+<p>我们来看一个包含 <code>yield</code> 关键字的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成器</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line"></span><br><span class="line">g = gen(<span class="number">5</span>)      <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g)        <span class="comment"># &lt;generator object gen at 0x10bb46f50&gt;</span></span><br><span class="line">print(type(g))  <span class="comment"># &lt;type 'generator'&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 迭代生成器中的数据</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> g:</span><br><span class="line">    print(i)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># 0 1 2 3 4</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，在这个例子中，当我们执行 <code>g = gen(5)</code> 时，<code>gen</code> 中的代码其实并没有执行，此时我们只是创建了一个「生成器对象」，它的类型是 <code>generator</code>。</p>
+<p>然后，当我们执行 <code>for i in g</code>，每执行一次循环，就会执行到 <code>yield</code> 处，返回一次 <code>yield</code> 后面的值。</p>
+<p>这个迭代过程是和迭代器最大的区别。</p>
+<p>换句话说，如果我们想输出 5 个元素，在创建生成器时，这个 5 个元素其实还并没有产生，什么时候产生呢？只有在执行 <code>for</code> 循环遇到 <code>yield</code> 时，才会依次生成每个元素。</p>
+<p>此外，生成器除了和迭代器一样实现迭代数据之外，还包含了其他方法：</p>
+<ul>
+<li><code>generator.__next__()</code>：执行 <code>for</code> 时调用此方法，每次执行到 <code>yield</code> 就会停止，然后返回 <code>yield</code> 后面的值，如果没有数据可迭代，抛出 <code>StopIterator</code> 异常，<code>for</code> 循环结束</li>
+<li><code>generator.send(value)</code>：外部传入一个值到生成器内部，改变 <code>yield</code> 前面的值</li>
+<li><code>generator.throw(type[, value[, traceback]])</code>：外部向生成器抛出一个异常</li>
+<li><code>generator.close()</code>：关闭生成器</li>
+</ul>
+<p>通过使用生成器的这些方法，我们可以完成很多有意思的功能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/21/python-advance-yield/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/11/python-advance-process-thread/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/11/python-advance-process-thread/" class="post-title-link" itemprop="url">Python技术进阶——如何正确使用进程和线程？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-11 18:03:17" itemprop="dateCreated datePublished" datetime="2018-05-11T18:03:17+08:00">2018-05-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/11/python-advance-process-thread/" class="post-meta-item leancloud_visitors" data-flag-title="Python技术进阶——如何正确使用进程和线程？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/11/python-advance-process-thread/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/11/python-advance-process-thread/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>26 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>为了提高程序的运行效率，Python与其他语言一样，提供了多进程和多线程的开发方式，这篇文章我们来讲Python的多进程和多线程开发。</p>
+<h1 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h1><p>Python提供了<code>mutilprocessing</code>模块，为多进程编程提供了友好的API，并且提供了多进程之间信息同步和通信的相关组件，如<code>Queue</code>、<code>Event</code>、<code>Pool</code>、<code>Lock</code>、<code>Pipe</code>、<code>Semaphore</code>、<code>Condition</code>等模块。</p>
+<h2 id="函数当做进程"><a href="#函数当做进程" class="headerlink" title="函数当做进程"></a>函数当做进程</h2><p>Python中创建多进程的方式有2种：</p>
+<ul>
+<li>函数当做进程</li>
+<li>类当做进程</li>
+</ul>
+<p>逻辑简单的任务一般使用函数当做进程，逻辑较多或代码结构复杂的建议使用类当做进程。</p>
+<p>首先来看函数当做进程的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task</span><span class="params">(name)</span>:</span></span><br><span class="line">    s = random.randint(<span class="number">1</span>, <span class="number">10</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'pid: %s, name: %s, sleep %s ...'</span> % (os.getpid(), name, s)</span><br><span class="line">    time.sleep(s)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># 创建5个子进程执行</span></span><br><span class="line">    ps = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        p = Process(target=task, args=(<span class="string">'p%s'</span> % i, ))</span><br><span class="line">        ps.append(p)</span><br><span class="line">        p.start()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 主进程等待子进程结束</span></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> ps:</span><br><span class="line">        p.join()</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># pid: 52361, name: p0, sleep 8 ...</span></span><br><span class="line"><span class="comment"># pid: 52362, name: p1, sleep 7 ...</span></span><br><span class="line"><span class="comment"># pid: 52363, name: p2, sleep 8 ...</span></span><br><span class="line"><span class="comment"># pid: 52364, name: p3, sleep 3 ...</span></span><br><span class="line"><span class="comment"># pid: 52365, name: p4, sleep 2 ...</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>p = Process(target=func, args=(arg1, arg2...))</code>即可创建一个进程，调用<code>p.start()</code>启动一个进程，<code>p.join()</code>使得主进程等待子进程执行结束后才退出。</p>
+<p>当这个程序执行时，你可以<code>ps</code>查看一下进程，会发现一共有6个进程在执行，其中包括1个主进程，5个子进程。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/11/python-advance-process-thread/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/2/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/4/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">51</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">373k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">10:22</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

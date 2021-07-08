@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kaito&#39;s Blog">
+<meta property="og:url" content="http://kaito-kidd.com/page/7/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Kaito">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/page/7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/10/13/peewee-insert-primary-key/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/10/13/peewee-insert-primary-key/" class="post-title-link" itemprop="url">peewee插入数据后获取主键值</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-10-13 23:20:01" itemprop="dateCreated datePublished" datetime="2015-10-13T23:20:01+08:00">2015-10-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/10/13/peewee-insert-primary-key/" class="post-meta-item leancloud_visitors" data-flag-title="peewee插入数据后获取主键值" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/10/13/peewee-insert-primary-key/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/10/13/peewee-insert-primary-key/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>最近使用<code>python</code>的ORM框架<code>peewee</code>开发项目，遇到一个问题就是：在插入数据后，获取不到数据库生成的自增主键值，然后分析源码后得到解决方案，以此记录。</p>
+</blockquote>
+<p>首先，定义<code>model</code>：</p>
+<pre><code>class User(Model):
+
+    id = IntegerField(primary_key=True)    
+    username = CharField()
+
+    class Meta:
+        database = db
+        db_table = &quot;user&quot;</code></pre><p>其中主键<code>id</code>是整型自增类型。</p>
+<p>根据<code>peewee</code>官方文档介绍，插入数据时使用如下：</p>
+<pre><code>user = User(username=&apos;admin&apos;)
+user.save()
+
+或
+
+user = User.create(username=&apos;admin&apos;)
+
+或
+
+id = User.insert(username=&apos;admin).execute()</code></pre><p>但是获取<code>user.id</code>或<code>id</code>结果却为<code>None</code>。</p>
+<p>于是乎开始看<code>peewee</code>的源码，看到底发生了什么？</p>
+<p>首先看<code>Moel</code>的<code>create</code>方法：</p>
+<pre><code>@classmethod
+def create(cls, **query):
+    inst = cls(**query)
+    inst.save(force_insert=True)    # 还是调用本类的save方法
+    inst._prepare_instance()
+    return inst</code></pre><p>发现<code>create</code>方法还是调用本类中得<code>save</code>方法，那么好办了，来看<code>save</code>方法做了些什么？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/10/13/peewee-insert-primary-key/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/10/09/search-engine-skill/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/10/09/search-engine-skill/" class="post-title-link" itemprop="url">搜索引擎搜索技巧</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-10-09 23:06:49" itemprop="dateCreated datePublished" datetime="2015-10-09T23:06:49+08:00">2015-10-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/10/09/search-engine-skill/" class="post-meta-item leancloud_visitors" data-flag-title="搜索引擎搜索技巧" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/10/09/search-engine-skill/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/10/09/search-engine-skill/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>616</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>每个开发人员必备的技能，就是如何使用搜索引擎来获取自己最需要的知识，这篇文章介绍使用搜索引擎的一些技巧，注：主要针对<code>Google</code>搜索，其他搜索引擎暂未尝试，部分可用，个人认为<code>百度</code>是用来卖萌的。</p>
+</blockquote>
+<h1 id="精准搜索"><a href="#精准搜索" class="headerlink" title="精准搜索"></a>精准搜索</h1><p>最简单地搜索，即输入搜索词，确认，等待返回结果，例如输入“北京什么地方好玩”，结果如下：<br><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/nomal-search.png" alt="常规搜索" title="常规搜索"></p>
+<p>但是这个结果是搜索引擎智能帮你分词后的结果，其中一些是你认为不想看到的，那么精准搜索就派上用场了，很简单，在搜索词两边加上<code>英文格式双引号</code>即可，再看结果，是不是明朗很多：<br><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/accurate-search.png" alt="精准搜索" title="精准搜索"></p>
+<h1 id="排除搜索"><a href="#排除搜索" class="headerlink" title="排除搜索"></a>排除搜索</h1><p>好了，学习了刚才的技巧之后，突然觉得有些范围的内容完全不是自己想要的，例如不想看到关于与百度相关的内容，那么就可以这样用：<code>关键词 -排除关键字</code>，注意，横杠+排除关键字前<em><code>必须有空格</code></em>，否则无效。<br><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/opposite-search.png" alt="排除搜索" title="排除搜索"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/10/09/search-engine-skill/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/04/11/spider-curl-tool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/04/11/spider-curl-tool/" class="post-title-link" itemprop="url">爬虫工具之curl</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-04-11 00:25:08" itemprop="dateCreated datePublished" datetime="2015-04-11T00:25:08+08:00">2015-04-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/04/11/spider-curl-tool/" class="post-meta-item leancloud_visitors" data-flag-title="爬虫工具之curl" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/04/11/spider-curl-tool/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/04/11/spider-curl-tool/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>解析页面肯定是写爬虫遇到的最常见的工作，但不要小看这个这个过程，有时它也会令你抓狂。这次写一下关于<code>curl</code>工具的使用，主要介绍一下平时很常用的几项。</p>
+</blockquote>
+<blockquote>
+<p><code>curl</code>是利用<code>URL</code>语法在命令行方式下工作的开源文件传输工具，使用这个工具，就能在命令行发起请求，获得响应，而且其命令简单且强大，非常适合用作写爬虫时，解析页面前的模拟工作。</p>
+</blockquote>
+<h1 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h1><pre><code># 发起HTTP请求，并把返回的网页内容显示在屏幕
+curl &quot;http://www.example.com&quot;
+
+# 发起HTTP请求，并把返回的网页内容输出到文件
+curl &quot;http://www.example.com&quot; &gt; test.html
+
+# 或者用命令-o参数也可达到同样的效果
+curl -o test.html &quot;http://www.example.com&quot;</code></pre><p><strong>注意：URL地址带上双引号是比较好的习惯，防止URL中带有特殊符号，导致不能解析报错情况。</strong></p>
+<h1 id="伪装头信息"><a href="#伪装头信息" class="headerlink" title="伪装头信息"></a>伪装头信息</h1><p>有时<code>curl</code>直接访问页面，会得到与浏览器打开不同的结果，所以此时就要伪装头信息，来模拟浏览器的行为，这样返回的数据就跟浏览器看到的一样了。</p>
+<pre><code># 使用-A参数定义User-Agent，模拟浏览器行为
+curl -A &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36&quot; &quot;http://www.example.com&quot;
+
+# 使用-e参数定义Referer，表示从哪个页面跳过来的，解决防盗链问题
+curl -e &quot;http://www.example.com&quot; &quot;http://detail.example.com&quot;
+
+# 或者使用-H参数自定义头信息，也可定义User-Agent、Referer、Content-Type等信息
+curl -H &quot;my-header:xxxxx&quot; &quot;http://www.example.com&quot;</code></pre><h1 id="代理访问"><a href="#代理访问" class="headerlink" title="代理访问"></a>代理访问</h1><p>或者你用程序频繁访问某个网站，结果人家把你<code>IP</code>封禁了，这时就可以用<code>代理</code>来进行访问。</p>
+<pre><code># 使用-x参数使用代理访问
+curl -x &quot;123.45.67.89:8102&quot; &quot;http://www.example.com&quot;</code></pre>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/04/11/spider-curl-tool/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/04/08/fast-translation-tool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/04/08/fast-translation-tool/" class="post-title-link" itemprop="url">基于命令行的快速翻译工具</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-04-08 22:31:25" itemprop="dateCreated datePublished" datetime="2015-04-08T22:31:25+08:00">2015-04-08</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/04/08/fast-translation-tool/" class="post-meta-item leancloud_visitors" data-flag-title="基于命令行的快速翻译工具" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/04/08/fast-translation-tool/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/04/08/fast-translation-tool/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>作为屌丝IT程序员，日常生活中看文档是必须的，自然看英文文档也是肯定的。但遇到不认识的单词是灰常头疼的。基于此原因，所以有了这个基于命令行快速翻译的工具。</p>
+</blockquote>
+<p>在遇到上面说的这种情况时，解决方案：</p>
+<ul>
+<li>下载某软件客户端，开启划词释义功能，鼠标放倒单词上，显示词义；</li>
+<li>使用在线翻译软件，复制，粘贴，OK，明了。</li>
+</ul>
+<p>我是偏向第二种方式的，因为在大多数有程序洁癖的码农来讲，装一款软件而且只用到其<code>5%</code>的功能不到，自己总会觉得很亏心，我也是如此，所以在线翻译便成了我的最佳选择，简单，快速，即开即用。</p>
+<p>程序员都是喜新厌旧的，什么东西用久了，都会觉得腻，甚至会感觉效率越来越低下。在线翻译用的久了，慢慢也感觉有一些问题出现，例如：首先打开某在线翻译网站，当然，你可以保存书签，但开发过程中，浏览器开N多个标签调试是常有的事情，一不留神就会把这个翻译标签页关掉，或者说开的太多了，机器变得越来越卡，<code>cmd + w</code>，连续按下数十次，整个世界都清静了。</p>
+<p>综合上述原因，所以开发了一个基于命令行的<a href="https://github.com/kaito-kidd/fast-translation" target="_blank">快速翻译工具</a>，主要优点如下：</p>
+<ul>
+<li>平时开发都是在<code>linux</code>上使用<code>vim</code>，而且<code>linux</code>终端的标签开N多个也很容易切换，不会卡顿；</li>
+<li>省去了浏览器界面渲染，减少内存占用，也平复了上面所述太多网页标签抓狂的心情；</li>
+<li>键盘党都大爱<code>终端</code>，这样来用，可能会显的逼格很高；</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/04/08/fast-translation-tool/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/04/03/programmer-equipment/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/04/03/programmer-equipment/" class="post-title-link" itemprop="url">程序员的装备</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-04-03 23:06:16" itemprop="dateCreated datePublished" datetime="2015-04-03T23:06:16+08:00">2015-04-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/04/03/programmer-equipment/" class="post-meta-item leancloud_visitors" data-flag-title="程序员的装备" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/04/03/programmer-equipment/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/04/03/programmer-equipment/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>最近公司办公室兴起了“键盘风”，同事一个接一个买了机械键盘，不过听着噼里啪啦的键盘声，也与程序员这个职业相符吧。这次写一下作为屌丝程序员，拥有的那些装备。</p>
+</blockquote>
+<h2 id="电脑"><a href="#电脑" class="headerlink" title="电脑"></a>电脑</h2><p>你还在用蜗牛电脑开发么？内存8G是最低配，上不封顶。有能力必须上SSD，电脑秒开或者扣盖子就走，一个月不关机无压力。当然最好还是配台<code>Mac</code>，不是<code>air</code>，是<code>pro</code>，自从用上<code>Mac</code>的触摸板，鼠标基本可以抛弃了。开发爽到爆。做开发的越早买Mac越好。如果买不起，win本的话我推荐：<code>Thinkpad T系列</code>，自从用了键盘中间的小红点，其他牌子的笔记本基本就不考虑了。我自己有一台<code>Macbook Pro 13</code>，公司配的是<code>Thinkpad T440P</code>。<br/></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/macpro.png" alt="Macbook pro"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/04/03/programmer-equipment/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/03/30/douban-group-spider/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/03/30/douban-group-spider/" class="post-title-link" itemprop="url">豆瓣租房小组爬虫</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-30 08:41:02" itemprop="dateCreated datePublished" datetime="2015-03-30T08:41:02+08:00">2015-03-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/03/30/douban-group-spider/" class="post-meta-item leancloud_visitors" data-flag-title="豆瓣租房小组爬虫" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/03/30/douban-group-spider/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/03/30/douban-group-spider/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>686</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><pre><code>最近一直没有更新博客了，主要忙什么？一言难尽，相信北漂的IT屌丝们，都会遇到这个问题，那就是找房子！
+房子到期，加上种种原因，决定撤离待了一年之久的小窝，不过也没什么特别值得留恋的，北漂就这样，工作、找房子、租房子。。
+找了半个多月的房子，房源信息包括豆瓣、58、搜房网等，看了不下十几家房子，感想只有一个字：找合适的真特么难！不过就在昨天，终于将这件头疼的事情尘埃落定！
+对于IT屌丝，当然是充分利用网络资源，但是网上例如58，赶集充斥了太多的中介信息，恶心的要命。最后在锁定在豆瓣租房小组中寻找。
+但豆瓣最坑爹的是竟然没有搜索相关功能，别人发帖后，你只能用肉眼一个个寻找自己所需的信息，不能忍了。
+最后决定自己写一个爬虫工具，时时监控豆瓣租房小组，抓下所有的信息，然后自己搞个页面，搜索、排序，OK，够用了！</code></pre><h1 id="项目"><a href="#项目" class="headerlink" title="项目"></a>项目</h1><pre><code>用了3个晚上的时间，写出了这个爬虫，也比较简单，主要就是配置需要抓取的页面，分析所需信息，入库等等。
+
+然后做个前台页面，加上搜索排序等功能，齐活！
+
+效果如下：</code></pre><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/spider-page.jpg" alt="爬虫前台页面效果图" title="爬虫前台页面效果图"></br></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/03/30/douban-group-spider/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/03/15/demand-of-feelings-md/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/03/15/demand-of-feelings-md/" class="post-title-link" itemprop="url">说下最近做需求的感想</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-15 16:41:32" itemprop="dateCreated datePublished" datetime="2015-03-15T16:41:32+08:00">2015-03-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E6%88%90%E9%95%BF/" itemprop="url" rel="index"><span itemprop="name">个人成长</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/03/15/demand-of-feelings-md/" class="post-meta-item leancloud_visitors" data-flag-title="说下最近做需求的感想" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/03/15/demand-of-feelings-md/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/03/15/demand-of-feelings-md/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>最近做的东西比较纯粹、直接，比如写爬虫抓数据，写程序脚本等等。但是突然接需求和与需求人沟通的时候，发现存在各种问题，导致需求延期、沟通扯皮等等问题。其中也有自身原因，也有需求人的不足。现在分析下情况，记下来，且当教训来鞭策自己吧。</p>
+</blockquote>
+<h2 id="需求设计缺陷"><a href="#需求设计缺陷" class="headerlink" title="需求设计缺陷"></a>需求设计缺陷</h2><p>从需求人手中拿到原型，接下来肯定是技术与需求人过一下，如果有问题，尽早提出并解决。当时犯的毛病就是，<strong>没有仔细分析原型，认为到了开发时遇到问题，再沟通解决也不晚，</strong>其实不然，秉着问题越早提出越好的原则，认真分析原型，发现问题，反馈需求人是很有必要的。否则到开发时，后果小则加功能项目延期，大则项目夭折都是非常痛苦的。分析如下：</p>
+<pre><code>1、原型代表着需求人直接想要得到的东西；
+2、原型直接关系到技术实现方面可能会遇到的问题；
+3、在前两者来看，一方面是需求，一方面是实现，如果沟通不好，很容易扯皮；
+4、技术角度来看，可能开发人员更熟悉其细节，要权衡利弊，提前说明可能会遇到的问题；</code></pre>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/03/15/demand-of-feelings-md/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/03/12/vimium-shortcut-keys/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/03/12/vimium-shortcut-keys/" class="post-title-link" itemprop="url">vimium快捷键</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-12 00:54:02" itemprop="dateCreated datePublished" datetime="2015-03-12T00:54:02+08:00">2015-03-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/03/12/vimium-shortcut-keys/" class="post-meta-item leancloud_visitors" data-flag-title="vimium快捷键" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/03/12/vimium-shortcut-keys/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/03/12/vimium-shortcut-keys/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>465</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>不用多说，常用<code>chrome</code>的应该有所耳闻，键盘党更是相见恨晚，<code>vimium</code>是一款可以用键盘来控制浏览器的插件。</p>
+</blockquote>
+<h3 id="vimium快捷键"><a href="#vimium快捷键" class="headerlink" title="vimium快捷键"></a>vimium快捷键</h3><pre><code>j：向下细微滚动窗口   k：向上细微滚动窗口
+J：下一个标签页  K：上一个标签页
+d：向下滚动半个屏幕   u：向上移动半个屏幕
+gg：回到顶部
+G：到达页面底部
+H：后退   L： 前进
+f：将当前网页上的所有可见链接/输入框分配一个快捷键。F：新窗口中打开页面
+g+i：定位到输入框，多个按Tab键切换
+x：关闭当前页面   X：恢复刚刚关闭的页面
+o：相当于地址栏，可匹配历史记录、收藏夹并在当前窗口打开，或者直接打开一个网址或者搜索一个关键字，O：新窗口中打开
+g+s：查看源代码
+r：重新载入当前网页
+t：创建新标签
+gu：跳转到父页面
+yy：拷贝当前页面的URL到剪贴板
+yf：拷贝某一个URL到剪贴板
+H：回退上一个历史页面（相当于浏览器中的向左箭头）
+L：回到下一个历史页面（相当于浏览器的向右箭头）</code></pre><blockquote>
+<p>以上只列出了几个常用的，更多快捷键参考：<a href="https://github.com/philc/vimium/blob/master/README.md" target="_blank" rel="noopener">https://github.com/philc/vimium/blob/master/README.md</a></p>
+</blockquote>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/03/12/python-html2pdf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/03/12/python-html2pdf/" class="post-title-link" itemprop="url">python wkhtmltopdf使用与注意事项</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-12 00:38:06" itemprop="dateCreated datePublished" datetime="2015-03-12T00:38:06+08:00">2015-03-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/03/12/python-html2pdf/" class="post-meta-item leancloud_visitors" data-flag-title="python wkhtmltopdf使用与注意事项" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/03/12/python-html2pdf/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/03/12/python-html2pdf/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>933</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>Python  <code>HTML</code> 导出 <code>PDF</code> 用到 <code>pdfkit</code> + <code>wkhtmltopdf</code></p>
+</blockquote>
+<p>说明：</p>
+<pre><code>wkhtmltopdf主要用于HTML生成PDF
+
+pdfkit是基于wkhtmltopdf的python封装，其最终还是调用wkhtmltopdf命令</code></pre><p>1、下载并安装：</p>
+<pre><code>wkhtmltox-0.12.1_linux-centos6-amd64.rpm</code></pre><p>2、安装pdfkit：</p>
+<pre><code>pip install pdfkit</code></pre><p>3、使用，参考：<a href="https://pypi.python.org/pypi/pdfkit/0.4.1" target="_blank" rel="noopener">https://pypi.python.org/pypi/pdfkit/0.4.1</a></p>
+<pre><code>import pdfkit
+
+pdfkit.from_url(&apos;http://google.com&apos;, &apos;out.pdf&apos;)
+pdfkit.from_file(&apos;test.html&apos;, &apos;out.pdf&apos;)
+pdfkit.from_string(&apos;Hello!&apos;, &apos;out.pdf&apos;)</code></pre>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/03/12/python-html2pdf/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/03/11/my-vimrc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2015/03/11/my-vimrc/" class="post-title-link" itemprop="url">从最基础开始配置Vim</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-03-11 23:39:06" itemprop="dateCreated datePublished" datetime="2015-03-11T23:39:06+08:00">2015-03-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/03/11/my-vimrc/" class="post-meta-item leancloud_visitors" data-flag-title="从最基础开始配置Vim" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/03/11/my-vimrc/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/03/11/my-vimrc/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>本文主要介绍了从最基础配置属于自己的<code>VIM</code>。<br>主要分为：1、基础配置，2、插件管理。<br>可以参考<a href="https://github.com/kaito-kidd/kaito-vim" target="_blank" rel="noopener">我的vim配置</a>。</p>
+</blockquote>
+<h2 id="vimrc基础配置"><a href="#vimrc基础配置" class="headerlink" title="~/.vimrc基础配置"></a>~/.vimrc基础配置</h2><pre><code>syntax on                   &quot;语法高亮
+
+&quot; 加载插件
+so ~/.vim/bundles.vim        在下面有说明
+
+set fileencodings=utf-8,gbk
+set backspace=indent,eol,start
+set tabstop=4               &quot;tab为4个空格
+set number                  &quot;显示行号
+set hlsearch                &quot;开启搜索高亮  
+set incsearch               &quot;输入搜索字符串的同时进行搜索  
+&quot;set ignorecase              &quot;搜索时忽略大小写  
+set ruler                   &quot;开启光标位置提示
+set cmdheight=1             &quot;命令部分高度为1
+&quot;set autoindent              &quot;自动缩进 
+set showmatch               &quot;显示匹配的括号 
+&quot;set smartindent             &quot;智能缩进
+set smarttab
+set expandtab
+set shiftwidth=4            &quot; 设定 &lt;&lt; 和 &gt;&gt; 命令移动时的宽度为 4
+set softtabstop=4           &quot; 使得按退格键时可以一次删掉 4 个空格
+set laststatus=2            &quot; 显示状态栏 (默认值为 1, 无法显示状态栏)
+
+&quot; Set leader，必须加上以下此项,后面插件会用到
+let mapleader = &quot;,&quot; 
+let g:mapleader = &quot;,&quot; </code></pre>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2015/03/11/my-vimrc/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，6年+工作经验，做过UGC后端服务，目前从事基础架构方向，主要聚焦在多机房数据库中间件的研发，实现多机房存储层的灾备与多活，主要使用Golang技术栈。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">71</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">51</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">373k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">10:22</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

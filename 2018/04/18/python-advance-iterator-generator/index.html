@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在 Python 开发中，我们经常听到有关「容器」、「迭代器」、「可迭代对象」、「生成器」的概念。 我们经常把这些概念搞混淆，它们之间有哪些联系和区别呢？ 这篇文章，我们就来看一下它们之间的关系。 容器首先，我们先来看一下容器是如何定义的？ 简单来说，容器就是存储某些元素的统称，它最大的特性就是判断一个元素是否在这个容器内。 怎么理解这句话？ 很简单，在 Python 中，我们通常使用 in 或">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶——迭代器和可迭代对象有什么区别？">
+<meta property="og:url" content="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在 Python 开发中，我们经常听到有关「容器」、「迭代器」、「可迭代对象」、「生成器」的概念。 我们经常把这些概念搞混淆，它们之间有哪些联系和区别呢？ 这篇文章，我们就来看一下它们之间的关系。 容器首先，我们先来看一下容器是如何定义的？ 简单来说，容器就是存储某些元素的统称，它最大的特性就是判断一个元素是否在这个容器内。 怎么理解这句话？ 很简单，在 Python 中，我们通常使用 in 或">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/relationships.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-04-18T11:33:10.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/relationships.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python进阶——迭代器和可迭代对象有什么区别？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python进阶——迭代器和可迭代对象有什么区别？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-18 11:33:10" itemprop="dateCreated datePublished" datetime="2018-04-18T11:33:10+00:00">2018-04-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/18/python-advance-iterator-generator/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——迭代器和可迭代对象有什么区别？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/18/python-advance-iterator-generator/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/18/python-advance-iterator-generator/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 Python 开发中，我们经常听到有关「容器」、「迭代器」、「可迭代对象」、「生成器」的概念。</p>
+<p>我们经常把这些概念搞混淆，它们之间有哪些联系和区别呢？</p>
+<p>这篇文章，我们就来看一下它们之间的关系。</p>
+<h1 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h1><p>首先，我们先来看一下容器是如何定义的？</p>
+<p>简单来说，容器就是存储某些元素的统称，它最大的特性就是判断一个元素是否在这个容器内。</p>
+<p>怎么理解这句话？</p>
+<p>很简单，在 Python 中，我们通常使用 <code>in</code> 或 <code>not in</code> 来判断一个元素存在/不存在于一个容器内。</p>
+<p>例如下面这个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">'x'</span> <span class="keyword">in</span> <span class="string">'xyz'</span>)  <span class="comment"># True</span></span><br><span class="line">print(<span class="string">'a'</span> <span class="keyword">not</span> <span class="keyword">in</span> <span class="string">'xyz'</span>)  <span class="comment"># True</span></span><br><span class="line">print(<span class="number">1</span> <span class="keyword">in</span> [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])       <span class="comment"># True</span></span><br><span class="line">print(<span class="number">2</span> <span class="keyword">not</span> <span class="keyword">in</span> (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>))  <span class="comment"># False</span></span><br><span class="line">print(<span class="string">'x'</span> <span class="keyword">not</span> <span class="keyword">in</span> &#123;<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>&#125;) <span class="comment"># True</span></span><br><span class="line">print(<span class="string">'a'</span> <span class="keyword">in</span> &#123;<span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>&#125;) <span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们可以看到 <code>str</code>、<code>list</code>、<code>tuple</code>、<code>set</code>、<code>dict</code> 都可以通过 <code>in</code> 或 <code>not in</code> 来判断一个元素是否在存在/不存在这个实例中，所以这些类型我们都可以称作「容器」。</p>
+<p>那为什么这些「容器」可以使用 <code>in</code> 或 <code>not in</code> 来判断呢？</p>
+<p>这是因为它们都实现了 <code>__contains__</code> 方法。</p>
+<p>如果我们也想自定义一个容器，只需像下面这样，在类中定义 <code>__contains__</code> 方法就可以了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.items = [<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__contains__</span><span class="params">(self, item)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> item <span class="keyword">in</span> self.items</span><br><span class="line"></span><br><span class="line">a = A()</span><br><span class="line">print(<span class="number">1</span> <span class="keyword">in</span> a)   <span class="comment"># True</span></span><br><span class="line">print(<span class="number">2</span> <span class="keyword">in</span> a)   <span class="comment"># True</span></span><br><span class="line">print(<span class="number">3</span> <span class="keyword">in</span> a)   <span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，类 <code>A</code> 定义了 <code>__contains__</code> 方法，所以我们就可以使用 <code>1 in a</code> 的方式去判断这个元素是否在 <code>A</code> 这个容器内。</p>
+<p>换句话说，一个类只要实现了 <code>__contains__</code> 方法，那么它就是一个「容器」。</p>
+<p>我们在开发时，除了使用 <code>in</code> 判断元素是否在容器内之外，另外一个常用的功能是：输出容器内的所有元素。</p>
+<p>例如执行 <code>for x in [1, 2, 3]</code>，就可以迭代出容器内的所有元素。</p>
+<p>那使用这种方式输出元素，是如何实现的？这就跟「迭代器」有关了。</p>
+<a id="more"></a>
+
+<h1 id="迭代器"><a href="#迭代器" class="headerlink" title="迭代器"></a>迭代器</h1><p>一个对象要想使用 <code>for</code> 的方式迭代出容器内的所有数据，这就需要这个类实现「迭代器协议」。</p>
+<p>也就是说，一个类如果实现了「迭代器协议」，就可以称之为「迭代器」。</p>
+<p>什么是「迭代器协议」呢？</p>
+<p>在 Python 中，实现迭代器协议就是实现以下 2 个方法：</p>
+<ul>
+<li><code>__iter__</code>：这个方法返回对象本身，即 <code>self</code></li>
+<li><code>__next__</code>：这个方法每次返回迭代的值，在没有可迭代元素时，抛出 <code>StopIteration</code> 异常</li>
+</ul>
+<p>下面我们来看一个实现迭代器协议的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    <span class="string">"""A 实现了迭代器协议 它的实例就是一个迭代器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.idx = <span class="number">0</span></span><br><span class="line">        self.n = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">'__iter__'</span>)</span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__next__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.idx &lt; self.n:</span><br><span class="line">            val = self.idx</span><br><span class="line">            self.idx += <span class="number">1</span></span><br><span class="line">            <span class="keyword">return</span> val</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> StopIteration()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 迭代元素</span></span><br><span class="line">a = A(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    print(i)</span><br><span class="line"><span class="comment"># 再次迭代 没有元素输出 因为迭代器只能迭代一次</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    print(i)</span><br><span class="line"></span><br><span class="line"><span class="comment"># __iter__</span></span><br><span class="line"><span class="comment"># 0</span></span><br><span class="line"><span class="comment"># 1</span></span><br><span class="line"><span class="comment"># 2</span></span><br><span class="line"><span class="comment"># __iter__</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了一个类 <code>A</code>，它内部实现了 <code>__iter__</code> 和 <code>__next__</code> 方法。</p>
+<p>其中 <code>__iter__</code> 方法返回了 <code>self</code>，<code>__next__</code> 方法实现了具体的迭代细节。</p>
+<p>然后执行 <code>a = A(3)</code>，在执行 <code>for i in a</code> 时，我们看到调用了 <code>__iter__</code> 方法，然后依次输出 <code>__next__</code> 中的元素。</p>
+<p>其实在执行 <code>for</code> 循环时，实际执行流程是这样的：</p>
+<ol>
+<li><code>for i in a</code> 相当于执行 <code>iter(a)</code></li>
+<li>每次迭代时会执行一次 <code>__next__</code> 方法，返回一个值</li>
+<li>如果没有可迭代的数据，抛出 <code>StopIteration</code> 异常，<code>for</code> 会停止迭代</li>
+</ol>
+<p>但是请注意，当我们迭代完 <code>for i in a</code> 时，如果再次执行迭代，将不会有任何数据输出。</p>
+<p>如果我们想每次执行都能迭代元素，只需每次迭代一个新对象即可：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 每次都迭代一个对象</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> A(<span class="number">3</span>):</span><br><span class="line">    print(i)</span><br></pre></td></tr></table></figure>
+
+<h1 id="可迭代对象"><a href="#可迭代对象" class="headerlink" title="可迭代对象"></a>可迭代对象</h1><p>明白了「迭代器」是如何执行的，我们接着来看什么是「可迭代对象」？</p>
+<p>这是什么意思？难道一个类是「迭代器」，那么它的实例不是一个「可迭代对象」吗？ 它们之间又有什么区别？</p>
+<p>其实，但凡是可以返回一个「迭代器」的对象，都可以称之为「可迭代对象」。</p>
+<p>换句话说：<strong><code>__iter__</code> 方法返回一个迭代器，那么这个对象就是「可迭代对象」。</strong></p>
+<p>听起来不太好理解，我们来看一个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    <span class="comment"># A是迭代器 因为它实现了 __iter__ 和__next__方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.idx = <span class="number">0</span></span><br><span class="line">        self.n = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__next__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.idx &lt; self.n:</span><br><span class="line">            val = self.idx</span><br><span class="line">            self.idx += <span class="number">1</span></span><br><span class="line">            <span class="keyword">return</span> val</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">raise</span> StopIteration()</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span>:</span></span><br><span class="line">    <span class="comment"># B不是迭代器 但B的实例是一个可迭代对象</span></span><br><span class="line">    <span class="comment"># 因为它只实现了 __iter__</span></span><br><span class="line">    <span class="comment"># __iter__返回了A的实例 迭代细节交给了A</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, n)</span>:</span></span><br><span class="line">        self.n = n</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> A(self.n)</span><br><span class="line"></span><br><span class="line"><span class="comment"># a是一个迭代器 同时也是一个可迭代对象</span></span><br><span class="line">a = A(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> a:</span><br><span class="line">    print(i)</span><br><span class="line"><span class="comment"># &lt;__main__.A object at 0x10eb95550&gt;</span></span><br><span class="line">print(iter(a))</span><br><span class="line"></span><br><span class="line"><span class="comment"># b不是迭代器 但它是可迭代对象 因为它把迭代细节交给了A</span></span><br><span class="line">b = B(<span class="number">3</span>)</span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> b:</span><br><span class="line">    print(i)</span><br><span class="line"><span class="comment"># &lt;__main__.A object at 0x10eb95450&gt;</span></span><br><span class="line">print(iter(b))</span><br></pre></td></tr></table></figure>
+
+<p>仔细看这个例子，我们定义了 2 个类 <code>A</code> 和 <code>B</code>，<code>A</code> 实现了 <code>__iter__</code> 和 <code>__next__</code> 方法。</p>
+<p>而 <code>B</code> 只实现了 <code>__iter__</code>，并没有实现 <code>__next__</code>，而且它的 <code>__iter__</code> 返回值是一个 <code>A</code> 的实例。</p>
+<p>对于 <code>A</code> 来说：</p>
+<ul>
+<li><code>A</code> 是一个「迭代器」，因为其实现了迭代器协议 <code>__iter__</code> 和 <code>__next__</code></li>
+<li>同时 <code>A</code> 的 <code>__iter__</code> 方法返回了实例本身 <code>self</code>，也就是说返回了一个迭代器，所以 <code>A</code> 的实例 <code>a</code> 也是一个「可迭代对象」</li>
+</ul>
+<p>对于<code>B</code> 来说：</p>
+<ul>
+<li><code>B</code> 不是一个「迭代器」，因为它只了实现 <code>__iter__</code>，没有实现 <code>__next__</code></li>
+<li>由于 <code>B</code> 的 <code>__iter__</code> 返回了 <code>A</code> 的实例，而 <code>A</code> 是一个迭代器，所以 <code>B</code> 的实例 <code>b</code> 是一个「可迭代对象」，<strong>换句话说，<code>B</code> 把迭代细节交给了 <code>A</code></strong></li>
+</ul>
+<p>总之，一个类的迭代细节，是可以交给另一个类的，就像这个例子的 <code>B</code> 这样，所以 <code>B</code> 的实例只能是「可迭代对象」，而不是「迭代器」。</p>
+<p>其实，这种情况我们见的非常多，我们使用最多的 <code>list</code>、<code>tuple</code>、<code>set</code>、<code>dict</code> 类型，都只是「可迭代对象」，但不是「迭代器」，因为它们都是把迭代细节交给了另外一个类，这个类才是真正的迭代器。</p>
+<p>看下面这个例子，你就能明白这两者之间的差别了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># list 是可迭代对象</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>l = [<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line"><span class="comment"># list 的迭代器是 list_iterator</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(l)</span><br><span class="line">&lt;list_iterator object at <span class="number">0x1009c1c18</span>&gt;</span><br><span class="line"><span class="comment"># 执行的是 list_iterator 的 __next__</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(l).__next__()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># tuple 是可迭代对象</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>t = (<span class="string">'a'</span>, <span class="string">'b'</span>)</span><br><span class="line"><span class="comment"># tuple 的迭代器是 tuple_iterator</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(t)</span><br><span class="line">&lt;tuple_iterator object at <span class="number">0x1009c1b00</span>&gt;</span><br><span class="line"><span class="comment"># 执行的是 tuple_iterator 的 __next__</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(t).__next__()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br><span class="line"></span><br><span class="line"><span class="comment"># set 是可迭代对象</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>s = &#123;<span class="number">1</span>, <span class="number">2</span>&#125;</span><br><span class="line"><span class="comment"># set 的迭代器是 set_iterator</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(s)</span><br><span class="line">&lt;set_iterator object at <span class="number">0x1009c70d8</span>&gt;</span><br><span class="line"><span class="comment"># 执行的是 set_iterator 的 __next__</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(s).__next__()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># dict 是可迭代对象</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d = &#123;<span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>&#125;</span><br><span class="line"><span class="comment"># dict 的迭代器是 dict_keyiterator</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(d)</span><br><span class="line"><span class="comment"># 执行的是 dict_keyiterator 的 __next__</span></span><br><span class="line">&lt;dict_keyiterator object at <span class="number">0x1009c34f8</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(d).next()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a</span><br></pre></td></tr></table></figure>
+
+<p>以 <code>list</code> 类型为例，我们先定义 <code>l = [1, 2]</code>，然后执行 <code>iter(l)</code> 得到 <code>list</code> 类型的迭代器是 <code>list_iterator</code>，也就是说在迭代 <code>list</code> 时，其实执行的是 <code>list_iterator</code> 的 <code>__next__</code>，<code>list</code> 把具体的迭代细节，交给了 <code>list_iterator</code>。</p>
+<p>所以 <code>list</code> 是一个可迭代对象，但它不是迭代器。其他类型 <code>tuple</code>、<code>set</code>、<code>dict</code> 也是同样的道理。</p>
+<p>由此我们可以得出一个结论：<strong>迭代器一定是个可迭代对象，但可迭代对象不一定是迭代器。</strong></p>
+<h1 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h1><p>我们再来看什么是「生成器」？</p>
+<p>其实，「生成器」是一个特殊的「迭代器」，并且它也是一个「可迭代对象」。</p>
+<p>有 2 种方式可以创建一个生成器：</p>
+<ul>
+<li>生成器表达式</li>
+<li>生成器函数</li>
+</ul>
+<p>用生成器表达式创建一个生成器的例子如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建一个生成器 类型是 generator</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g = (i <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>))</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g</span><br><span class="line">&lt;generator object &lt;genexpr&gt; at <span class="number">0x101334f50</span>&gt;</span><br><span class="line"><span class="comment"># 生成器就是一个迭代器</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>iter(g)</span><br><span class="line">&lt;generator object &lt;genexpr&gt; at <span class="number">0x101334f50</span>&gt;</span><br><span class="line"><span class="comment"># 生成器也是一个可迭代对象</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">for</span> i <span class="keyword">in</span> g:</span><br><span class="line"><span class="meta">... </span>    print(i)</span><br><span class="line"><span class="comment"># 0 1 2 3 4</span></span><br></pre></td></tr></table></figure>
+
+<p>注意看这个例子，我们使用 <code>g = (i for i in range(5))</code> 创建了一个生成器，它的类型是 <code>generator</code>，同时调用 <code>iter(g)</code> 可以得知 <code>__iter__</code> 返回的是实例本身，即生成器也是一个迭代器，并且它也是一个可迭代对象。</p>
+<p>再来看用函数创建一个生成器：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建一个生成器</span></span><br><span class="line">g = gen(<span class="number">5</span>)</span><br><span class="line"><span class="comment"># &lt;generator object gen at 0x10bb46f50&gt;</span></span><br><span class="line">print(g)</span><br><span class="line"><span class="comment"># &lt;type 'generator'&gt;</span></span><br><span class="line">print(type(g))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 迭代这个生成器</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> g:</span><br><span class="line">    print(i)</span><br><span class="line"><span class="comment"># 0 1 2 3 4</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们在函数中使用 <code>yield</code> 关键字。其实，包含 <code>yield</code> 关键字的函数，不再是一个普通的函数，而返回的是一个生成器。它在功能上与上面的例子一样，可以迭代生成器中的所有数据。</p>
+<p>通常情况下，我们习惯在函数内使用 <code>yield</code> 的方式来创建一个生成器。</p>
+<p>但是，使用生成器迭代数据相比于普通方式迭代数据，有什么优势呢？</p>
+<p>这就要来看一下使用 <code>yield</code> 的函数和使用 <code>return</code> 的普通函数，有什么区别了。</p>
+<p>使用 <code>yield</code> 的函数与使用 <code>return</code> 的函数，在执行时的差别在于：</p>
+<ul>
+<li>包含 <code>return</code> 的方法会以 <code>return</code> 关键字为最终返回，每次执行都返回相同的结果</li>
+<li>包含 <code>yield</code> 的方法一般用于迭代，每次执行时遇到 <code>yield</code> 就返回 <code>yield</code> 后的结果，但内部会保留上次执行的状态，下次继续迭代时，会继续执行 <code>yield</code> 之后的代码，直到再次遇到 <code>yield</code> 后返回</li>
+</ul>
+<p>当我们想得到一个集合时，如果使用普通方法，只能一次性创建出这个集合，然后 <code>return</code> 返回：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_data</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="comment"># 创建一个集合</span></span><br><span class="line">    <span class="keyword">return</span> [i <span class="keyword">for</span> i <span class="keyword">in</span> range(n)]</span><br></pre></td></tr></table></figure>
+
+<p>但如果此时这个集合中的数据非常多，我们就需要在内存中一次性申请非常大的内存空间来存储。</p>
+<p>如果我们使用 <code>yield</code> 生成器的方式迭代这个集合，就能解决内存占用大的问题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> gen_data(n):</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        <span class="comment"># 每次只返回一个元素</span></span><br><span class="line">        <span class="keyword">yield</span> i</span><br></pre></td></tr></table></figure>
+
+<p>使用生成器创建这个集合，只有在迭代执行到 <code>yield</code> 时，才会返回一个元素，在这个过程中，不会一次性申请非常大的内存空间。当我们面对这种场景时，使用生成器就非常合适了。</p>
+<p>其实，生成器在 Python 中还有很大的用处，我会在后面的文章讲解 <code>yield</code> 时，再进行详细的分析。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，这篇文章我们主要分析了 Python 中「容器」、「迭代器」、「可迭代对象」、「生成器」的联系和区别，用一张图表示它们的关系：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/relationships.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>如果一个类实现了 <code>__iter__</code> 和 <code>__next__</code> 方法，那么它就是一个迭代器。如果只是实现了 <code>__iter__</code>，并且这个方法返回的是一个迭代器类，那么这个类的实例就只是一个可迭代对象，因为它的迭代细节是交给了另一个类来处理。</p>
+<p>像我们经常使用的 <code>list</code>、<code>tuple</code>、<code>set</code>、<code>dict</code> 类型，它们并不是迭代器，只能叫做可迭代对象，它们的迭代细节都是交给了另一个类来处理的。由此我们也得知，一个迭代器一定是一个可迭代对象，但可迭代对象不一定是迭代器。</p>
+<p>而生成器可以看做是一个特殊的迭代器，同时它也是一个可迭代对象。使用生成器配合 <code>yield</code> 使用，我们可以实现懒惰计算的功能，同时，我们也可以用非常小的内存，来迭代一个大集合中的数据。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/" title="Python进阶——迭代器和可迭代对象有什么区别？">http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/17/python-advance-context-manager/" rel="prev" title="Python进阶——什么是上下文管理器？">
+      <i class="fa fa-chevron-left"></i> Python进阶——什么是上下文管理器？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/19/python-advance-metaclass/" rel="next" title="Python进阶——什么是元类？">
+      Python进阶——什么是元类？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#容器"><span class="nav-number">1.</span> <span class="nav-text">容器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#迭代器"><span class="nav-number">2.</span> <span class="nav-text">迭代器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#可迭代对象"><span class="nav-number">3.</span> <span class="nav-text">可迭代对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生成器"><span class="nav-number">4.</span> <span class="nav-text">生成器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

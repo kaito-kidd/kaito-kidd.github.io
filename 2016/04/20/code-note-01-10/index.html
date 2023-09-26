@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="由于最近正在看《编码：隐匿在计算机软硬件背后的语言》，整理并记下读书笔记。  1、至亲密友2个人远距离交流，可以通过手电筒开和关进行通信，但想表达的文字太复杂，手电筒开关次数太多，难度非常大。 引出莫尔斯电码，使用点和划（短闪和长闪）通信。 结论：  编码是用来在机器和人之间信息传递的方式，编码就是交流。  编码无处不在，手电筒的闪烁，英语词汇，空气中的比划，手语，布莱叶盲文。  计算机里存储和">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10">
+<meta property="og:url" content="http://kaito-kidd.com/2016/04/20/code-note-01-10/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="由于最近正在看《编码：隐匿在计算机软硬件背后的语言》，整理并记下读书笔记。  1、至亲密友2个人远距离交流，可以通过手电筒开和关进行通信，但想表达的文字太复杂，手电筒开关次数太多，难度非常大。 引出莫尔斯电码，使用点和划（短闪和长闪）通信。 结论：  编码是用来在机器和人之间信息传递的方式，编码就是交流。  编码无处不在，手电筒的闪烁，英语词汇，空气中的比划，手语，布莱叶盲文。  计算机里存储和">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-20T23:04:03.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="图书">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="编码">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/04/20/code-note-01-10/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/04/20/code-note-01-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-20 23:04:03" itemprop="dateCreated datePublished" datetime="2016-04-20T23:04:03+00:00">2016-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/04/20/code-note-01-10/" class="post-meta-item leancloud_visitors" data-flag-title="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/04/20/code-note-01-10/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/04/20/code-note-01-10/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>由于最近正在看《编码：隐匿在计算机软硬件背后的语言》，整理并记下读书笔记。</p>
+</blockquote>
+<h2 id="1、至亲密友"><a href="#1、至亲密友" class="headerlink" title="1、至亲密友"></a>1、至亲密友</h2><p>2个人远距离交流，可以通过手电筒开和关进行通信，但想表达的文字太复杂，手电筒开关次数太多，难度非常大。</p>
+<p>引出<strong>莫尔斯电码</strong>，使用点和划（短闪和长闪）通信。</p>
+<p>结论：</p>
+<ul>
+<li><p>编码是用来在机器和人之间信息传递的方式，编码就是交流。</p>
+</li>
+<li><p>编码无处不在，手电筒的闪烁，英语词汇，空气中的比划，手语，布莱叶盲文。</p>
+</li>
+<li><p>计算机里存储和传递数字、声音、音乐、图片和电影，处理后呈现出信息与人类沟通。</p>
+</li>
+</ul>
+<h2 id="2、编码与组合"><a href="#2、编码与组合" class="headerlink" title="2、编码与组合"></a>2、编码与组合</h2><p>莫尔斯码发送简单，但是接收后解析困难，解决方案：<strong>构建信息与编码的图表</strong>。</p>
+<p>结论：</p>
+<ul>
+<li><p><strong>码字的数目 = 2^编码位数</strong></p>
+</li>
+<li><p>编码进行适合的组合，得出完整的信息表示。</p>
+</li>
+</ul>
+<h2 id="3、布莱叶盲文与二进制码"><a href="#3、布莱叶盲文与二进制码" class="headerlink" title="3、布莱叶盲文与二进制码"></a>3、布莱叶盲文与二进制码</h2><p>布莱叶觉得最初的盲文编码过于复杂，不利于长文本阅读，随之改造盲文编码，使用2*3的矩阵，利用凸/平点表示一个字母信息。此标准沿用至今，改造后有了二级布莱叶盲文（使用很多缩写,一个2*3矩阵表示一个单词）</p>
+<p>结论：<strong>使用6位二进制码表示出2^6=64种编码表示，并且根据上下文有双重身份。</strong></p>
+<h2 id="4、手电筒的剖析"><a href="#4、手电筒的剖析" class="headerlink" title="4、手电筒的剖析"></a>4、手电筒的剖析</h2><p><strong>原子构成：中子、质子、电子。</strong></p>
+<p>一个原子的中电子数=质子数，如果电子从原子中脱离，就会产生<strong>电流</strong>。</p>
+<p>当质子与电子出现失衡，就会自我修复，从其他物体带走电子，例如地毯带走脚上的电子，自己感觉被静电电到了。</p>
+<p>电路中的电子不断从一个原子移动到下一个原子，就形成了<strong>电流</strong>。</p>
+<p>电池内部经过化学反应，能够使多余的自由电子聚集到负极(阴极)，正极(阳极)变得急需电子，<strong>化学能转为电能</strong>。</p>
+<p>电池为电路提供电能，反过来，电路为电池内化学反应提供条件，化学反应持续进行，化学物质被消耗完，电池没电。</p>
+<p>导体：最外层电子容易逃逸。绝缘体：阻抗性很大(电阻)。</p>
+<p>交代出：电流、电压、电阻、功率。</p>
+<p>白炽灯发光原理：<strong>钨丝电阻非常小，电流经过后钨丝变热达到燃点，由于存在真空中，不会燃烧，所以发亮！</strong></p>
+<h2 id="5、绕过拐角的通信"><a href="#5、绕过拐角的通信" class="headerlink" title="5、绕过拐角的通信"></a>5、绕过拐角的通信</h2><p>远距离如何通信？通过电源+导线的方式，实现远距离通信。</p>
+<p>距离越远，需要的导线越长，成本高并且电阻大，需要强电压。</p>
+<p>如果电压足够强，电池足够大，通信2方只需要一端接地，另一端使用一根导线即可，减少成本。</p>
+<p>结论：<strong>使用导线可以构建出绕过拐角、视线之外的发报系统，不受距离限制，涉及问题：电流、电阻等。</strong></p>
+<a id="more"></a>
+
+<h2 id="6、电报机与继电器"><a href="#6、电报机与继电器" class="headerlink" title="6、电报机与继电器"></a>6、电报机与继电器</h2><p>早期提高远距离通信速度方式：人站在高山上，作为中继系统挥旗发出旗语，或通过机械臂装置代替人工。</p>
+<p>电报机原理：<strong>在线路一端采取一些措施，使线路另一端发生某种变化。</strong></p>
+<p>电池+导线缠绕铁棒，电流通过后，铁棒具有磁性。<strong>电磁铁是电报机的基础。</strong></p>
+<p>电报机构成：</p>
+<ul>
+<li>发送端：一个开关，敲击使其上下移动，产生点、划莫尔斯码</li>
+<li>接收端：一块电磁铁拉动一根金属杆构成，发送端电键按下，电磁铁拉动金属杆下降，松开电键，弹回原来位置，接收点、划信息。</li>
+</ul>
+<p>中继器由来：距离太远产生的问题：电压有限，距离越长，电阻增大，需中间设备传送信息。</p>
+<p><strong>中继器其实就是在接收端再增加一个类似发送端的设备，可以同步发送端的信息，发送给下个接收端，以此循环，放大“信号”。</strong></p>
+<h2 id="7、我们的十个数字"><a href="#7、我们的十个数字" class="headerlink" title="7、我们的十个数字"></a>7、我们的十个数字</h2><p>人的数字世界：十个数字，因为有十只手指。</p>
+<p>罗马数字：I、V、X、L等，缺点乘除复杂。</p>
+<p>阿拉伯数字：计算简单，分解计算。</p>
+<h2 id="8、十的替代品"><a href="#8、十的替代品" class="headerlink" title="8、十的替代品"></a>8、十的替代品</h2><p>手指、卡通人物、龙虾、海豚的数字世界：10、4、2、1。</p>
+<p>数字可以有十进制、八进制、二进制表示。</p>
+<p>二进制只有0、1，可以代表开关、电流是否通过、灯泡是否发亮。</p>
+<p><strong>二进制与计算机有紧密联系。</strong></p>
+<h2 id="9、二进制数"><a href="#9、二进制数" class="headerlink" title="9、二进制数"></a>9、二进制数</h2><p>二进制每一位，被称为比特位(bit)。</p>
+<p><strong>编码数量 = 2^比特位</strong></p>
+<p>UPC(商品统一代码,条形码)是95位的二进制码，包含左护线、数字、中护线、数字、右护线。</p>
+<p>UPC下一串数字就是二进制码通过一定规则编码转换后的数字(分类,ID,校验码)。</p>
+<p><strong>结论：比特可以表示文字、图片、声音、电影，也可以表示产品编码、胶片速度等。用比特表示信息所要做的就是计算有多少种可能性罢了。</strong></p>
+<h1 id="10、逻辑与开关"><a href="#10、逻辑与开关" class="headerlink" title="10、逻辑与开关"></a>10、逻辑与开关</h1><p>在解决问题时，可以把文字语言转换为数学语言，根据数学公式可推导计算问题结果。</p>
+<p>在布尔代数中，操作数不是数字而是类，一个类就是一个事物的的群体(集合)。</p>
+<p>布尔代数中，类的计算使用<strong>交集、并集</strong>计算，<strong>1表示全集，0表示空集</strong>。</p>
+<p>矛盾律：一个事物既不可能是它本身同时又是它的对立面。</p>
+<p>交集、并集、全集去掉某些元素：可用<strong>OR、AND、NOT</strong>表示。</p>
+<p>映射到电路中的表示：</p>
+<ul>
+<li>AND：串联</li>
+<li>OR：并联</li>
+</ul>
+<p>电路中使用开关的原理，可以制造出电报机，从而可以演变制造出计算机。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/04/20/code-note-01-10/" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10">http://kaito-kidd.com/2016/04/20/code-note-01-10/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%BE%E4%B9%A6/" rel="tag"><i class="fa fa-tag"></i> 图书</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/06/expect/" rel="prev" title="堡垒机Expect登陆服务器">
+      <i class="fa fa-chevron-left"></i> 堡垒机Expect登陆服务器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/05/28/code-note-11-17/" rel="next" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17">
+      《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、至亲密友"><span class="nav-number">1.</span> <span class="nav-text">1、至亲密友</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、编码与组合"><span class="nav-number">2.</span> <span class="nav-text">2、编码与组合</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3、布莱叶盲文与二进制码"><span class="nav-number">3.</span> <span class="nav-text">3、布莱叶盲文与二进制码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4、手电筒的剖析"><span class="nav-number">4.</span> <span class="nav-text">4、手电筒的剖析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5、绕过拐角的通信"><span class="nav-number">5.</span> <span class="nav-text">5、绕过拐角的通信</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6、电报机与继电器"><span class="nav-number">6.</span> <span class="nav-text">6、电报机与继电器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#7、我们的十个数字"><span class="nav-number">7.</span> <span class="nav-text">7、我们的十个数字</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#8、十的替代品"><span class="nav-number">8.</span> <span class="nav-text">8、十的替代品</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#9、二进制数"><span class="nav-number">9.</span> <span class="nav-text">9、二进制数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#10、逻辑与开关"><span class="nav-number"></span> <span class="nav-text">10、逻辑与开关</span></a></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

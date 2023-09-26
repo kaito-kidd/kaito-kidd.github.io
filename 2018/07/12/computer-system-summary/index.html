@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="如果你想对计算机的组成和系统结构有个系统的了解，推荐你看一本书，叫做《深入理解计算机系统》。这本书也是计算机界的经典书籍，如果能吃透这本书里的内容，你会对计算机系统和软件开发有一个全新的认识。   由于这本书不太容易学习，有很多程序员买了这本书，但可能读了一两个章节发现太过枯燥理解不了，便放下珍藏了。 我和你一样，每次拿起这本书都刻意让自己学下去，但都败下阵来。 后来在知乎发现有人指导如何阅读这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（一）概览">
+<meta property="og:url" content="http://kaito-kidd.com/2018/07/12/computer-system-summary/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="如果你想对计算机的组成和系统结构有个系统的了解，推荐你看一本书，叫做《深入理解计算机系统》。这本书也是计算机界的经典书籍，如果能吃透这本书里的内容，你会对计算机系统和软件开发有一个全新的认识。   由于这本书不太容易学习，有很多程序员买了这本书，但可能读了一两个章节发现太过枯燥理解不了，便放下珍藏了。 我和你一样，每次拿起这本书都刻意让自己学下去，但都败下阵来。 后来在知乎发现有人指导如何阅读这">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531281095.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531365963.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531366123.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531367697.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531367932.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-07-12T12:10:17.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531281095.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/07/12/computer-system-summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（一）概览 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/12/computer-system-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（一）概览
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-12 12:10:17" itemprop="dateCreated datePublished" datetime="2018-07-12T12:10:17+00:00">2018-07-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/12/computer-system-summary/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（一）概览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/12/computer-system-summary/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/12/computer-system-summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>如果你想对计算机的组成和系统结构有个系统的了解，推荐你看一本书，叫做《深入理解计算机系统》。这本书也是计算机界的经典书籍，如果能吃透这本书里的内容，你会对计算机系统和软件开发有一个全新的认识。</p>
+</blockquote>
+<blockquote>
+<p>由于这本书不太容易学习，有很多程序员买了这本书，但可能读了一两个章节发现太过枯燥理解不了，便放下珍藏了。</p>
+<p>我和你一样，每次拿起这本书都刻意让自己学下去，但都败下阵来。</p>
+<p>后来在知乎发现有人指导如何阅读这本书时，有网友推荐了国人写的教材，与《深入理解计算机系统》内容非常类似，但更易读。</p>
+<p>这本书的作者叫袁春风，她是南京大学计算机系的教授，写过2本书《计算机组成与系统结构》（2010年出版)、《计算机系统基础》(2014年出版)，两者内容差不多，第二本更像是第一本的升级版。</p>
+<p>在阅读这2本书时，发现还是比较容易理解的，这个系列整理出了相关知识点，加深记忆以备忘。</p>
+</blockquote>
+<h1 id="计算机的功能和特性"><a href="#计算机的功能和特性" class="headerlink" title="计算机的功能和特性"></a>计算机的功能和特性</h1><p>我们现在使用计算机能做的事情非常多，能够看网页、听音乐、看视频、社交聊天，这背后其实都是对信息的处理。</p>
+<p>计算机背后是如何工作的呢？我们先来看计算机的一个简单定义：</p>
+<p>计算机是一种能自动化对数字信息进行运算和逻辑处理的高速处理装置，计算机处理的对象都是数字化信息。</p>
+<p>计算机的基本功能包括以下3个方面：</p>
+<ul>
+<li>数据处理：计算机最基本的功能，可以计算加减乘除等运算，也可以处理文字、数字、音乐、视频信息。</li>
+<li>数据存储：计算机能够自动工作的最基本保证，数据和程序事先被存储好，在需要时被取出自动执行。</li>
+<li>数据传送：计算机内部各功能部件之间的数据传输，以达到信息交换，计算机外部连接使得信息得以传输到另一台计算机，从而构建出了计算机网络。</li>
+</ul>
+<p>有了这些基本功能，计算机中肯定需要有对数据处理、数据存储、数据传送相对应的功能部件，它们分别是<strong>：算术逻辑运算器、存储器、总线和IO接口</strong>。</p>
+<p>计算机主要的核心部件都采用高速电子元器件制造，处理速度极快，这就为运算速度提供了基础保证。</p>
+<p>计算机可以处理各种信息，应用也极其广泛，只要现实世界中某个问题能找到相应的算法，就能编写成程序通过计算机执行算出结果，这为计算机的准确性和智能化提供了重要的基础。</p>
+<a id="more"></a>
+
+<h1 id="计算机发展史"><a href="#计算机发展史" class="headerlink" title="计算机发展史"></a>计算机发展史</h1><p>接下来我们看计算机是如何发展起来的，其中都经历了哪些阶段，每个阶段都有什么特点？</p>
+<h2 id="诞生"><a href="#诞生" class="headerlink" title="诞生"></a>诞生</h2><p>在二战期间，美国急于需要一种高速电子装置来解决弹道的复杂计算问题，当时美国宾夕法尼亚大学的一位物理学博士也常常为物理学研究中的大量枯燥数学计算头疼，也渴望电子计算机帮忙。</p>
+<p>接着他们在冯·诺依曼等人的帮助下，在1946年研发出世界上第一台电子计算机ENIAC。</p>
+<p>ENIAC是一个庞然大物，占地面积就达170平方米，重30吨，第一次开机甚至整个费城地区的照明灯都开始闪烁。</p>
+<p>ENIAC的出现使得军方计算射程弹道的计算时间由原来的20分钟一下子缩短到30秒，ENIAC名声大振。</p>
+<p>第一台电子计算机的诞生，人类社会进入一个崭新的电子计算和信息化时代！</p>
+<h2 id="第一代计算机"><a href="#第一代计算机" class="headerlink" title="第一代计算机"></a>第一代计算机</h2><p>世界第一台计算机ENIAC的逻辑元件采用<strong>电子管</strong>，并且没有采用二进制运算和存储程序控制，在这段期间也产生出了类似于ENIAC的计算机，它们的特点都是体积大、速度慢（每秒千次或万次）、存储容量小。</p>
+<p>1945年，冯·诺依曼领导的小组提出了「存储程序」方式的电子计算机方案EDVAC，这种思想宣告了现代计算计结构思想的诞生。</p>
+<p>存储程序方式的基本思想是：<strong>事先将编写好的程序和原始数据送入主存后才能执行程序，一旦程序开始执行，计算机不需要人员干预就能自动完成逐条指令的取出和执行任务。</strong></p>
+<p>这类计算机被称为IAS计算机，它包括5大基本部件：</p>
+<ul>
+<li>算术逻辑单元</li>
+<li>程序控制器</li>
+<li>存储器</li>
+<li>输入设备</li>
+<li>输出设备</li>
+</ul>
+<p>ISA计算机结构如下图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531281095.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>整个计算机以「存储器」为中心，程序和数据首先输入到运算器，然后保存到主存中。程序运行时，从主存调出指令，在程序控制器和运算器中执行，执行的中间结果送入主存保存，最终结果送到输出设备，并且整个计算机内部采用<strong>二进制</strong>形式表示指令和数据。</p>
+<p>IAS计算机直到1951年才研发完成，在此期间（20世纪40年代到50年代末）研发的计算机都属于第一代计算机。</p>
+<h2 id="第二代计算机"><a href="#第二代计算机" class="headerlink" title="第二代计算机"></a>第二代计算机</h2><p>在1947年，美国贝尔实验室三位科学家发明出了<strong>晶体管</strong>，然后在1954年研制出晶体管计算机，与第一代相比，这一代晶体计算机体积更小、速度更快、功耗更低、可靠性更高。</p>
+<p><strong>此外内存采用磁芯存储器，外存采用磁鼓与磁带存储器，并实现了浮点运算，并在系统结构方面提出了变址、中断、I/O处理器等新概念。</strong></p>
+<p>这时计算机软件也得到了发展，出现了<strong>多种高级语言及其编译程序</strong>。</p>
+<p>在这期间（20世界50年代中后期到60年代末）研发的计算机都属于第二代计算机。</p>
+<h2 id="第三代计算机"><a href="#第三代计算机" class="headerlink" title="第三代计算机"></a>第三代计算机</h2><p>1958年德州仪器公司工程师和仙童半导体公司的工程师同时各自独立发明了<strong>集成电路</strong>，为现代计算机发展奠定了革命性基础。</p>
+<p>1964年IBM公司宣布了世界第一个采用集成电路的通用计算机IBM360，最重要的是出现了新技术：<strong>微程序控制、告诉缓存、虚拟存储器、流水线技术等</strong>。</p>
+<p>这一时期还出现了另一个特点：大型机、小型机同时发展。</p>
+<p>在这期间（20世界60年代末到70年代中后期）研发的计算机都属于第三代计算机。</p>
+<h2 id="第四代计算机"><a href="#第四代计算机" class="headerlink" title="第四代计算机"></a>第四代计算机</h2><p>20世界70年代，微电子学飞速发展，产生了<strong>大规模集成电路和微处理器</strong>给计算机工业注入新鲜血液。</p>
+<p>当时最大的微处理器制造商就是我们熟知的Intel公司。</p>
+<p>半导体集成电路的集成度越来越高，速度也越来越快，由于硅技术不断改进，Intel公司的创始人之一戈登·摩尔对半导体芯片工业发展前景进行了预测：<strong>每隔18个月，集成度将翻一番，速度将提高一倍，而价格将下降一半，这个规律就是我们熟知的摩尔定律</strong>。</p>
+<p>现在的计算机运算速度极快，每秒可计算1.6亿次浮点数运算。</p>
+<p>这一时期的另一个特点是：<strong>计算机网络的发展和广泛应用</strong>。</p>
+<p>互联网逐渐发展起来，全世界的计算机开始相连，这大大扩展了信息的加速流通，提高了社会的协调和合作能力，也使得个人计算机方式向网络化方向发展。</p>
+<p>此后计算机业界不再沿用传统以元器件划分“第X代计算机”的说法。</p>
+<h1 id="计算机硬件与软件"><a href="#计算机硬件与软件" class="headerlink" title="计算机硬件与软件"></a>计算机硬件与软件</h1><p>在计算机刚刚出现的初期，“计算机”实际上是指计算机硬件，在这期间都是为了改进硬件得以让计算机运算速度更快。</p>
+<p>这时的计算机主要是<strong>CPU、存储器、I/O控制器、外设、各类总线</strong>。</p>
+<p>这段时间的计算机主要以科学计算为主，计算量大，但输入输出量不大。</p>
+<p>直到20世纪60年代，除了科学计算之外，还出现了不但计算量大，而且输入输出量也较大的需求，这时才逐渐产生了计算机软件的概念。</p>
+<p>为了充分利用处理器、存储器和输入输出等计算机资源，逐渐出现了<strong>操作系统</strong>。</p>
+<p>为了提高编程工作效率，出现了<strong>高级语言</strong>。</p>
+<p>为了适应大量的数据处理，出现了<strong>数据库管理系统</strong>。</p>
+<p>随着软件规模和复杂性不断提高，软件开发过程中出现了各种难以控制的局面，即所谓的软件危机，为了克服这种危机，人们研究出了很多技术方法，这就产生了“<strong>软件工程</strong>”概念和方法出现。</p>
+<p>我们来总结一下计算机硬件和软件：</p>
+<ul>
+<li>硬件：主要包括CPU、存储器、I/O控制器、外设和各类总线</li>
+<li>软件：<ul>
+<li>系统软件：操作系统、编译器、数据库管理系统等</li>
+<li>应用软件：科学计算软件、多媒体处理软件、电子邮件软件、文字处理软件等</li>
+</ul>
+</li>
+</ul>
+<h1 id="程序开发与执行"><a href="#程序开发与执行" class="headerlink" title="程序开发与执行"></a>程序开发与执行</h1><p>在最早期使用计算机时，计算机只能接收二进制信息，即0和1，操作人员只能通过很多0和1来编写程序，然后让计算机执行，但这样就有一个问题，非常多的0和1，稍微不注意就有可能发生错误，而且很难发现。</p>
+<p>逐渐人们开始想，把一组固定的0和1用一个标记表示，以后不再写0和1，而是通过很多标记来表达自己的意图，最终再通过转换得到计算机能够识别的0和1，这个标记语言就是<strong>汇编语言</strong>。</p>
+<p>但人们还是没有得到满足，汇编语言虽然比0和1要容易编写和识别，但编写难度和复杂度还是比较大，且还是不太符合人类的编写程序的逻辑思路，为了解决这个问题，又发展出了<strong>高级语言</strong>，高级语言的语法更符合人们的逻辑思路习惯，但是要想执行高级语言编写的程序，还是要转换成汇编语言，再通过汇编程序转换成计算机可识别的信息。</p>
+<p>可见，一个程序要想在计算机中运行，都要经过层层翻译转换才行。</p>
+<p>我们以最简单一个例子，来分析一下程序是如何从开发到执行的。</p>
+<p>首先我们需要编写一段程序，打开任意一个编辑软件写下如下代码，并命名为<code>hello.c</code>：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">&lt;stdio.h&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">main</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">"hello world\n"</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这段程序是如何存储在计算机中的呢？</p>
+<p>在计算机内部，这段代码会以<code>ASCII</code>字符方式存储，如图，每个字符对应的<code>ASCII</code>码的十进制值：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531365963.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>有了程序后，我们如何执行它？在计算机世界中，计算机只认识二进制信息，就是0和1，我们要想让一个程序执行，就必须通过某种方式，把我们的程序转换成计算机能够识别的信息。</p>
+<p>在C语言中，这种转换包含以下几种方式：<strong>预处理、编译、汇编、链接</strong>：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531366123.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>通过这几个阶段，我们可以得到一个可执行文件，这个可执行文件才能被计算机执行。</p>
+<p>任何一种编程语言，都需要类似这样一个转换翻译的过程，不过转换方式不同，大体分以下3类：</p>
+<ul>
+<li>汇编程序：将汇编语言程序翻译成机器语言</li>
+<li>解释程序：将源程序按语句顺序逐条翻译成机器指令并执行，不生成目标程序，例如Python可编写后直接执行</li>
+<li>编译程序：将高级语言源程序翻译成汇编语言或机器语言程序，例如C、C++、Java都需要编译后执行</li>
+</ul>
+<p>我们再来看一个实现两个相邻数据元素交换的程序，从高级语言到机器语言转换的过程如下:</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531367697.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>各语言层次的程序表示如下：</p>
+<ul>
+<li>在编写高级语言时，用3个赋值语句实现</li>
+<li>转换成汇编语言后，变成4个汇编语句</li>
+<li>经过汇编程序转换成机器语言时，对应的是计算机识别的机器指令0和1</li>
+<li>计算机将机器语言翻译成控制信号，驱动硬件执行</li>
+</ul>
+<h1 id="计算机系统分层"><a href="#计算机系统分层" class="headerlink" title="计算机系统分层"></a>计算机系统分层</h1><p>一个计算机系统可以分为硬件和各类软件层次化方式构建的分层系统，不同用户工作在不同的层次，如下图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531367932.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>可以看到不同层次的用户，对计算机的关注点是不同的。</p>
+<p>图中虚线部分是我们这个系列重点关注的模块，只有了解计算机内部是如何工作，从上到下是如何让计算机执行的，我们在编写程序时，才能有更深刻的认识。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/07/12/computer-system-summary/" title="计算机系统基础（一）概览">http://kaito-kidd.com/2018/07/12/computer-system-summary/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/30/ascii-gb18030-unicode-utf8/" rel="prev" title="字符集和字符编码：ASCII、GB18030、Unicode、UTF-8">
+      <i class="fa fa-chevron-left"></i> 字符集和字符编码：ASCII、GB18030、Unicode、UTF-8
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" rel="next" title="计算机系统基础（二）数值进制和进制转换">
+      计算机系统基础（二）数值进制和进制转换 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#计算机的功能和特性"><span class="nav-number">1.</span> <span class="nav-text">计算机的功能和特性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#计算机发展史"><span class="nav-number">2.</span> <span class="nav-text">计算机发展史</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#诞生"><span class="nav-number">2.1.</span> <span class="nav-text">诞生</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第一代计算机"><span class="nav-number">2.2.</span> <span class="nav-text">第一代计算机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第二代计算机"><span class="nav-number">2.3.</span> <span class="nav-text">第二代计算机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第三代计算机"><span class="nav-number">2.4.</span> <span class="nav-text">第三代计算机</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#第四代计算机"><span class="nav-number">2.5.</span> <span class="nav-text">第四代计算机</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#计算机硬件与软件"><span class="nav-number">3.</span> <span class="nav-text">计算机硬件与软件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#程序开发与执行"><span class="nav-number">4.</span> <span class="nav-text">程序开发与执行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#计算机系统分层"><span class="nav-number">5.</span> <span class="nav-text">计算机系统分层</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

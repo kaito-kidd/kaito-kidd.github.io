@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="11、门通过串联或并联的开关组成继电器完成简单的逻辑任务，继电器的组合叫做逻辑门，逻辑门一般有两个或多个输入。 继电器的优点是：可以被其他继电器控制，而不需要人工控制，意味着简单的逻辑门组合起来可以完成复杂的功能。 如何连接继电器，是逻辑门的关键：  继电器串联：与门(AND) 继电器并联：或门(OR) 反向器：NOT 只有1-1输出0：或与门(NAND) 只有0-0输出1：或非门(NOR) 延迟">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17">
+<meta property="og:url" content="http://kaito-kidd.com/2016/05/28/code-note-11-17/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="11、门通过串联或并联的开关组成继电器完成简单的逻辑任务，继电器的组合叫做逻辑门，逻辑门一般有两个或多个输入。 继电器的优点是：可以被其他继电器控制，而不需要人工控制，意味着简单的逻辑门组合起来可以完成复杂的功能。 如何连接继电器，是逻辑门的关键：  继电器串联：与门(AND) 继电器并联：或门(OR) 反向器：NOT 只有1-1输出0：或与门(NAND) 只有0-0输出1：或非门(NOR) 延迟">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-05-28T22:41:52.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="图书">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="编码">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/05/28/code-note-11-17/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/05/28/code-note-11-17/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-05-28 22:41:52" itemprop="dateCreated datePublished" datetime="2016-05-28T22:41:52+00:00">2016-05-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/05/28/code-note-11-17/" class="post-meta-item leancloud_visitors" data-flag-title="《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/05/28/code-note-11-17/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/05/28/code-note-11-17/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="11、门"><a href="#11、门" class="headerlink" title="11、门"></a>11、门</h1><p>通过串联或并联的开关组成继电器完成简单的逻辑任务，继电器的组合叫做<strong>逻辑门</strong>，逻辑门一般有<strong>两个或多个输入</strong>。</p>
+<p>继电器的优点是：<strong>可以被其他继电器控制，而不需要人工控制，意味着简单的逻辑门组合起来可以完成复杂的功能。</strong></p>
+<p>如何连接继电器，是逻辑门的关键：</p>
+<ul>
+<li>继电器串联：与门(AND)</li>
+<li>继电器并联：或门(OR)</li>
+<li>反向器：NOT</li>
+<li>只有1-1输出0：或与门(NAND)</li>
+<li>只有0-0输出1：或非门(NOR)</li>
+<li>延迟信号：缓冲器</li>
+</ul>
+<p>利用4个门与2个反向器连接的电路叫做<strong>2-4译码器</strong>：2个输入，输出4种不同的信号。</p>
+<p>同样的原理可以制造出3-8译码器或4-16译码器。</p>
+<p><strong>由缓冲器、反向器、四种基本逻辑门可以组成复杂电路。</strong></p>
+<h1 id="12、二进制加法器"><a href="#12、二进制加法器" class="headerlink" title="12、二进制加法器"></a>12、二进制加法器</h1><p>一对二进制数相加的结果，有2个数位：<strong>加法位、进位位</strong>，这2个数位计算是分别进行的。</p>
+<ul>
+<li><strong>进位位逻辑：与门</strong></li>
+<li><strong>加法位逻辑：或门 + 与非门 = 异或门(XOR)</strong></li>
+</ul>
+<p>2个输入 –&gt; 异或门 –&gt; 结果 –&gt; 与门 = 半加器</p>
+<p>2个半加器 + 或门 = 全加器</p>
+<ul>
+<li>组成与门、或门、与非门(3 * 2 = 6个继电器)</li>
+<li>异或门 + 与门 = 半加器(8个继电器)</li>
+<li>2个半加器 + 或门 = 全加器(18个继电器)</li>
+<li>8个全加器= 8位二进制加法器(144个继电器)</li>
+</ul>
+<p>全加器的计算原理就是计算机的加法原理，但这种进位方式叫行<strong>波进位(脉冲进位)</strong>，更快的加法器使用<strong>前置进位</strong>提高运算速度。</p>
+<p>现如今的计算机使用晶体管，耗能低、价格低、体积小，但如果搭建一个8位加法器依然需要144个晶体管，如果使用<strong>前置进位</strong>法，将用到更多的晶体管，但电路是体积非常小。</p>
+<h1 id="13、如何实现减法"><a href="#13、如何实现减法" class="headerlink" title="13、如何实现减法"></a>13、如何实现减法</h1><p>十进制减法计算步骤：</p>
+<ul>
+<li>减数大于被减数：<strong>被减数 - 减数 = 减数位个9 - 减数 + 被减数 + 1 - 10^减数位数</strong></li>
+<li>减数小于被减数：<strong>被减数 - 减数 = -(减数位个9 - (减数位个9 - 减数 + 被减数))</strong></li>
+</ul>
+<p>二进制减法计算步骤：</p>
+<ul>
+<li>减数大于被减数：<strong>被减数 - 减数 = 减数位个1 - 减数 + 被减数 + 1 - 2^减数位数</strong></li>
+<li>减数小于被减数：<strong>被减数 - 减数 = -(减数位个1 - (减数位个1 - 减数 + 被减数))</strong></li>
+</ul>
+<p>8个异或门连接为<strong>求补器</strong>，<strong>1个求补器+1个8位加法器+1个异或门形成可完成加法和减法的电路。</strong></p>
+<p><strong>用2的补码来表示二进制中的负数，最高位代表符号位。</strong></p>
+<h1 id="14、反馈与触发器"><a href="#14、反馈与触发器" class="headerlink" title="14、反馈与触发器"></a>14、反馈与触发器</h1><p>2开关+电池+磁铁可以完成一个循环电路，如果连上金属簧片可以形成一个蜂鸣器，也可以叫<strong>振荡器</strong>。</p>
+<p>振荡器可以在不需要人干涉的情况下，自发工作。</p>
+<p>振荡器在0和1之间交替规律变化，又称为<strong>时钟</strong>。</p>
+<p>振荡器从某个初始状态开始，经过一段时间又回到初始状态的间隔，称为<strong>周期</strong>。</p>
+<p>周期的倒数就是振荡器的<strong>频率</strong>，也叫<strong>赫兹</strong>。</p>
+<p>2个或非门+2个开关+1个灯泡的电路，左边或非门的输出是右边或非门的输入，而右边或非门的输出是左边或非门的输入，这种连接方式称之为<strong>反馈</strong>。</p>
+<p>而当2个开关都断开时，电路有2个稳定态，这类电路统称为<strong>触发器</strong>。<strong>触发器</strong>可以“记住”某些信息，这类电路叫做<strong>R-S(复位/置位)触发器</strong>，这类触发器的特点在于：<strong>可以记住哪个输入端最终状态为1</strong>。</p>
+<p>现在把2个输入分别叫做<strong>数据端和保持位</strong>，经过分析，保持位为0意味着输出不被数据端所影响，那么电路演变可以为：<strong>增加2个与门</strong>，变成3个输入：<strong>复位、保持位、置位</strong>，此时的电路和之前电路功能是相同的。</p>
+<p>但是我们只想要2个输入，继续分析电路后得出：2个输入端同时为0是无意义的，而同时为1是非法的，因此只要将<strong>保持位设置为0</strong>，即可完成相同功能，电路演变为：<strong>复位和置位变为1个数据端+反向器</strong>代替，这样就有2个输入了：保持位+数据端。</p>
+<p>此时的电路称为<strong>电平触发的D型触发器</strong>，即当保持位输入为某一特定电平，触发器保存数据端的输入。</p>
+<p>通常情况下，保持位又叫做<strong>时钟</strong>，它可以在0和1之间规律来回变化，但此时的时钟仅用来指示什么时候保存数据。</p>
+<p>至此，此电路就是电平触发的<strong>D型锁存器</strong>，也叫<strong>1位存储器</strong>，它可以锁存住1位数据并保持它，以便将来使用。</p>
+<p>由2级R-S触发器连接的电路，时钟端既控制第一级R-S触发器，也控制着第二级，只有当时钟信号由0变为1时，数据端的输入才被保存下来，输出0到1或1到0，而下级触发器的频率正好是上级触发器频率的一半，这种电路叫<strong>分频器</strong>，就这样多个振荡器连接下去，就形成了<strong>计数器</strong>。</p>
+<p>至此，我们可以通过使用继电器形成的电路来<strong>加法、减法和计数</strong>了。</p>
+<h1 id="15、字节与十六进制"><a href="#15、字节与十六进制" class="headerlink" title="15、字节与十六进制"></a>15、字节与十六进制</h1><p><strong>8位代表1个字节(byte)</strong>，追溯历史原因，8位可以表示0-255共256种不同的事物，而最早的书面语言的基本字符都少于256个，所以使用8位表示1个字节是比较理想的手段，通用1个字节也可以表示RGB256种颜色值。</p>
+<p>如果要表达的事物1个字节不够用，则可以扩展字节，采用2个字节甚至更多字节来表示，表示起来也很方便(扩展方便)。</p>
+<p>把1个字节分为每4位为1组，进而演化出16进制，1个16进制位表示4位，表达起来也很方便。</p>
+<a id="more"></a>
+
+<h1 id="16、存储器组织"><a href="#16、存储器组织" class="headerlink" title="16、存储器组织"></a>16、存储器组织</h1><p>把之前的<strong>D型电平触发器</strong>的时钟端、数据端分别改名为<strong>写操作端，数据输入</strong>，然后把多个这种1位锁存器连接起来，就形成了<strong>多位锁存器</strong>。</p>
+<p>目前的电路，只能存储1个8位二进制数，如果想存储8个单独的比特怎么办？</p>
+<p>使用8-1数据选择器，来控制哪个比特位存储。</p>
+<p>目前输出端可以满足要求，控制每个比特位的单独存储。</p>
+<p>但输入端包括了<strong>数据输入和写操作信号</strong>，要想合并这2个，只要一个输入端，使用<strong>3-8译码器</strong>即可完成合并。</p>
+<p>译码器和选择器具有相同的选择信号，放在一起叫做<strong>地址端口</strong>。</p>
+<p>通过3-8译码器的输入端，地址决定哪个锁存器可以被写操作端信号触发来保存数据，在输出端，8-1选择器来通过地址选择8个锁存器中的1个，最后输出。</p>
+<p>至此，完成了一个可以存储8个单独比特的<strong>随机存储器(RAM)</strong>。</p>
+<p>将多个RAM组织起来可以形成<strong>RAM阵列</strong>。</p>
+<p>RAM阵列的<strong>存储容量与地址输入端的数量</strong>有直接联系，RAM阵列的存储容量=2^地址输入端的个数。</p>
+<p>同理，使用RAM阵列就可以组织处1024<em>8的RAM，即1KB的RAM，其有*</em>8个数据输入端、8个数据输出端和10个地址输入端(2^10=1024)**，地址输入端决定RAM的存储能力。</p>
+<p>继续就能组织出64K*8的RAM，此RAM需要16个地址输入端，地址范围为0000h~FFFFh。</p>
+<p>但是产生的另一个问题就是，组装出此电路的电路零件非常多，很难管理，如果使用一个<strong>控制面板</strong>来管理，就会简单的多。</p>
+<p>控制面板上有16个开关用于控制地址位，8个开关控制输入的8比特数据，写操作端用1个开关，8个灯泡显示8位数据，最后还有个<strong>控制开关</strong>，控制是否来自其他电路的控制(其实就是CPU来控制)。</p>
+<p>至此，我们制造出了64KB<em>8的RAM，能存储65536个8位数，并且此电路可以*</em>接入其他电路，使其他电路来读、写存储器。**</p>
+<p><strong>但是由于此RAM都是通过逻辑门和电路磁片组成的，所以断电后，将失去存储能力，这就是RAM断电后丢失数据的特点。</strong></p>
+<h1 id="17、自动操作"><a href="#17、自动操作" class="headerlink" title="17、自动操作"></a>17、自动操作</h1><p>现在如果想计算多个数相加的结果，用1个8位加法器+1个8位锁存器就可以完成，但是有2个缺陷：</p>
+<ul>
+<li>无法计算结果大于255的数</li>
+<li>如果加数很多，输入的过程中一旦输入错误，则需重新输入</li>
+</ul>
+<p>由于以上缺陷，可以连接之前的64k*8的RAM阵列，RAM的输入是一个16位数计数器(由之前的触发器组成)，RAM的输出连接加法器的输入，这样就可以把输入的数先保存到RAM中，每次输入都会通过计数器在RAM中寻址后保存，这样等全部输入完成后，就可以等待加法器依次相加得出结果。</p>
+<p>这种电路只能上述说的第2个缺陷，但第1个缺陷还是无法解决，并且此电路启动后，无法停止。</p>
+<p>上面所述的加法是，依次输入后，其先保存到RAM中，再输出给加法器，依次相加。</p>
+<p>如果想计算50对数相加，产生50个结果，然后保存到RAM中，并且可以任意读取这50个结果，怎么做？</p>
+<p>改造电路，使8位锁存器的输出连接到RAM的输入端，也就是说把计算后的值，再写回到RAM中保存，就可以达到目的。</p>
+<p>目前解决问题需要如何配置一个自动加法器，不仅可以对一组数字做累加运算，还能自主确定累加了多少数字，并且能记住在RAM中存放了多少个计算结果？</p>
+<p>经过分析，我们希望8位锁存器能做4件事：</p>
+<ul>
+<li>把一个字节从RAM中加载到累加器(Load)</li>
+<li>把RAM中的一个字节加到累加器中(Add)</li>
+<li>把累加器的计算结果存放到RAM中(Store)</li>
+<li>可以自动停止(Halt)</li>
+</ul>
+<p>解决上述问题，需要引入另一个RAM，这个RAM来保存这些Load、Add、Store、Halt操作码，也就是说电路中有2个RAM共同工作，RAM1保存了数据，RAM2保存了代码(指令)。同时，要想达到8位锁存器Load指令的效果，需改造电路，8位加法器的输出与一个2-1选择器连接，2-1选择器连接RAM2和8位锁存器，这样锁存器就可以实现从RAM2中执行Load指令。</p>
+<p>如果要实现减法如何做？有了之前由加法可以变相计算减法的逻辑，可以在RAM2和加法器之间连接一个反向器，就可以实现<strong>减法操作</strong>。</p>
+<p>回到最开始提的问题，如何解决结果不能大于255的问题？解决办法是，把加数拆分，分别计算高字节和低字节的和，然后合并就可以得到结果。</p>
+<p>这里又产生一个问题，如果低字节加法计算后，需要进位，这个进位需要与高字节累加才是正确结果，解决方法是：引入1个1位锁存器，叫它<strong>进位锁存器</strong>，同时引入一个<strong>“进位加法”</strong>的指令，专门保存进位的值，然后再和高字节累加计算。</p>
+<p>同理，减法如何需要借位，添加一个“借位减法”的指令，此指令将减数取反，并把加法器的进位输入变为1。</p>
+<p><strong>截止现在，此电路不限于计算8位数的加法运算，也可以计算16、24、32及以上位数的运算，包括加法和减法。</strong></p>
+<p>但现在的电路有个问题，如果几个数相加，得到了结果，但是想再减去一个数，却做不到，不能复用之前的结果。</p>
+<p>产生此问题的原因在于代码存储器和数据存储器是同步的、顺序的，代码存储器每一条指令对应数据存储器相同地址的存储单元。</p>
+<p>解决此问题的方案是：每一个指令占据3个字节，第1个字节代表操作码，后2个字节存放1个16位存储器单元地址。</p>
+<p>改造电路，把指令RAM阵列输出改为3个8位锁存器，第1个锁存器保存指令代码，后2个锁存器保存16位地址，输出给数据RAM阵列。</p>
+<p>现在使用了3个字节存储指令和数据，那么就可以把2个RAM合为1个RAM。改造电路，去掉数据RAM，把2个8位锁存器的输出接入到2-1选择器然后连接RAM。</p>
+<p>现在的电路虽然可以完成基本功能，但是还不够完美，因为现在的电路使用地址空间是要非常小心的，如果不注意，就会发生地址被覆盖的情况，导致执行错误。</p>
+<p>要解决此问题的方法是：加入一个<strong>跳转(jump)指令</strong>，同时改造电路，使指令的后2个字节输出也可以输出到计数器，然后通过计数器来确定遇到跳转指令后，计数器输出需跳转的地址，完成跳转寻址。</p>
+<p>如何完成2各数相乘的运算？那么就可以使用跳转指令完成，但是还是不够，这里需要一个跳转条件来配合，达到什么条件后才发生跳转。</p>
+<p>增加1个锁存器，叫做<strong>零锁存器</strong>，只有当加法器的输出全部为0时它的值才是1。通过计数器和零锁存器的配合，就可以计算乘法运算。</p>
+<p>当然同理，实现除法、平方根、取对数、三角函数运算也都是可行的。</p>
+<p><strong>到这里，我们完成了一个计算机的核心功能，包括：处理器、存储器、输入设备、输出设备。这里的处理器即是CPU，主要负责控制和逻辑运算。</strong></p>
+<p><strong>处理器包括若干组件，累加器就是其中一个非常重要的组件，它是一个锁存器，用来保存处理器内部的部分数据。</strong></p>
+<p>在此电路设计中：</p>
+<ul>
+<li>8位反向器和8位加法器构成了算数逻辑单元(ALU)，其只能进行算数运算(主要是加法和减法，在以后的计算机中可以进行逻辑运算)</li>
+<li>16位计数器叫做程序计数器(PC)，其实就控制单元</li>
+</ul>
+<p>我们设计的计算机由继电器、电线、开关、灯泡构成，这些都叫<strong>硬件</strong>，而存储器中的指令和数值叫做<strong>软件</strong>，平时我们所说的<strong>“编写代码”</strong>就是做软件的工作。</p>
+<p>计算机处理的操作码(如Load、Add、Store)最终转换数字的其实叫做<strong>机器码或机器语言</strong>，这些操作码也叫做<strong>助记符</strong>，方便“编写”，但其本质还是转换为机器码。</p>
+<p>用操作码和地址表示的程序，叫做<strong>汇编</strong>，它是机器语言和指令的文字描述的结合体，<strong>使用汇编语言的好处在于降低了使用机器代码编写的错误率，同时易于理解。</strong></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/05/28/code-note-11-17/" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17">http://kaito-kidd.com/2016/05/28/code-note-11-17/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%BE%E4%B9%A6/" rel="tag"><i class="fa fa-tag"></i> 图书</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/04/20/code-note-01-10/" rel="prev" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10">
+      <i class="fa fa-chevron-left"></i> 《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/06/03/assembly-note-1/" rel="next" title="汇编总结(1)：基础、存储器、寄存器、汇编程序">
+      汇编总结(1)：基础、存储器、寄存器、汇编程序 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#11、门"><span class="nav-number">1.</span> <span class="nav-text">11、门</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#12、二进制加法器"><span class="nav-number">2.</span> <span class="nav-text">12、二进制加法器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#13、如何实现减法"><span class="nav-number">3.</span> <span class="nav-text">13、如何实现减法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#14、反馈与触发器"><span class="nav-number">4.</span> <span class="nav-text">14、反馈与触发器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#15、字节与十六进制"><span class="nav-number">5.</span> <span class="nav-text">15、字节与十六进制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#16、存储器组织"><span class="nav-number">6.</span> <span class="nav-text">16、存储器组织</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#17、自动操作"><span class="nav-number">7.</span> <span class="nav-text">17、自动操作</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

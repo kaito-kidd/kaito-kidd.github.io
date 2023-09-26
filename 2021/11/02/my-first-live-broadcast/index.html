@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="你好，我是 Kaito。 上周五，我在极客时间做了一场直播，也是我有史以来第一次公开直播，从忐忑的心情到把它完成，整个经历还挺有意思的。 写下这篇文章和你聊一聊这段经历，以及在这过程中我的一些启发和思考，希望对你也有所帮助。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="第一次公开直播，我的启发和思考">
+<meta property="og:url" content="http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="你好，我是 Kaito。 上周五，我在极客时间做了一场直播，也是我有史以来第一次公开直播，从忐忑的心情到把它完成，整个经历还挺有意思的。 写下这篇文章和你聊一聊这段经历，以及在这过程中我的一些启发和思考，希望对你也有所帮助。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/11/16356968723721.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/11/16356968723729.jpg">
+<meta property="article:published_time" content="2021-11-02T10:22:41.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="成长">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/11/16356968723721.jpg">
+
+<link rel="canonical" href="http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>第一次公开直播，我的启发和思考 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          第一次公开直播，我的启发和思考
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-11-02 10:22:41" itemprop="dateCreated datePublished" datetime="2021-11-02T10:22:41+00:00">2021-11-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">程序人生</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/11/02/my-first-live-broadcast/" class="post-meta-item leancloud_visitors" data-flag-title="第一次公开直播，我的启发和思考" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/11/02/my-first-live-broadcast/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/11/02/my-first-live-broadcast/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>你好，我是 Kaito。</p>
+<p>上周五，我在极客时间做了一场直播，也是我有史以来第一次公开直播，从忐忑的心情到把它完成，整个经历还挺有意思的。</p>
+<p>写下这篇文章和你聊一聊这段经历，以及在这过程中我的一些启发和思考，希望对你也有所帮助。</p>
+<a id="more"></a>
+
+<h2 id="准备"><a href="#准备" class="headerlink" title="准备"></a>准备</h2><p>大概在 2 周前，极客时间联系我，邀请我做一场直播，应该是之前在他们那做过技术演讲的原因，所以他们这次又找到了我。</p>
+<blockquote>
+<p>上次在极客时间做了场技术分享，我还写了篇复盘文章，感兴趣可以看看：<a href="http://kaito-kidd.com/2021/08/16/technical-presentation-taught-me/">我做了一场技术演讲，学到了这些东西</a>。</p>
+</blockquote>
+<p>我听说是直播讲课，第一感觉是比上一次的演讲更难一些。后来经过沟通得知，直播不像演讲那么正式，可以随意一些，直播主题可以根据自己的情况来定。</p>
+<p>考虑了一天，想到之前技术演讲尝试过了，这次直播也可以试一下，主要是想看看自己能做到什么程度，于是便接受了这个邀请。</p>
+<p>虽然说直播主题可以自定，但思考过后还是决定分享自己擅长的领域，于是选了《如何更高效地学习 Redis》这个主题。</p>
+<p>这块内容其实之前多少有做过一些分享，但感觉并不全面，这次正好趁这个机会再重新梳理一下，对自己也算是一个复盘。</p>
+<p>有了上次演讲的经验，这次准备 PPT 算是轻车熟路了，2 天时间做了 40+ 页，从 Redis 入门、进阶、高阶 3 个方面，全面梳理高效学习 Redis 的路径（后面我会发一篇文字稿）。</p>
+<p>极客时间还专门给我做了直播海报。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/11/16356968723721.jpg" alt=""></p>
+<h2 id="直播"><a href="#直播" class="headerlink" title="直播"></a>直播</h2><p>直播当天，在做开播前测试时被告知，这次<strong>除了在极客时间 App 上直播，还会在视频号、InfoQ 上同步播放</strong>，另外我还发现，我的直播预告还被挂到了极客时间 App 首页上。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/11/16356968723729.jpg" alt=""></p>
+<p>这么一搞，感觉比预想观看的人要多啊，着实有些紧张。</p>
+<p>正式直播时，为了缓解紧张，我故意放慢了语速，让自己有时间思考和组织语言，所以前半段节奏略慢。当然，因为内容本身就比较多，所以前半部分讲得也比较细。</p>
+<p>渐渐地，我自己进入了「心流」状态，等我讲到最后一部分时，抬头看了一下时间，发现竟然已经讲了 40 分钟了，为了避免直播超时太严重，最后一部分内容有意加快了速度。</p>
+<p>讲完之后，最后又做了在线答疑，整个直播一共持续 1 小时多一点，比预想的要久一些。</p>
+<h2 id="复盘"><a href="#复盘" class="headerlink" title="复盘"></a>复盘</h2><p>如果给这次直播表现打分的话，我会给自己打 75 分（满分 100），比上一次演讲发挥要好一些，不过整体还是有很大的进步空间。</p>
+<p>之前自己在线下过 PPT 时，其实是设计了很多互动和演示环节的，但直播时太过紧张，有些跳过去了。现在想一想，其实应该能表现得更好。</p>
+<p>不过没关系了，<strong>毕竟完成比完美更重要</strong>。</p>
+<p>其实在这次直播之前，我心里也有想过这种形式的技术分享，毕竟视频所呈现的内容肯定要比写文章丰富很多，也更容易被吸收。不过因为拖延症的原因，一直被搁置了，这次算是被外力推了一把，提前让自己做了尝试。</p>
+<p>虽然自我感觉一般，但反馈说直播观看人数的数据还不错。而且直播完有些人加我微信，说讲得很好，受益匪浅，这让我也受到很大鼓励，看来以后可以多尝试一下这种形式的分享。</p>
+<p>最让我印象深刻的是答疑环节，因为除了有人问技术问题之外，还有很多人都在问有关「<strong>个人成长</strong>」和「<strong>职业发展</strong>」的问题，我觉得很有意思，下面我们就再深入聊一聊这个话题。</p>
+<h2 id="关于个人成长"><a href="#关于个人成长" class="headerlink" title="关于个人成长"></a>关于个人成长</h2><p>评论区关于个人成长和职业发展的问题，大致是这些：</p>
+<ul>
+<li>程序员怎么做职业规划？</li>
+<li>怎么去做有挑战的事情？</li>
+<li>职场上如何更快成长？</li>
+</ul>
+<p>其实这些是每个程序员都比较关心的，我也不例外。</p>
+<p>可能是因为我工作时间比较久了，之前也有很多读者问过我类似的问题，在这里简单聊一聊我的看法。</p>
+<p><strong>1、警惕温水煮青蛙</strong></p>
+<p>如果你进入一个新岗位，前期肯定会面临很多有挑战的事，在这期间你会感觉到成长是飞快的。但随着时间的推移和工作的熟练，慢慢你就会进入舒适区。</p>
+<p>但如果在舒适区待得太久，就好像温水里的青蛙一样。通常来说，我觉得在一个岗位工作 2-3 年，如果还一直在做没有提升的重复工作，我觉得需要警惕起来了，因为这会丧失自己的竞争力。</p>
+<p>所以我建议你时常审视一下自己，是否处于这种状态，避免在舒适区待太久。</p>
+<p><strong>2、主动寻求机会</strong></p>
+<p>避免温水煮青蛙的办法，就是踏出舒适区，寻找更多机会和可能性，把自己投入下一个有挑战的周期内。具体要怎么做呢？</p>
+<p>其实没想象的那么难，主动争取新项目的参与机会，主动推进项目进展，主动沟通和协作，总之，只要是之前没尝试过的领域，都可以去试着去做一做。</p>
+<p>如果确实没有这些机会，那你至少要多花时间去修炼「内功」，把基础打牢，这样等跳槽面试时，你也会比那些只会 CRUD 的人有竞争力。</p>
+<p><strong>3、切忌浮躁</strong></p>
+<p>近几年互联网行业进来的人越来越多，这个行业也变得越来越内卷了，但是，无论怎样，这个世界还是符合「二八定律」的，也就是 80% 的人平庸，20% 的人优秀。</p>
+<p>在这种情况下，<strong>但凡你努力一点点，其实就能超过很多人。</strong></p>
+<p>所以，心态上一定不要浮躁，不要跟风躺平，该看书看书，该看源码看源码，要沉得住气把一项技术学精，而不是蜻蜓点水式的学习。</p>
+<p><strong>4、成长是一点点积累的</strong></p>
+<p>不知道你有没有这样的感受，就是总觉得那些牛人怎么那么厉害，好像自己这一辈子都追不上。</p>
+<p>其实不是的，很多人觉得自己差距太大就选择放弃，但殊不知那些牛人之所以这么厉害，都是一点点积累起来的。</p>
+<p>有天赋的人是极少数，大部分人其实和你一样，都是普通人。只不过有些人在做每一件小事时，都极其认真，然后积少成多，一点点成长。</p>
+<p>那些经常在技术大会上做分享的人，他们一开始就这么厉害吗？肯定不是的。</p>
+<p>他们肯定是通过自己一点点的技术积累，先在公司做出了一点点成就，在内部做分享，之后再走出来，在行业里影响更多的人。我们只是看到了结果，但殊不知他们也是一步一个脚印走出来的。</p>
+<p>其实我也有职业焦虑，担心自己写不动代码，怕被淘汰。所以近几年我开始转变自己的思路，让自己变得更「开放」一些。</p>
+<p>之前很多时候有一些机会放在我面前，因为担心自己不能胜任，多数情况下都选择了拒绝。但现在遇到一些机会，我会大胆地选择去尝试，选择公开演讲、公开直播都是基于这样的心态。</p>
+<p>虽然我知道自己一次做不到位，但我就想先看看自己能做到什么程度。再说，失败了我又没什么损失，万一某件事做成了，又为自己探索出一条新的道路，岂不是赚了？</p>
+<h2 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h2><p>毕竟我们还年轻，还有试错的资本，现在不去尝试，等年龄越大试错成本更高，可能真的就折腾不动了。</p>
+<p>凡事迈出一小步，走出自己的舒适区，虽然会有些「阵痛」，但你会发现很快就能适应它。很多时候，我们的成长都是伴随阵痛才过来的。</p>
+<p>虽然每次只是往前走了一小步，但到后面你会走得越来越快、越来越远。</p>
+<p>等那时再过回头来看看曾经的自己，我想你也会发出这样的感叹：<strong>很多事情其实也没想的那么难，自己竟然也都能做到。</strong></p>
+<p>所以，无论是进阶技术，还是职业选择，我觉得<strong>都要学会给自己创造了更多的可能性。</strong></p>
+<p>希望我的这些思考，对你也有所启发。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/" title="第一次公开直播，我的启发和思考">http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%88%90%E9%95%BF/" rel="tag"><i class="fa fa-tag"></i> 成长</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/28/bad-programmers-bad-habits/" rel="prev" title="糟糕程序员的20个坏习惯">
+      <i class="fa fa-chevron-left"></i> 糟糕程序员的20个坏习惯
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2022/01/17/my-2021-summary/" rel="next" title="持续向前：我的2021年总结">
+      持续向前：我的2021年总结 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#准备"><span class="nav-number">1.</span> <span class="nav-text">准备</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#直播"><span class="nav-number">2.</span> <span class="nav-text">直播</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复盘"><span class="nav-number">3.</span> <span class="nav-text">复盘</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关于个人成长"><span class="nav-number">4.</span> <span class="nav-text">关于个人成长</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最后"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="信息的二进制编码在计算机内部，所有信息都是采用二进制进行编码和计算的，有没有想过，为什么采用这种方式？ 其原因在于二进制只有两种状态，制造一个只有两个稳定状态的物理器件要比多个稳定状态的物理期间容易得多，使用高、低电位或脉冲有、无表示都很方便，能够很可靠的表示“0”和“1”。 如果都采用二进制计算，那么我们平时使用的数字、符号甚至图片和视频，都应该通过某种方式转换成二进制，才能得以让计算机运算。这">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（二）数值进制和进制转换">
+<meta property="og:url" content="http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="信息的二进制编码在计算机内部，所有信息都是采用二进制进行编码和计算的，有没有想过，为什么采用这种方式？ 其原因在于二进制只有两种状态，制造一个只有两个稳定状态的物理器件要比多个稳定状态的物理期间容易得多，使用高、低电位或脉冲有、无表示都很方便，能够很可靠的表示“0”和“1”。 如果都采用二进制计算，那么我们平时使用的数字、符号甚至图片和视频，都应该通过某种方式转换成二进制，才能得以让计算机运算。这">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531793546.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531794193.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531795682.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-07-17T09:58:52.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="编码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531793546.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（二）数值进制和进制转换 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（二）数值进制和进制转换
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-17 09:58:52" itemprop="dateCreated datePublished" datetime="2018-07-17T09:58:52+00:00">2018-07-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（二）数值进制和进制转换" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="信息的二进制编码"><a href="#信息的二进制编码" class="headerlink" title="信息的二进制编码"></a>信息的二进制编码</h1><p>在计算机内部，所有信息都是采用二进制进行编码和计算的，有没有想过，为什么采用这种方式？</p>
+<p>其原因在于二进制只有两种状态，制造一个只有两个稳定状态的物理器件要比多个稳定状态的物理期间容易得多，使用高、低电位或脉冲有、无表示都很方便，能够很可靠的表示“0”和“1”。</p>
+<p>如果都采用二进制计算，那么我们平时使用的数字、符号甚至图片和视频，都应该通过某种方式转换成二进制，<br>才能得以让计算机运算。这种转换方式称为“编码”。</p>
+<p>我们人类角度看到的数据到计算机内部的数据转换如下：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531793546.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>这篇文章，我们先来分析数值型数据的进制与转换规则。</p>
+<a id="more"></a>
+
+<h1 id="进制计数制"><a href="#进制计数制" class="headerlink" title="进制计数制"></a>进制计数制</h1><p>日常生活中我们都是使用十进制数，每个数位可用10个不同符号（0-9）表示，在进行加法运算时，逢十进一。</p>
+<p>在计算机系统中，常用的进位计数制有以下几种：</p>
+<ul>
+<li>二进制R=2：基本符号为0、1</li>
+<li>八进制R=8：基本符号为0、1、2、3、4、5、6、7</li>
+<li>十进制R=10，基本符号为0、1、2、3、4、5、6、7、8、9</li>
+<li>十六进制R=16，基本符号为0、1、2、3、4、5、6、7、8、9、A、B、C、D、E、F</li>
+</ul>
+<p>下图列出了4种进制之间的对应关系：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531794193.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>计算机内部都使用二进制编码表示，但计算机外部，我们为了书写和阅读方便，会采用八进制、十进制或十六进制。</p>
+<p>在书写时采用后缀字母标识该数的计数制，一般用B（Binary）表示二进制，用O（Octal）表示八进制，用D（Decimal）表示十进制，用H（Hexadeciaml）表示十六进制。例如二进制10011B，十进制56D，十六进制308FH等。</p>
+<p>那各计数制之间的数据如何转换呢？下面我们逐个进行讲解。</p>
+<h1 id="R进制转换成十进制"><a href="#R进制转换成十进制" class="headerlink" title="R进制转换成十进制"></a>R进制转换成十进制</h1><p>任何一个R进制数转换成十进制，只要”按权展开”即可，这个“权”就是R，我们看下面几个例子：</p>
+<p>将二进制数10101.01转换成十进制数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">10101.01(B) &#x3D; 1 * 2^4 + 0 * 2^3 + 1 * 2^2 + 0 * 2^1 + 0 * 2^-1 + 1 * 2^-2 &#x3D; 21.25(D)</span><br></pre></td></tr></table></figure>
+
+<p>将八进制数307.6转换成十进制数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">307.6(O) &#x3D; 3 * 8^2 + 7 * 8^0 + 6 * 8^-1 &#x3D; 199.75(D)</span><br></pre></td></tr></table></figure>
+
+<p>将十六进制数3A.C转换成十进制数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">3A.C(H) &#x3D; 3 * 16^1 + 10 * 16^0 + 12 * 16^-1 &#x3D; 58.75(D)</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="十进制转换成R进制"><a href="#十进制转换成R进制" class="headerlink" title="十进制转换成R进制"></a>十进制转换成R进制</h1><p>十进制转换成R进制，要将整数部分和小数部分分别进行转换，这两部分的转换规则是不同的。</p>
+<h2 id="整数部分的转换"><a href="#整数部分的转换" class="headerlink" title="整数部分的转换"></a>整数部分的转换</h2><p>整数部分的转换规则为：反复除以基数R，直到余数为0为止，每次除法得到的余数从下到上依次排列即是R进制数最终结果。</p>
+<p>我们看一个例子，将十进制数135分别转换成八进制数和二进制数：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1531795682.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>所以135(D) = 207(O) = 10000111(B)。</p>
+<h2 id="小数部分的转换"><a href="#小数部分的转换" class="headerlink" title="小数部分的转换"></a>小数部分的转换</h2><p>小数部分的转换规则为：要转换的十进制数乘以基数R，得到的数字小数部分继续与基数R相乘，直到某一步结果的小数部分为0为止。每次相乘得到的中间结果从高到低依次排列即是最终结果。</p>
+<p>例如将十进制小数0.6875分别转换成二进制数和八进制数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0.6875 * 2 &#x3D; 1.375  整数部分&#x3D;1  （高位）</span><br><span class="line">0.735 * 2 &#x3D; 0.75    整数部分&#x3D;0    ↓</span><br><span class="line">0.75 * 2 &#x3D; 1.5      整数部分&#x3D;1    ↓</span><br><span class="line">0.5 * 2 &#x3D; 1.0       整数部分&#x3D;1  （低位）</span><br></pre></td></tr></table></figure>
+
+<p>所以0.6875(D) = 0.1011(B)。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0.6875 * 8 &#x3D; 5.5    整数部分&#x3D;5  （高位）</span><br><span class="line">0.5 * 8 &#x3D; 4.0       整数部分&#x3D;4  （低位）</span><br></pre></td></tr></table></figure>
+
+<p>所以0.6875(D) = 0.54(O)。</p>
+<p>有一种情况就是每次乘积后的小数部分永远得不到0，这种情况下得到的是个近似值。</p>
+<p>例如将十进制小数0.63转换成二进制数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">0.63 * 2 &#x3D; 1.26     整数部分&#x3D;1  （高位）</span><br><span class="line">0.25 * 2 &#x3D; 0.52     整数部分&#x3D;0</span><br><span class="line">0.52 * 2 &#x3D; 1.04     整数部分&#x3D;1</span><br><span class="line">0.04 * 2 &#x3D; 0.08     整数部分&#x3D;0  （低位）</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>所以0.63(D) = 0.1010…(B)。</p>
+<h2 id="含整数、小数部分的转换"><a href="#含整数、小数部分的转换" class="headerlink" title="含整数、小数部分的转换"></a>含整数、小数部分的转换</h2><p>我们知道了整数部分和小数部分的转换规则，对一个数字这两部分分别转换，再这两部分转换的结果合起来就得到一个完整的结果。</p>
+<p>那么135.6875分别转换成二进制数和八进制数的结果为：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">135.6875(D) &#x3D; 10000111.1011(B) &#x3D; 207.54(O)</span><br></pre></td></tr></table></figure>
+
+
+<h1 id="二进制、八进制、十进制互相转换"><a href="#二进制、八进制、十进制互相转换" class="headerlink" title="二进制、八进制、十进制互相转换"></a>二进制、八进制、十进制互相转换</h1><h2 id="八进制数转二进制数"><a href="#八进制数转二进制数" class="headerlink" title="八进制数转二进制数"></a>八进制数转二进制数</h2><p>八进制数转换成二进制数，只需要把每一个八进制数逐位改成等值的3位二进制数即可。</p>
+<p>在上图各进制数值之间的对应关系得知，八进制数与二进制数对应关系如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0(O) &#x3D; 000  1(O) &#x3D; 001  2(O) &#x3D; 010  3(O) &#x3D; 011</span><br><span class="line">4(O) &#x3D; 100  5(O) &#x3D; 101  6(O) &#x3D; 110  7(O) &#x3D; 111</span><br></pre></td></tr></table></figure>
+
+<p>将八进制数13.724转换成二进制：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">13.724(O) &#x3D; 001 011.111 010 100(B) &#x3D; 1011.1110101(B)</span><br></pre></td></tr></table></figure>
+
+<h2 id="十六进制数转二进制数"><a href="#十六进制数转二进制数" class="headerlink" title="十六进制数转二进制数"></a>十六进制数转二进制数</h2><p>十六进制数转换二进制数方法与上面类似，只需要把每一个十六进制数逐位改写等值的4位二进制数即可。</p>
+<p>十六进制数与二进制数对应关系如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0(H) &#x3D; 0000  1(H) &#x3D; 0001  2(H) &#x3D; 0010  3(H) &#x3D; 0011</span><br><span class="line">4(H) &#x3D; 0100  5(H) &#x3D; 0101  6(H) &#x3D; 0110  7(H) &#x3D; 0111</span><br><span class="line">8(H) &#x3D; 1000  9(H) &#x3D; 1001  A(H) &#x3D; 1010  B(H) &#x3D; 1011</span><br><span class="line">C(H) &#x3D; 1100  D(H) &#x3D; 1101  E(H) &#x3D; 1110  F(H) &#x3D; 1111</span><br></pre></td></tr></table></figure>
+
+<p>将十六进制数2B.53转换成二进制：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">2B.5E(H) &#x3D; 0010 1011.0101 1110(B) &#x3D; 101011.0101111(B)</span><br></pre></td></tr></table></figure>
+
+<h2 id="二进制数转八进制数"><a href="#二进制数转八进制数" class="headerlink" title="二进制数转八进制数"></a>二进制数转八进制数</h2><p>二进制数转换为八进制数，正好与上面相反：整数部分从低位到高位方向每3位改写成八进制数替换，最后不足3位时在高位补0凑满3位。小数部分从高位向低位方向每3位改写成八进制数替换，最后不足3位时在低位补0凑满3位。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0.10101(B) &#x3D; 000.101 010(B) &#x3D; 0.52(O)</span><br><span class="line">10011.01(B) &#x3D; 010 011.010(B) &#x3D; 23.2(O)</span><br></pre></td></tr></table></figure>
+
+<h2 id="二进制数转十六进制数"><a href="#二进制数转十六进制数" class="headerlink" title="二进制数转十六进制数"></a>二进制数转十六进制数</h2><p>二进制数转换为十六进制数与上面类似，只不过是每4位改写成十六进制数替换。</p>
+<p>例如：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">11001.11(B) &#x3D; 0001 1001.1100(B) &#x3D; 19.C(H)</span><br></pre></td></tr></table></figure>
+
+<p>以上可以看出，二进制与八进制、二进制与十六进制之间的转换关系非常直观，通过简单的规则直接替换即可。</p>
+<p>由于二进制数太长，书写和阅读步方便，所以在程序开发或阅读机器代码时，一般采用八进制或十六进制等价表示二进制。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" title="计算机系统基础（二）数值进制和进制转换">http://kaito-kidd.com/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/12/computer-system-summary/" rel="prev" title="计算机系统基础（一）概览">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（一）概览
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/07/23/computer-system-fixed-point/" rel="next" title="计算机系统基础（三）定点数">
+      计算机系统基础（三）定点数 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#信息的二进制编码"><span class="nav-number">1.</span> <span class="nav-text">信息的二进制编码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#进制计数制"><span class="nav-number">2.</span> <span class="nav-text">进制计数制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#R进制转换成十进制"><span class="nav-number">3.</span> <span class="nav-text">R进制转换成十进制</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#十进制转换成R进制"><span class="nav-number">4.</span> <span class="nav-text">十进制转换成R进制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#整数部分的转换"><span class="nav-number">4.1.</span> <span class="nav-text">整数部分的转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小数部分的转换"><span class="nav-number">4.2.</span> <span class="nav-text">小数部分的转换</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#含整数、小数部分的转换"><span class="nav-number">4.3.</span> <span class="nav-text">含整数、小数部分的转换</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二进制、八进制、十进制互相转换"><span class="nav-number">5.</span> <span class="nav-text">二进制、八进制、十进制互相转换</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#八进制数转二进制数"><span class="nav-number">5.1.</span> <span class="nav-text">八进制数转二进制数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十六进制数转二进制数"><span class="nav-number">5.2.</span> <span class="nav-text">十六进制数转二进制数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二进制数转八进制数"><span class="nav-number">5.3.</span> <span class="nav-text">二进制数转八进制数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二进制数转十六进制数"><span class="nav-number">5.4.</span> <span class="nav-text">二进制数转十六进制数</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

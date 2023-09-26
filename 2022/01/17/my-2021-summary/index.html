@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="你好，我是 Kaito。 好久不见，2022 年已经过去半个月，由于最近事情比较多，拖到现在才写自己的 2021 总结。 之前每到年终时，我都是在朋友圈发一个简单的总结，因为去年开通了公众号，那么从今年开始，每年的年终总结都会写我的个人公众号 + 技术博客上，详细记录一下每年的事情和思考。（文末扫码关注我的公众号） 2021 年对我来说，可以算得上是变化最大的一年了，这一年做出了一点小成绩，也有了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="持续向前：我的2021年总结">
+<meta property="og:url" content="http://kaito-kidd.com/2022/01/17/my-2021-summary/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="你好，我是 Kaito。 好久不见，2022 年已经过去半个月，由于最近事情比较多，拖到现在才写自己的 2021 总结。 之前每到年终时，我都是在朋友圈发一个简单的总结，因为去年开通了公众号，那么从今年开始，每年的年终总结都会写我的个人公众号 + 技术博客上，详细记录一下每年的事情和思考。（文末扫码关注我的公众号） 2021 年对我来说，可以算得上是变化最大的一年了，这一年做出了一点小成绩，也有了">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/03/16462401654568.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554489.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554495.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554500.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422429460209.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422429460215.jpg">
+<meta property="article:published_time" content="2022-01-17T10:01:02.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="成长">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/03/16462401654568.jpg">
+
+<link rel="canonical" href="http://kaito-kidd.com/2022/01/17/my-2021-summary/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>持续向前：我的2021年总结 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2022/01/17/my-2021-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          持续向前：我的2021年总结
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2022-01-17 10:01:02" itemprop="dateCreated datePublished" datetime="2022-01-17T10:01:02+00:00">2022-01-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%A8%8B%E5%BA%8F%E4%BA%BA%E7%94%9F/" itemprop="url" rel="index"><span itemprop="name">程序人生</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2022/01/17/my-2021-summary/" class="post-meta-item leancloud_visitors" data-flag-title="持续向前：我的2021年总结" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2022/01/17/my-2021-summary/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2022/01/17/my-2021-summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>6 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>你好，我是 Kaito。</p>
+<p>好久不见，2022 年已经过去半个月，由于最近事情比较多，拖到现在才写自己的 2021 总结。</p>
+<p>之前每到年终时，我都是在朋友圈发一个简单的总结，因为去年开通了公众号，那么从今年开始，每年的年终总结都会写我的个人公众号 + 技术博客上，详细记录一下每年的事情和思考。（文末扫码关注我的公众号）</p>
+<p>2021 年对我来说，可以算得上是变化最大的一年了，这一年做出了一点小成绩，也有了一些新的思考，记录下来希望对你也有所启发。</p>
+<a id="more"></a>
+
+<h1 id="一些事情"><a href="#一些事情" class="headerlink" title="一些事情"></a>一些事情</h1><h2 id="公众号"><a href="#公众号" class="headerlink" title="公众号"></a>公众号</h2><p>还记得在 2020 年底，我发过这样一个朋友圈。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/03/16462401654568.jpg" alt=""></p>
+<p>当时给 2021 年定的一个大方向是：<strong>不要在乎外界的看法，坚持自己内心，坚持做难的事情，需要时间积累的事情。</strong></p>
+<p>所以 2021 年我发力最大的一个方向就是对外分享，也就是在公众号写文章。</p>
+<p>回顾这一年，我在一共输出了 19 篇原创文章（少的可怜），虽然写的不多，但每一篇都很用心，在公众号已经红海的环境下，年中凭借 8 篇文章，从 0 涨到了 1W 粉，现在已快到 2W 粉。</p>
+<p><strong>其中有 5 篇文章被转载超过 50+ 次，最高一篇被转载 61 次，平均每篇被转载次数 30+ 次。</strong></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554489.jpg" alt=""><br><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554495.jpg" alt=""></p>
+<p>从数据上来看，用户反馈还不错，因为内容比较优质，很多文章都得到了二次传播，平均每篇文章阅读人数在 2500+（技术公众号里算可以的了），有 2 篇文章阅读人数达到了 8000+，还有很多读者拿我的文章在公司内做了相关的技术分享。</p>
+<h2 id="对外分享"><a href="#对外分享" class="headerlink" title="对外分享"></a>对外分享</h2><p>除了在公众号写文章之外，我还参加了一次极客时间的 QConf+ 课程录制和一次公开直播，也是技术生涯中第一次对外技术分享。</p>
+<p>因为是第一次尝试，虽然没有达到自己很满意的成绩，不过能迈出这一步我已经很知足了。</p>
+<p>为此我还写了 2 篇文章做复盘：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2021/08/16/technical-presentation-taught-me/">我做了一场技术演讲，学到了这些东西</a></li>
+<li><a href="http://kaito-kidd.com/2021/11/02/my-first-live-broadcast/">第一次公开直播，我的启发和思考</a></li>
+</ul>
+<p>整体来看，在技术领域这方面，初步完成了个人技术影响力的建设。</p>
+<h2 id="投资"><a href="#投资" class="headerlink" title="投资"></a>投资</h2><p>除了技术领域，我对投资也非常感兴趣。</p>
+<p>我有 5 年多的投资经验，大概在三四年前，我还系统学习了投资相关的知识，涉猎经济、金融、商业、心理学等。</p>
+<p>从最早的技术流派，到现在的价值投资者，已经逐渐形成了一套自己的投资理念。在 2021 年依旧魔幻的市场环境下，一年收益率在 17%+，算是远跑赢市场。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422393554500.jpg" alt=""></p>
+<p>很多人问我是不是买了新能源股票，其实不是。</p>
+<p>2021 年我基本没有怎么操作，因为我入局比较早（熊市最低迷时刻），曾经经历过股灾、牛熊周期，在系统学习投资知识后，经过实战分析，逐渐形成了自己的投资策略：<strong>长线价值投资 + 逆向操作 + 定投 + 必须消费品 + 互联网赛道</strong>。</p>
+<p>我一直认为，<strong>越是短期的市场预测，赢的概率越接近于赌博。越是长期的趋势判断，越容易接近真实的逻辑推断。我喜欢寻求不变的规律，而不是三天两头跟风追热点。</strong></p>
+<p>另外，学习投资除了让我的资产保值升值外，它对我的心态上也有了很大程度的磨练。</p>
+<p>投资是一个跨多个学科，甚至要跨越多个周期的实战项目，在学习过程中我能感受到，它可以让我把投资相关的理念，应用在生活和工作的各个角落，例如<strong>做事不浮躁、坚持长期主义、延迟满足、坚持困难但正确的事情</strong>。</p>
+<p>可以说，投资是我近几年除了技术之外，收获最大的一个领域。</p>
+<h2 id="读书"><a href="#读书" class="headerlink" title="读书"></a>读书</h2><p>2021 年读了大概 10 多本书，印象最深刻的是《软技能 : 代码之外的生存指南》和《被讨厌的勇气》这 2 本。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422429460209.jpg" alt=""></p>
+<p>《软技能》是我第二次读了，真心推荐每个程序员都读一读。这本书告诉你，程序员不要只会关注技术，技术之外的东西同样重要。</p>
+<p>例如，程序员如何找到好工作？如何打造自己的个人影响力？如何像做企业一样经营自己？</p>
+<p>2021 年决定在公众号写作，或还是对外分享，其中很大程度上也受到这本书的影响。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2022/01/16422429460215.jpg" alt=""></p>
+<p>《被讨厌的勇气》是我近几年看过心理学方面，比较惊叹的书了。</p>
+<p>这本书通过「禅师」和「青年」对话辩论的方式，从心理学的角度分析了很多生活中、工作中经常遇到的问题，这些问题也都很有冲突性和代表性，所以也很易读，书中给的解答，很大程度上会颠覆你的认知。</p>
+<p>有些人觉得这本书是逻辑鸡汤，不值得一读。我的看法是，抱着开放的心态，去看待问题的另一种解法，给自己更多解题的思路，又未尝不可？</p>
+<p>分享几个我自己很喜欢的观点：</p>
+<blockquote>
+<p>决定我们自身的不是过去的经历，而是我们赋予经历的「意义」。</p>
+<p>你之所以无法改变，是因为自己下了「不改变」的决心。</p>
+<p>要学会把自己和别人的人生课题「分离」开来。</p>
+</blockquote>
+<h1 id="关键词"><a href="#关键词" class="headerlink" title="关键词"></a>关键词</h1><p>以上简单梳理了一下我的 2021 年做的事情，下面简单聊一聊我的一些思考。</p>
+<p>我给自己的 2021 总结了 3 个关键词：<strong>开放、输出、心态</strong>。</p>
+<h2 id="开放"><a href="#开放" class="headerlink" title="开放"></a>开放</h2><p>2021 是我变得开放的元年，这一年我做了很多之前从来没有尝试过的事情。</p>
+<p>之前默默写博客自己看，2021 开始写公众号，分享更多的技术文章和自己的思考。</p>
+<p>之前在公司内做分享都紧张的不行，2021 尝试了录制视频课、做直播。</p>
+<p>之前觉得做好分内的事情就好，2021 发现通过分享，我可以影响很多人。</p>
+<p>之前在遇到一些挑战和机会时，担心自己做不到，所以我的第一想法是拒绝。而 2021 我遇到有机会和挑战时，我会选择：<strong>先试试看</strong>。</p>
+<p>从拒绝到开放，是心态的转变。</p>
+<p>我是一个拖延症比较严重的人，2021 为了解决执行力问题，我的解决方案是通过「外力」的方式来驱动自己。</p>
+<p>例如，承诺读者更新文章（很多人等着看，自己不好意思不更新），提前答应别人录课、直播（承诺别人的事情自己会认真对待）等等。</p>
+<p>这么做下来我发现，<strong>很多事情并没有想的那么难，反而越做越顺手，一来二去自信心也树立起来了，反而更敢去尝试更有挑战的事情</strong>。</p>
+<p>最近几年大家都在说内卷，很多人心态都很浮躁，总是在抱怨，然后选择躺平。</p>
+<p>但你有没有真正思考过，如果真的有一个好机会摆到你面前，你是否能接得住？</p>
+<p>我总是在想，为什么那些优秀的人，每一年都能持续进步，变得越来越厉害？怎样才能做到像他们一样？</p>
+<p>后来我才发现，这些人的心态都是很开放的，因为开放，他们就敢于面对各种有挑战的事情，随之带来的就是能力潜移默化的成长，等到好机会来临时，他们就顺其自然成为了最大的受益者。</p>
+<p>整个逻辑就是：<strong>心态变得开放 -&gt; 敢于迎接挑战 -&gt; 解决一次次困难的事 -&gt; 能力提升 -&gt; 自信心增强 -&gt; 敢于迎接更大挑战 -&gt; 好机会/运气来临 -&gt; 选择你的概率就越大 -&gt; 能力跃迁/财富增长 -&gt; 持续循环。</strong></p>
+<p>所以，我希望自己也能够进入这样的正向循环中。</p>
+<h2 id="输出"><a href="#输出" class="headerlink" title="输出"></a>输出</h2><p>之前我提到过，写作是一个「深度思考」的过程，它可以让你把看似明白的事情，想得更清晰、更彻底。</p>
+<p>人的大脑很容易欺骗自己，很多知识你以为已经吸收掉，但殊不知遗失了大量细节，只有在你真正输出时，才能真正思考这些细节，这时你会花大量时间去调研、辨别、思考、输出。</p>
+<p>这个过程会涉及大量的输入，你的时间也会花在这些地方，整个过程都在加重你的脑回路，通过这种方式学习下来的知识，你会记得更牢，更全面。</p>
+<p>我在写每一篇技术文章，为了文章的准确性，都会去读大量的资料，所以这个过程让我对很多技术的细节研究得更透彻。当我在面试时，能答出很多面试官都想不到的技术点。</p>
+<p>虽然输出对于每个人来说，都不是件容易的事情，但只要你想去做，随时都可以开始。</p>
+<h2 id="心态"><a href="#心态" class="headerlink" title="心态"></a>心态</h2><p>说完了正向收获，也要聊一聊负面反馈。</p>
+<p>2021 年我也遇到了一些不太顺心的事情，工作上、生活上都有，那段时间心态上有些低落，也沉迷过一段时间，这也让我沉下心来去思考一些事情。</p>
+<p>在成年人的生活中，我们听到的大多数都是正向的声音，听得久了反而会得意洋洋。每隔一段时间遭遇一次挫折其实是好事，它可以时刻告诉你，不要太高估自己，你还有哪些地方是脆弱的，需要弥补的。</p>
+<p>我是个偏乐观主义的人，不太喜欢去抱怨，面对这些事情唯有摆好心态去面对，<strong>杀不死我的会让我变得更加强大</strong>。</p>
+<p>最近这几年越来越爱听张学友的歌，我是个 90 后，5 年前年轻气盛的我，根据不理解为什么那么多 80 后把他奉为歌神。但随着年龄和阅历的增长，我发现自己的心态也逐渐变得沉稳，听他的歌就有一种共鸣，愈发觉得内敛、沉稳、有韵味。</p>
+<p>这可能就是心态的成长吧。</p>
+<h1 id="2022-年-Flag"><a href="#2022-年-Flag" class="headerlink" title="2022 年 Flag"></a>2022 年 Flag</h1><p>2022 年 Flag 还是要立的，这些外力是督促自己最好的方式。</p>
+<ul>
+<li>公众号文章至少更新 20 篇</li>
+<li>尝试打造自己的知识网络</li>
+<li>提升稳定的副业收入</li>
+</ul>
+<p>总之，2022 年还是要做更多尝试，让自己变得更开放。</p>
+<h1 id="2021-热门文章"><a href="#2021-热门文章" class="headerlink" title="2021 热门文章"></a>2021 热门文章</h1><p>如果你错过了我之前的写的文章，在这里我再汇总一下，没看过的可以再看看：</p>
+<ul>
+<li>Redis 系列</li>
+<li>架构设计</li>
+<li>程序人生</li>
+</ul>
+<h1 id="最后"><a href="#最后" class="headerlink" title="最后"></a>最后</h1><p>之前在网上看到过一则，关于如何在不好的环境下，持续保持自己的竞争力的话，我觉得说得很好，这里也分享给你。</p>
+<blockquote>
+<p>我们每个人的一生就像在大海中航行，最开始我们是一只小木筏，抗风浪能力很差，随着自己的成长，我们逐渐变成一艘艘快艇、一艘艘游船。</p>
+<p>唯有真正让自己变得更加强大，才能持续在大海中乘风破浪。</p>
+</blockquote>
+<p><strong>切忌浮躁，持续向前，共勉。</strong></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2022/01/17/my-2021-summary/" title="持续向前：我的2021年总结">http://kaito-kidd.com/2022/01/17/my-2021-summary/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%88%90%E9%95%BF/" rel="tag"><i class="fa fa-tag"></i> 成长</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/11/02/my-first-live-broadcast/" rel="prev" title="第一次公开直播，我的启发和思考">
+      <i class="fa fa-chevron-left"></i> 第一次公开直播，我的启发和思考
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2023/07/18/reading-musk-earth-entrepreneurship-game/" rel="next" title="读《火星人马斯克的地球创业游戏》随想">
+      读《火星人马斯克的地球创业游戏》随想 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一些事情"><span class="nav-number">1.</span> <span class="nav-text">一些事情</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#公众号"><span class="nav-number">1.1.</span> <span class="nav-text">公众号</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#对外分享"><span class="nav-number">1.2.</span> <span class="nav-text">对外分享</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#投资"><span class="nav-number">1.3.</span> <span class="nav-text">投资</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读书"><span class="nav-number">1.4.</span> <span class="nav-text">读书</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关键词"><span class="nav-number">2.</span> <span class="nav-text">关键词</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#开放"><span class="nav-number">2.1.</span> <span class="nav-text">开放</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输出"><span class="nav-number">2.2.</span> <span class="nav-text">输出</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#心态"><span class="nav-number">2.3.</span> <span class="nav-text">心态</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2022-年-Flag"><span class="nav-number">3.</span> <span class="nav-text">2022 年 Flag</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2021-热门文章"><span class="nav-number">4.</span> <span class="nav-text">2021 热门文章</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#最后"><span class="nav-number">5.</span> <span class="nav-text">最后</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

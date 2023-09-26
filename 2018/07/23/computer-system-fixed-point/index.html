@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在现实生活中，我们经常使用整数和小数，不知道你有没有思考过，这些数字在计算机中是如何存储的？ 我们学习计算机知识时，经常听到「定点数」和「浮点数」，它们之间有什么区别？ 平时说到整数，我们就说它是一个定点数，说到小数，就说它是一个浮点数，这种说法是正确的吗？ 这篇文章，我们先来看一下，「定点数」究竟与整数和小数有什么关系。 什么是定点数？要想理解什么是「定点数」，首先，我们需要理解「定点」究竟是什">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（三）定点数">
+<meta property="og:url" content="http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在现实生活中，我们经常使用整数和小数，不知道你有没有思考过，这些数字在计算机中是如何存储的？ 我们学习计算机知识时，经常听到「定点数」和「浮点数」，它们之间有什么区别？ 平时说到整数，我们就说它是一个定点数，说到小数，就说它是一个浮点数，这种说法是正确的吗？ 这篇文章，我们先来看一下，「定点数」究竟与整数和小数有什么关系。 什么是定点数？要想理解什么是「定点数」，首先，我们需要理解「定点」究竟是什">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-07-23T09:52:27.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="定点数">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（三）定点数 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（三）定点数
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-23 09:52:27" itemprop="dateCreated datePublished" datetime="2018-07-23T09:52:27+00:00">2018-07-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/23/computer-system-fixed-point/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（三）定点数" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/23/computer-system-fixed-point/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/23/computer-system-fixed-point/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在现实生活中，我们经常使用整数和小数，不知道你有没有思考过，这些数字在计算机中是如何存储的？</p>
+<p>我们学习计算机知识时，经常听到「定点数」和「浮点数」，它们之间有什么区别？</p>
+<p>平时说到整数，我们就说它是一个定点数，说到小数，就说它是一个浮点数，这种说法是正确的吗？</p>
+<p>这篇文章，我们先来看一下，「定点数」究竟与整数和小数有什么关系。</p>
+<h1 id="什么是定点数？"><a href="#什么是定点数？" class="headerlink" title="什么是定点数？"></a>什么是定点数？</h1><p>要想理解什么是「定点数」，首先，我们需要理解「定点」究竟是什么意思？</p>
+<p>我们都知道，数字既包括整数，又包括小数，而小数的精度范围要比整数大得多，所以如果我们想在计算机中，既能表示整数，也能表示小数，关键就在于这个<strong>小数点</strong>如何表示？</p>
+<p>于是人们想出一种方法，即<strong>约定计算机中小数点的位置</strong>，且这个位置固定不变，小数点前、后的数字，分别用二进制表示，然后组合起来就可以把这个数字在计算机中存储起来，这种表示方式叫做「定点」表示法，用这种方法表示的数字叫做「定点数」。</p>
+<p>也就是说「定」是指固定的意思，「点」是指小数点，<strong>小数点位置固定</strong>即定点数名字的由来。</p>
+<h1 id="定点数如何表示数字？"><a href="#定点数如何表示数字？" class="headerlink" title="定点数如何表示数字？"></a>定点数如何表示数字？</h1><p>既然定点数只是表示数字的一种方式，那试想，它可以表示整数吗？可以表示小数吗？</p>
+<p>答案是肯定的。</p>
+<p>定点数如果要表示整数或小数，分为以下三种情况：</p>
+<ol>
+<li>纯整数：例如整数100，小数点其实在最后一位，所以忽略不写</li>
+<li>纯小数：例如：0.123，小数点固定在最高位</li>
+<li>整数+小数：例如1.24、10.34，小数点在指定某个位置</li>
+</ol>
+<p>对于前两种情况，纯整数和纯小数，因为小数点固定在最低位和最高位，所以它们用定点数表示时，原理是相同的，只需要把整数部分、小数部分，按照十进制转二进制的规则，分别转换即可。</p>
+<p>而对于整数 + 小数的情况，用定点表示时，需要<strong>约定</strong>小数点的位置，才能在计算机中表示。</p>
+<a id="more"></a>
+
+<h1 id="定点数表示纯整数和纯小数"><a href="#定点数表示纯整数和纯小数" class="headerlink" title="定点数表示纯整数和纯小数"></a>定点数表示纯整数和纯小数</h1><p>听闻不如一见，我们举几个例子。先来看一下定点数如何表示纯整数和纯小数？</p>
+<p>对于纯整数100，由于小数点固定在最低位，假定我们以 1 个字节（8 bit）表示，用定点数表示如下（D为十进制缩写，B为二进制缩写）：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">100(D) &#x3D; 01100100(B)</span><br></pre></td></tr></table></figure>
+
+<p>对于纯小数 0.125，由于小数点固定在最高位，同样以 1 个字节（8 bit）表示，用定点数表示如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">0.125(D) &#x3D; 0.00100000(B)</span><br></pre></td></tr></table></figure>
+
+<p>从以上例子可以看出，这 2 种情况用定点数表示都比较简单，按照十进制转为二进制规则，即可得到结果。</p>
+<h1 id="定点数表示整数-小数"><a href="#定点数表示整数-小数" class="headerlink" title="定点数表示整数+小数"></a>定点数表示整数+小数</h1><p>我们再来看定点数如何表示整数 + 小数？</p>
+<p>这种情况下，我们需要先约定小数点的位置。</p>
+<p>依旧以 1 个字节（8 bit）为例，我们可以约定<strong>前 5 位</strong>表示整数部分，<strong>后 3 位</strong>表示小数部分。</p>
+<p>对于数字 1.5 用定点数表示就是这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">1.5(D) &#x3D; 00001 100(B)</span><br></pre></td></tr></table></figure>
+
+<p>数字 25.125 用定点数表示就是这样：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">25.125(D) &#x3D; 11001 001(B)</span><br></pre></td></tr></table></figure>
+
+<p>这就是用定点数表示一个小数的方式。这里再总结一下这个过程：</p>
+<ol>
+<li>在有限的 bit 宽度下，先约定小数点的位置</li>
+<li>整数部分和小数部分，分别转换为二进制表示</li>
+<li>两部分二进制组合起来，即是结果</li>
+</ol>
+<p>在计算机中，用定点数表示一个数字的方法，是不是很简单？</p>
+<p>但是有没有发现一个问题，我们约定了前 5 位表示整数部分，后 3 位表示小数部分，此时这个整数部分的二进制最大值只能是 11111，即十进制的 31，小数部分的二进制最大只能表示 0.111，即十进制的 0.875。</p>
+<p>如果我们想要表示更大范围的值，怎么办？</p>
+<ol>
+<li>扩大 bit 的宽度：例如使用 2 个字节、4 个字节，这样整数部分和小数部分宽度增加，表示范围也就变大了</li>
+<li>改变小数点的位置：小数点向后移动，整个数字范围就会扩大，但是小数部分的精度就会越来越低，没有办法表示类似 0.00001 这种高精度的值</li>
+</ol>
+<p>由此我们发现，不管如何约定小数点的位置，都会存在以下问题:</p>
+<ul>
+<li>数值的表示范围有限（小数点越靠左，整个数值范围越小）</li>
+<li>数值的精度范围有限（小数点越靠右，数值精度越低）</li>
+</ul>
+<p>总的来说，就是用定点数表示的小数，不仅数值的范围表示有限，而且其精度也很低。要想解决这 2 个问题，所以人们就提出了使用「浮点数」的方式表示数字，关于浮点数的表示方法，我们会在下一篇文章进行讲解。</p>
+<p>虽然定点数表示数字，存在以上说的这些问题，但也只是在表示小数的场景下。如果只是用于表示整数，还是非常方便的。</p>
+<p>所以，现代计算机中一般使用定点数来表示整数。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这篇文章我们主要讲了，在计算机中如何使用定点数表示一个数字。总结如下：</p>
+<ol>
+<li>定点数是在计算机中表示数字的一种方式，它既可以表示整数，也可以表示小数</li>
+<li>在固定 bit 下，约定小数点的位置，然后把整数部分和小数部分分别转换为二进制，就是定点数的结果</li>
+<li>受限于小数点的位置，用定点数表示小数时，数值的范围和小数精度是有限的</li>
+<li>在现代计算机中，定点数通常用来表示整数，对于高精度的小数，通常用浮点数表示</li>
+</ol>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/" title="计算机系统基础（三）定点数">http://kaito-kidd.com/2018/07/23/computer-system-fixed-point/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E5%AE%9A%E7%82%B9%E6%95%B0/" rel="tag"><i class="fa fa-tag"></i> 定点数</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/07/17/computer-system-binary-octal-hexadecimal-decimal/" rel="prev" title="计算机系统基础（二）数值进制和进制转换">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（二）数值进制和进制转换
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/08/computer-system-float-point/" rel="next" title="计算机系统基础（四）浮点数">
+      计算机系统基础（四）浮点数 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是定点数？"><span class="nav-number">1.</span> <span class="nav-text">什么是定点数？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#定点数如何表示数字？"><span class="nav-number">2.</span> <span class="nav-text">定点数如何表示数字？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#定点数表示纯整数和纯小数"><span class="nav-number">3.</span> <span class="nav-text">定点数表示纯整数和纯小数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#定点数表示整数-小数"><span class="nav-number">4.</span> <span class="nav-text">定点数表示整数+小数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

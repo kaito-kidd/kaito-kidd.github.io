@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从这篇文章开始，我们开始讲解存储器相关的知识。存储器在计算机中处于非常重要的位置，其中内存最为重要，其涉及到的内容主要包含高速缓存Cache和虚拟内存两大块，这篇文章先来看高速缓存Cache的基本原理。  存储器层次化结构存储器有很多种类，我们常见的有内存、磁盘，还有平时看不到的集成在CPU内部的寄存器、高速缓存等。 正常来说，存储器的容量和性能应该伴随着CPU的速度和性能提升而提升，以匹配CP">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（七）高速缓存Cache">
+<meta property="og:url" content="http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="从这篇文章开始，我们开始讲解存储器相关的知识。存储器在计算机中处于非常重要的位置，其中内存最为重要，其涉及到的内容主要包含高速缓存Cache和虚拟内存两大块，这篇文章先来看高速缓存Cache的基本原理。  存储器层次化结构存储器有很多种类，我们常见的有内存、磁盘，还有平时看不到的集成在CPU内部的寄存器、高速缓存等。 正常来说，存储器的容量和性能应该伴随着CPU的速度和性能提升而提升，以匹配CP">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534925865.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534995073.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535007716.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535008731.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535009099.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535015356.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535009827.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-08-23T17:24:38.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="高速缓存">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534925865.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（七）高速缓存Cache | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（七）高速缓存Cache
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-23 17:24:38" itemprop="dateCreated datePublished" datetime="2018-08-23T17:24:38+00:00">2018-08-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/23/computer-system-cpu-cache/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（七）高速缓存Cache" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/23/computer-system-cpu-cache/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/23/computer-system-cpu-cache/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>从这篇文章开始，我们开始讲解存储器相关的知识。存储器在计算机中处于非常重要的位置，其中内存最为重要，其涉及到的内容主要包含高速缓存Cache和虚拟内存两大块，这篇文章先来看高速缓存Cache的基本原理。</p>
+</blockquote>
+<h1 id="存储器层次化结构"><a href="#存储器层次化结构" class="headerlink" title="存储器层次化结构"></a>存储器层次化结构</h1><p>存储器有很多种类，我们常见的有内存、磁盘，还有平时看不到的集成在CPU内部的寄存器、高速缓存等。</p>
+<p>正常来说，存储器的容量和性能应该伴随着CPU的速度和性能提升而提升，以匹配CPU的数据处理。但随着时间的推移，CPU和存储器在性能上的发展差异越来越大，存储器在性能增长越来越跟不上CPU性能发展的需要。</p>
+<p>那怎么办呢？</p>
+<p>为了缩小存储器和CPU之间的性能差距，通常在计算机内部采用层次化的存储器体系结构，以此来发挥出存储器的综合性能。</p>
+<a id="more"></a>
+
+<p>存储器层次化结构如下：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534925865.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>最上层的是寄存器，存取时间极快，但容量小。其次是高速缓存，存取时间次之，容量比寄存器大一些。再往下就是我们常见的内存、硬盘，存取速度递减，但容量越来越大。</p>
+<p>CPU在访问数据时，数据一般在相邻两层之间复制传送，且总是从慢速存储器复制到快速存储器，通过这种方式保证CPU的速度和存储器的速度相匹配。</p>
+<h1 id="程序访问的局部性"><a href="#程序访问的局部性" class="headerlink" title="程序访问的局部性"></a>程序访问的局部性</h1><p>最早期的计算机，在执行一段程序时，都是把硬盘中的数据加载到内存，然后CPU从内存中取出代码和数据执行，在把计算结果写入内存，最终输出结果。</p>
+<p>其实这么干，本身没有什么问题，但后来程序运行越来越多，就发现一个规律：<strong>内存中某个地址被访问后，短时间内还有可能继续访问这块地址。内存中的某个地址被访问后，它相邻的内存单元被访问的概率也很大。</strong></p>
+<p>人们发现的这种规律被称为<strong>程序访问的局部性</strong>。</p>
+<p>程序访问的局部性包含2种：</p>
+<ul>
+<li>时间局部性：某个内存单元在较短时间内很可能被再次访问</li>
+<li>空间局部性：某个内存单元被访问后相邻的内存单元较短时间内很可能被访问</li>
+</ul>
+<p>出现这种情况的原因很简单，因为程序是指令和数据组成的，指令在内存中按顺序存放且地址连续，如果运行一段循环程序或调用一个方法，又或者再程序中遍历一个数组，都有可能符合上面提到的局部性原理。</p>
+<p>那既然在执行程序时，内存的某些单元很可能会经常的访问或写入，那可否在CPU和内存之间，加一个缓存，CPU在访问数据时，先看一下缓存中是否存在，如果有直接就读取缓存中的数据即可。如果缓存中不存在，再从内存中读取数据。</p>
+<p>事实证明利用这种方式，程序的运行效率会提高90%以上，这个缓存也叫做<strong>高速缓存Cache</strong>。</p>
+<h1 id="高速缓存Cache原理"><a href="#高速缓存Cache原理" class="headerlink" title="高速缓存Cache原理"></a>高速缓存Cache原理</h1><p>高速缓存Cache是非常小容量的存储器，它集成在CPU芯片内。为了便于CPU、高速缓存Cache、内存之间的信息交换，内存按块划分，高速缓存Cache按行或槽划分。</p>
+<p>CPU对内存、高速缓存Cache进行数据访问的流程如图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534995073.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>CPU先查询Cache中是否有数据，如果有，直接读取即可。</p>
+<p>如果Cache中没有，则从内存中读取数据，同时把数据放入Cache中，然后把数据返回给CPU。</p>
+<p>整个流程其实很简单，但对于Cache和内存信息的交换，需要考虑一些问题：</p>
+<ul>
+<li>对于CPU读取数据，如果Cache中没有数据，从内存中读取数据后，如何分配到Cache中？</li>
+<li>如果Cache满了，采用什么策略替换？</li>
+<li>对于CPU写入数据，如何保证Cache和内存数据的一致性？</li>
+</ul>
+<p>对于这3个问题，下面依次来分析是如何解决的。</p>
+<h1 id="Cache和内存映射方式"><a href="#Cache和内存映射方式" class="headerlink" title="Cache和内存映射方式"></a>Cache和内存映射方式</h1><p>对于第一个问题，Cache中没有命中数据时，内存数据是如何分配到Cache中的。</p>
+<p>由于内存的容量比Cache容量要大，两者之间的容量不匹配，所以内存数据填充到Cache中，就需要设计一种规则来保证Cache的利用率最大，保证CPU访问Cache的命中率最高。</p>
+<p>内存到Cache的映射规则有3种方式：</p>
+<ul>
+<li>直接映射：每个内存块数据只映射到<strong>固定</strong>的缓存行中</li>
+<li>全相联映射：每个内存块数据可以映射到<strong>任意</strong>缓存行中</li>
+<li>组相联映射：每个内存块数据可以映射到<strong>固定组</strong>的<strong>任意</strong>缓存行中</li>
+</ul>
+<p>下面我们分别来看这3种映射方式。</p>
+<h2 id="直接映射"><a href="#直接映射" class="headerlink" title="直接映射"></a>直接映射</h2><p>访问内存数据会给出一个内存地址，首先把这个内存地址，按位划分为3个字段：标记、Cache行号、块内地址，如图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535007716.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>然后根据第2个字段的二进制位进行<strong>取模</strong>运算，得到对应的Cache行号。</p>
+<p>找到对应的Cache号后，校验Cache的有效位，如果有效，再比较内存第1个字段的标记与Cache的标记是否一致，如果一致，直接获取Cache中的数据即可。</p>
+<p>如果有效位无效，或有效位有效但内存第1个字段的标记与Cache的标记不一致，那么根据内存地址去内存获取数据，然后把对应的Cache行有效位设置为有效，标记设置为与内存标记一致，并在Cache中记录内存的数据，以便下次获取。</p>
+<p>具体映射关系如图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535008731.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>可见Cache与内存的映射可能是一对多的，即不同内存块可能映射到同一Cache行。</p>
+<p>这种映射方式比较简单粗暴，如果缓存不命中或内存和Cache标识不一致，就会替换Cache行中的数据。这就可能导致同一Cache行在短时间内被频繁替换，命中率不高。</p>
+<h2 id="全相联映射"><a href="#全相联映射" class="headerlink" title="全相联映射"></a>全相联映射</h2><p>全相联映射与直接映射方式不同的是，它把内存分成2个字段：标记、块内地址，没有了Cache行号这个字段。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535009099.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>在访问数据时，直接根据内存地址中的标记，去直接遍历对比每一个Cache行，直到找到一致的标记的Cache行，然后访问Cache中的数据即可。</p>
+<p>如果遍历完Cache行后，没有找到一致的标记，那么会从内存中获取数据，然后找到空闲的Cache行，直接写入标记和数据即可。</p>
+<p>也就是说，这种映射方式，就是哪里有空闲的Cache行，我就把内存块映射到这个Cache行中。在访问时，依次遍历Cache行，直到找到标记一直的Cache行，然后读取数据。</p>
+<p>这种方式虽然在空间利用率上保证最大化，但其缺点在于要在Cache中寻找符合标识一致的行的时间要比直接映射的时间久，效率较低。</p>
+<p>那有什么方式能集合上面2种方式，发挥各自的优势呢？这就是下面要说的组相联映射方式。</p>
+<h2 id="组相联映射"><a href="#组相联映射" class="headerlink" title="组相联映射"></a>组相联映射</h2><p>组相联映射方式把内存也分为3个字段：标记、Cache组号、块内地址</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535015356.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>注意，与直接映射不同的是，第2个字段是<strong>组号</strong>而不是行号。这种方式把Cache行先进行分组，然后每个分组中包含多个Cache行，如图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1535009827.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>在访问数据时，先根据内存地址中的Cache组号，定位到Cache的分组，然后在这个组内，依次遍历每个行，寻找标记一致的Cache行，如果标记一致则获取数据，不一致则从内存中获取数据后写入当前组内空闲的任意一个Cache行中。</p>
+<p>这种方式兼顾了访问速度和空间利用率，使用前2种方式结合的方案，保证缓存命中率最大化。在现实中实际上采用的这种映射方式。</p>
+<h1 id="Cache的替换算法"><a href="#Cache的替换算法" class="headerlink" title="Cache的替换算法"></a>Cache的替换算法</h1><p>对于上面提的第2个问题，如果Cache满了，如何进行替换？</p>
+<p>Cache容量比内存小，所以内存数据映射到Cache时，必然会导致Cache满的情况，那之后的内存映射要替Cache中的哪些行呢？这就需要制定一种策略。</p>
+<p>常见的替换算法有如下几种：</p>
+<ul>
+<li>先进先出算法（FIFO)：总是把最早装入Cache的行替换掉，这种算法实现简单，但不能正确反映程序的访问局部性，命中率不高</li>
+<li>最近最少使用算法（LRU)：总是选择最近最少使用的Cache行替换，这种这种算法稍微复杂一些，但可以正确反映程序访问的局部性，命中率最高</li>
+<li>最不经常使用算法（LFU）：总是替换掉Cache中引用次数最少的行，与LRU类似，但没有LRU替换方式更精准</li>
+<li>随机替换算法（Random）：随机替换掉Cache中的行，与使用情况无关，命中率不高</li>
+</ul>
+<p>现实使用最多的是最近最少使用算法（LRU)进行Cache行的替换方案，这种方案使得缓存的命中率最高。</p>
+<h1 id="Cache的一致性问题"><a href="#Cache的一致性问题" class="headerlink" title="Cache的一致性问题"></a>Cache的一致性问题</h1><p>上面提的第3个问题，对于写入的数据，如何保证Cache和内存数据的一致性？</p>
+<p>试想，如果CPU想要修改某个内存的数据，这块内存的数据刚好在Cache中存在，那么是不是要同时更新Cache中的数据？</p>
+<p>这个写入数据的过程，通常采用2种方式：</p>
+<ul>
+<li>全写法（通写法/直写法/写直达法）</li>
+<li>回写法（写回法）</li>
+</ul>
+<h2 id="全写法"><a href="#全写法" class="headerlink" title="全写法"></a>全写法</h2><p>在写操作时，如果Cache命中，则同时写Cache和内存。</p>
+<p>如果Cache中不命中，则分为以下2种情况：</p>
+<ul>
+<li>写分配法：先更新内存数据，然后再写入空闲的Cache行中，保证Cache有数据，提高了缓存命中率，但增加了写入Cache的开销</li>
+<li>非写分配法：只更新内存数据，不写入Cache，只有等访问不命中时，再进行缓存写入</li>
+</ul>
+<p>另外，这种方式为了减少内存的写入开销，一般会在Cache和内存之间加一个写缓冲队列，在CPU写入Cache的同时，也会写入缓冲队列，然后由存储控制器将缓冲队列写入内存。</p>
+<p>如果在写操作不频繁的情况下，效果很好。但如果写操作频繁，则会导致写缓冲队列饱和而发生阻塞。</p>
+<h2 id="回写法"><a href="#回写法" class="headerlink" title="回写法"></a>回写法</h2><p>这种方式在写操作时，如果Cache命中，则只更新Cache而不更新内存。</p>
+<p>如果Cache不命中，则从内存中读取内容，写入Cache并更新为最新内容。</p>
+<p>这种方式不会主动更新内存，只有在Cache被再次修改时，才将内容一次性写入内存。这样做的好处是减少了写内存的次数，大大降低内存带宽需求。但有可能在某个时间点，Cache和内存中的数据会出现不一致的情况。</p>
+<h1 id="影响Cache的性能因素"><a href="#影响Cache的性能因素" class="headerlink" title="影响Cache的性能因素"></a>影响Cache的性能因素</h1><p>既然Cache在CPU访问数据时提升的效率这么高，那决定Cache性能的因素有哪些？</p>
+<p>决定访问性能的重要因素之一就是Cache的命中率，它与许多因素有关，具体涉及如下：</p>
+<ul>
+<li>Cache容量：容量越大，缓存数据越多，命中率越高</li>
+<li>内存块大小：大的内存交换单位能更好地利用空间局部性，但过大也会导致命中率降低，必须适中</li>
+</ul>
+<p>除此之外，如何设计Cache也会影响到它的性能：</p>
+<ul>
+<li>多级Cache：现在的CPU会采用3级Cache，最大程度的提升命中率</li>
+<li>内存、总线、Cache连接结构：设计一个效率高的传输通道，能够提升Cache的访问速度</li>
+<li>内存结构与Cache配合：在访问不命中时，会去访问内存，设计效率高的传输通道与Cache配合也可以提升Cache的性能</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>本篇文章主要介绍了高速缓存Cache的重点知识，总结如下：</p>
+<ul>
+<li>程序运行有访问局部性的规律：时间局部性、空间局部性</li>
+<li>内存与Cache的映射方式有3种：直接映射、全相联映射、组相联映射，其中组相联映射方式命中率最高</li>
+<li>Cache的替换算法有4种：先进先出（FIFO）、最近最少使用（LRU）、最不经常使用（LFU）、随机（Random），其中最近最少使用算法的命中率最高</li>
+<li>保证内存与Cache的一致性方案有2种：全写法、回写法</li>
+<li>影响Cache的性能因素有：容量、内存块大小、Cache组合、内存结构与传输通道设计等</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/" title="计算机系统基础（七）高速缓存Cache">http://kaito-kidd.com/2018/08/23/computer-system-cpu-cache/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E9%AB%98%E9%80%9F%E7%BC%93%E5%AD%98/" rel="tag"><i class="fa fa-tag"></i> 高速缓存</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/15/character-expression/" rel="prev" title="计算机系统基础（六）字符的表示">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（六）字符的表示
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/09/06/computer-system-virtual-memory/" rel="next" title="计算机系统基础（八）虚拟存储器">
+      计算机系统基础（八）虚拟存储器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#存储器层次化结构"><span class="nav-number">1.</span> <span class="nav-text">存储器层次化结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#程序访问的局部性"><span class="nav-number">2.</span> <span class="nav-text">程序访问的局部性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#高速缓存Cache原理"><span class="nav-number">3.</span> <span class="nav-text">高速缓存Cache原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cache和内存映射方式"><span class="nav-number">4.</span> <span class="nav-text">Cache和内存映射方式</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#直接映射"><span class="nav-number">4.1.</span> <span class="nav-text">直接映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全相联映射"><span class="nav-number">4.2.</span> <span class="nav-text">全相联映射</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组相联映射"><span class="nav-number">4.3.</span> <span class="nav-text">组相联映射</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cache的替换算法"><span class="nav-number">5.</span> <span class="nav-text">Cache的替换算法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cache的一致性问题"><span class="nav-number">6.</span> <span class="nav-text">Cache的一致性问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#全写法"><span class="nav-number">6.1.</span> <span class="nav-text">全写法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#回写法"><span class="nav-number">6.2.</span> <span class="nav-text">回写法</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#影响Cache的性能因素"><span class="nav-number">7.</span> <span class="nav-text">影响Cache的性能因素</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

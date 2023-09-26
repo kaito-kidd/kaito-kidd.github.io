@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kaito&#39;s Blog">
+<meta property="og:url" content="http://kaito-kidd.com/page/7/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Kaito">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/page/7/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/10/09/Mac-edge-tools-assist/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/10/09/Mac-edge-tools-assist/" class="post-title-link" itemprop="url">Mac效率利器（三）辅助篇</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-10-09 09:20:31" itemprop="dateCreated datePublished" datetime="2016-10-09T09:20:31+00:00">2016-10-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/10/09/Mac-edge-tools-assist/" class="post-meta-item leancloud_visitors" data-flag-title="Mac效率利器（三）辅助篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/10/09/Mac-edge-tools-assist/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/10/09/Mac-edge-tools-assist/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>2 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>前两篇文章：<a href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/">Mac效率利器（一）系统管理篇</a>、<a href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/">Mac效率利器（二）开发篇</a>，主要介绍了系统、开发相关的效率利器。</p>
+<p>这篇文章主要介绍一下在工作中同样能提升效率的一些辅助小工具。</p>
+</blockquote>
+<h1 id="Manico"><a href="#Manico" class="headerlink" title="Manico"></a>Manico</h1><p>这个工具是我每天必用的一款辅助工具，简单来说，这个工具可以给你安装的软件定义一个快捷键，一般是以<code>option</code>为前缀。以后每次打开软件时，就可以完全脱离鼠标，使用定义好的快捷键快速启动或切换。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1475938688.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1475938979.png" />
+
+<p>这与之前的<code>command</code> + <code>tab</code>相比，有什么不同？</p>
+<p>使用<code>command</code> + <code>tab</code>：</p>
+<ul>
+<li>打开任务切换视图；</li>
+<li>继续按一次或n次<code>tab</code>，切换到已打开的软件；</li>
+</ul>
+<p>使用<code>Manico</code>后，为每个软件定义好快捷键后：</p>
+<ul>
+<li><code>option</code> + 快捷键，直接切换至软件</li>
+</ul>
+<p>一步到位，而且，<code>Macico</code>在没有打开软件的情况下，使用快捷键是可以直接打开的，而前者则不行。</p>
+<p>这真的是解放了我的双手，再也不用繁琐的按<code>commad</code> + <code>tab</code> n次来切换软件了。</p>
+<p><strong>注意：只有购买付费版，才可以自定义快捷键，否则只能使用默认的快捷键。</strong></p>
+<h1 id="Spectacle"><a href="#Spectacle" class="headerlink" title="Spectacle"></a>Spectacle</h1><p>窗口管理软件，使用<strong>快捷键</strong>控制软件窗口的布局，最重要的是<strong>免费</strong>！</p>
+<p>当然没有<code>Moom</code>那么强大可以随意控制窗口的大小，但作为键盘党，能脱离鼠标快速调整窗口布局才是最刚性的需求。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1475939014.png" width="728" height="647" />
+
+<p>使用举例：</p>
+<ul>
+<li><code>option</code> + <code>command</code> + <code>←</code>：窗口填充屏幕左半边</li>
+<li><code>option</code> + <code>command</code> + <code>→</code>：窗口填充屏幕右半边</li>
+<li><code>option</code> + <code>command</code> + <code>↑</code>：窗口填充屏幕上半边</li>
+<li><code>option</code> + <code>command</code> + <code>↓</code>：窗口填充屏幕下半边</li>
+<li><code>option</code> + <code>command</code> + <code>F</code>：窗口全屏</li>
+<li><code>option</code> + <code>command</code> + <code>C</code>：窗口居中</li>
+<li><code>control</code> + <code>option</code> + <code>command</code> + <code>←</code>：窗口移至上个显示器屏幕</li>
+<li><code>control</code> + <code>option</code> + <code>command</code> + <code>→</code>：窗口移至下个显示器屏幕</li>
+</ul>
+<h1 id="Pomotodo"><a href="#Pomotodo" class="headerlink" title="Pomotodo"></a>Pomotodo</h1><p>对于有拖延症的同学，在工作上或学习上效率会越来越低，如何管理自己的时间，提升时间利用率？</p>
+<p>这就用到了<strong>番茄时间法</strong>，简单来说就是，以25分钟为一个工作单位（也叫番茄），这25分钟全身心投入一件事中，不被外界干扰，同时会有时钟倒计时，会有紧迫感。</p>
+<p>倒计时结束后，需要填写这25分钟做了什么事情（也叫土豆），然后休息5分钟，这5分钟可以冲杯咖啡、喝口水、回复邮件或微信等，5分钟过后，可以继续25分钟（番茄），往复循环。</p>
+<p>这个工具软件除了上述功能外，还可以自动形成工作数据统计，例如展示出哪段时间内工作效率最高，某段时间内在哪件事上占用时间最多，帮助你分析你的时间都用在哪里，逐渐提高时间利用率。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1475939867.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1475939881.png" />
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/10/09/Mac-edge-tools-assist/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/09/26/Mac-edge-tools-dev/" class="post-title-link" itemprop="url">Mac效率利器（二）开发篇</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-26 22:30:50" itemprop="dateCreated datePublished" datetime="2016-09-26T22:30:50+00:00">2016-09-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/09/26/Mac-edge-tools-dev/" class="post-meta-item leancloud_visitors" data-flag-title="Mac效率利器（二）开发篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/09/26/Mac-edge-tools-dev/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/09/26/Mac-edge-tools-dev/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>上一篇文章，主要推荐了Mac上系统管理相关的效率利器：<a href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system">Mac效率利器（一）系统管理篇</a>，今天这篇文章主要推荐下Mac平台与开发相关的效率利器。</p>
+</blockquote>
+<h1 id="iTerm2"><a href="#iTerm2" class="headerlink" title="iTerm2"></a>iTerm2</h1><p>如果是服务端开发，自然少不了终端工具，iTerm2算是Mac平台的王牌终端工具，它增强了普通终端，提供了开发中很常用的功能，例如分屏、检索高亮、命令自动补全、选中自动复制、剪贴板历史、终端主题等强大功能。总之，用上了iTerm2，在开发中能达到事半功倍的效果。</p>
+<h2 id="会话分屏"><a href="#会话分屏" class="headerlink" title="会话分屏"></a>会话分屏</h2><p><code>command + d</code>(水平分割)、<code>command + shift + d</code>(垂直分割)：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474881929.png" />
+
+<h2 id="检索高亮"><a href="#检索高亮" class="headerlink" title="检索高亮"></a>检索高亮</h2><p><code>command + f</code>，按<code>Tab</code>自动补全，然后按<code>option + 回车</code>自动粘贴：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474882035.png" />
+
+<h2 id="命令自动补全"><a href="#命令自动补全" class="headerlink" title="命令自动补全"></a>命令自动补全</h2><p>快捷键：<code>command + ;</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885255.png" />
+
+<h2 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h2><p>快捷键：<code>command + shift + h</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885284.png" />
+
+<h2 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h2><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474884157.png" />
+
+<h1 id="Dash"><a href="#Dash" class="headerlink" title="Dash"></a>Dash</h1><p>在写代码时，肯定少不了查文档，打开官方网站，找到Document，然后搜索关键字，之后打开N个网页，不但网页越开越多，而且每次这个流程大部分都是重复的工作。</p>
+<p><code>Dash</code>很好的把这些工作集成在一起，只需打开<code>Dash</code>，搜索关键字即可，<code>Dash</code>提供了非常多官方文档，例如：JQuery、CSS、HTML、Python、Git、Java，在工具中直接下载即可。没有收录到<code>Dash</code>的文档，自己也可以制作导入。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885786.png" />
+
+<h2 id="模糊检索"><a href="#模糊检索" class="headerlink" title="模糊检索"></a>模糊检索</h2><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885827.png" />
+
+<h2 id="代码片段"><a href="#代码片段" class="headerlink" title="代码片段"></a>代码片段</h2><p><code>Dash</code>除了支持管理、搜索文档之外，还提供了代码片段的收录存储。</p>
+<p>例如，我先定义了一段代码片段，然后定义别名为<code>hello</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886595.png" />
+
+<p>当我在开发工具中输入<code>hello</code>后，就会出现：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886531.png" />
+
+<p>最重要的是，代码片段中可以预留<strong>占位符</strong>，然后在用的时候再进行填充。这个<code>__name__</code>就是代码片段中预留的占位符，在使用的时候，就可以自定义填充内容。</p>
+<p><code>Dash</code>还与其他很多开发工具和软件友好集成，例如<code>Alfred</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886095.png" />
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/09/26/Mac-edge-tools-dev/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/09/13/Mac-edge-tools-system/" class="post-title-link" itemprop="url">Mac效率利器（一）系统管理篇</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-13 20:58:59" itemprop="dateCreated datePublished" datetime="2016-09-13T20:58:59+00:00">2016-09-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/09/13/Mac-edge-tools-system/" class="post-meta-item leancloud_visitors" data-flag-title="Mac效率利器（一）系统管理篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/09/13/Mac-edge-tools-system/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/09/13/Mac-edge-tools-system/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>作为程序员，要想提高工作和开发效率，总是需要一些神兵利器的，正所谓工欲善其事，必先利其器，这样做事才能达到事半功倍的效果！这次就来介绍一下Mac平台下的利器软件。</p>
+</blockquote>
+<p>先放一张到目前为止积累的利器图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mac-used-apps.png" alt="Mac软件"></p>
+<p>下面分别介绍一下用于系统的管理利器。</p>
+<h1 id="Alfred"><a href="#Alfred" class="headerlink" title="Alfred"></a>Alfred</h1><p>用过Mac的人都知道，必装神器，称得上Mac平台的利器TOP 1，自从用上了Alfred，键盘党真是爽到欲罢不能，从此解放双手，效率提升N倍。</p>
+<p>Alfred提供一个快捷入口，这个快捷入口提供了非常多平时常用的功能，而且还提供强大的工作流控制。</p>
+<h2 id="快速打开应用"><a href="#快速打开应用" class="headerlink" title="快速打开应用"></a>快速打开应用</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-app.png" alt="Alfred快速打开应用"></p>
+<p>此功能可以快速打开某个应用程序，Mac的Dock可以隐藏起来了。</p>
+<h2 id="全局文件搜索、定位、文件内容搜索"><a href="#全局文件搜索、定位、文件内容搜索" class="headerlink" title="全局文件搜索、定位、文件内容搜索"></a>全局文件搜索、定位、文件内容搜索</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-find-file.png" alt="Alfred快速查找文件"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-folder.png" alt="Alfred快速打开文件夹"></p>
+<p>支持模糊检索，只要记得文件、文件夹、文件内容任意一项，便可以快速定位到文件位置，并且支持记录下文件后，多个文件进一步操作。</p>
+<h2 id="多网站快速搜索"><a href="#多网站快速搜索" class="headerlink" title="多网站快速搜索"></a>多网站快速搜索</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-1.png" alt="Alfred快速搜索"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-2.png" alt="Alfred快速搜索"></p>
+<p>之前的操作是，先打开浏览器，再输入网址打开网站，然后在搜索框中输入搜索词，回车，才出现搜索结果。</p>
+<p>现在好了，流程大大简化，打开alfred，输出搜索词，选择网站，回车！</p>
+<h2 id="计算器"><a href="#计算器" class="headerlink" title="计算器"></a>计算器</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-calc.png" alt="Alfred在线计算器"></p>
+<p>不用打开任何计算器软件，直接在线计算得出结果，回车自动复制。</p>
+<h2 id="剪切板历史、文字片段"><a href="#剪切板历史、文字片段" class="headerlink" title="剪切板历史、文字片段"></a>剪切板历史、文字片段</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard.png" alt="Alfred剪切板配置"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard-his.png" alt="Alfred剪切板历史"></p>
+<p>传统的剪切板，每次复制之后，都会覆盖之前的内容，alfred自带剪切板历史功能，并且支持检索。</p>
+<p>同时还提供了文字片段功能，可以预先保存常用的内容片段，然后在使用时使用快捷键打开alfred片段功能，输出关键词，回车，直接粘贴出内容，非常方便！</p>
+<h2 id="系统控制"><a href="#系统控制" class="headerlink" title="系统控制"></a>系统控制</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-system.png" alt="Alfred系统控制"></p>
+<p>alfred提供了系统管理的快捷命令，例如锁屏、睡眠、关机、退出程序、清理垃圾桶等等，全键盘操作控制系统状态。</p>
+<h2 id="工作流集成和开发（付费功能）"><a href="#工作流集成和开发（付费功能）" class="headerlink" title="工作流集成和开发（付费功能）"></a>工作流集成和开发（付费功能）</h2><p>alfred还提供了工作流功能，此功能是付费功能，不过非常超值。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflows.png" alt="Alfred工作流"></p>
+<p>这个功能可以让开发者开发自己的插件，根据自己的工作习惯，开发出符合自身的工作流。</p>
+<p>例如，我想在豆瓣上搜一本书，常规做法是，打开浏览器，打开豆瓣，输入书名，点击搜索。</p>
+<p>alfred的工作流，就是把这一流程，通过程序一步到位，如下图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-2.png" alt="Alfred豆瓣工作流"></p>
+<p>其他的工作流：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-1.png" alt="Alfred豆瓣工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-3.png" alt="Alfred github工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-4.png" alt="Alfred知乎工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-5.png" alt="Alfred翻译工作流"></p>
+<p>alfred工作流插件支持大部分主流语言开发，上手简单。</p>
+<p>网上有其他人开发好的插件，直接下载使用即可：<a href="http://www.alfredworkflow.com/" target="_blank" rel="noopener">http://www.alfredworkflow.com/</a></p>
+<h1 id="CleanMyMac"><a href="#CleanMyMac" class="headerlink" title="CleanMyMac"></a>CleanMyMac</h1><p>脱离了windows系统，总算脱离了各种全家桶，Mac的世界很清静，不过平时清理垃圾什么的还是很有必要的。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/clean-my-mac.png" alt="CleanMyMac"></p>
+<p>CleanMyMac操作简单，并且支持大型和旧文件扫描、干净卸载软件等功能，非常值得安装。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/09/13/Mac-edge-tools-system/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/09/03/HK-travel/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/09/03/HK-travel/" class="post-title-link" itemprop="url">香港之旅</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-03 18:16:14" itemprop="dateCreated datePublished" datetime="2016-09-03T18:16:14+00:00">2016-09-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%94%9F%E6%B4%BB/" itemprop="url" rel="index"><span itemprop="name">生活</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/09/03/HK-travel/" class="post-meta-item leancloud_visitors" data-flag-title="香港之旅" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/09/03/HK-travel/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/09/03/HK-travel/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>很久没来更新了，最近事情比较多，加上工作有调动比较忙，现在好了，事情进展还算顺利，也正好在这空闲时间之间休了几天假，去了趟香港，玩的还算开心。</p>
+</blockquote>
+<h1 id="出行准备"><a href="#出行准备" class="headerlink" title="出行准备"></a>出行准备</h1><p>前几个月工作很忙，心情也很压抑，心里想必须要找个机会出去好好放松一下，工作上的事情定的差不多了，就计划着出行的准备。</p>
+<p>原本打算想去成都玩一下，身边的很多人都推荐说值得一去，由于计划的也比较晚，看了下机票确实贵了不少。后来也不知怎么的突然想到了香港这个地方，看了看机票，也不比成都贵多少，心想，等了这么久，要玩还不如玩的痛快些，正好今年过年时，在家办护照时顺便也办了港澳通行证，正好用的上，哈哈。现在想想，真的是很多事情就好像冥冥之中安排好似的，签证费也不会浪费掉。</p>
+<p>决定了要去香港，便开始做攻略，其实也是很匆忙，白天上班，晚上回来还要在网上搜攻略。最终盘算一下，决定购买机票+酒店的自由行套餐划算些，共计5天4晚，香港这个地方也不大，也足够玩了。</p>
+<p>然后在网上买了电话卡、地铁卡，周末去银行兑换了港币，总比确实比在境内玩要准备的东西多一些。</p>
+<h1 id="第一天"><a href="#第一天" class="headerlink" title="第一天"></a>第一天</h1><p>万事俱备，由于飞机起飞时间较早，凌晨就要出发，前天晚上预约了专车送机场，师傅服务也很好。由于是L签，到机场后联系送关的人，又等办完登机牌，再去过关、安检，这里真的要吐槽一下，北京机场安检效率是真低，慢的要死，导致差点延误飞机，在起飞前10分钟冲进去的，第一次坐飞机出境就弄的这么紧张，也是醉了。</p>
+<p>飞机起飞的感觉很棒，哈哈。落地后坐巴士到酒店，沿途看到海，心情还不错，香港的巴士确实很干净，而且还有专门的行李放置处。</p>
+<p>下午在酒店休息，晚上去了中环，吃了茶餐厅“添好运”，人不算多，但是味道确实不错。</p>
+<p>然后坐天星小轮，从中环到尖沙咀，看了香港夜景，很美。</p>
+<p>尖沙咀的人很多，而且有很多街头歌手。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/HK-TX.JPG" alt="乘坐天星小轮看夜景"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/HK-Tsim.JPG" alt="尖沙咀夜景"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/HK-night-view.JPG" alt="香港夜景"></p>
+<h1 id="第二天"><a href="#第二天" class="headerlink" title="第二天"></a>第二天</h1><p>第二天早早的收拾完，然后去了迪士尼乐园，因为之前已经做好了攻略，去的这天也不是节假日，人相对来说较少。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/HK-Disney.JPG" alt="香港迪士尼"></p>
+<p>迪士尼乐园是个梦幻乐园，没有欢乐谷那么惊悚刺激，喜欢的几个项目：</p>
+<ul>
+<li>飞跃太空山，一个室内过山车，在完全漆黑的室内，看不到轨道，然后会出现类似太空的场景，就好像在太空中穿梭，非常棒！</li>
+<li>米奇的幻想世界，一个4D的视频演出，画面立体感非常强，好多镜头的东西都像是在眼前，而且随着故事情景的变化现实环境也会有相同的变化，就好像身临其境。</li>
+<li>迷离大宅，非常棒的视觉之旅，而且有些惊悚刺激的场景，里面很多东西设计的都很精巧。</li>
+<li>森林河流之旅，坐船体验森林的冒险之旅，在河中看到了很多很逼真的动物和惊险场景。</li>
+</ul>
+<p>玩到下午，已经把经典项目都玩了一遍，然后等着晚上8点半放烟花。</p>
+<p>不得不说香港到了雨季几乎是天天下雨，还好出门一直带着雨伞，一天下下停停。</p>
+<p>总是在电视上看到的睡公主城堡，终于看到了，大家都在等待烟花演出。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/HK-Disney-tower.JPG" alt="迪士尼睡公主城堡"></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/09/03/HK-travel/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/06/24/code-note-18-25/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/06/24/code-note-18-25/" class="post-title-link" itemprop="url">《编码：隐匿在计算机软硬件背后的语言》读书笔记18-25</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-06-24 09:55:55" itemprop="dateCreated datePublished" datetime="2016-06-24T09:55:55+00:00">2016-06-24</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/06/24/code-note-18-25/" class="post-meta-item leancloud_visitors" data-flag-title="《编码：隐匿在计算机软硬件背后的语言》读书笔记18-25" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/06/24/code-note-18-25/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/06/24/code-note-18-25/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>17 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="18、从算盘到芯片"><a href="#18、从算盘到芯片" class="headerlink" title="18、从算盘到芯片"></a>18、从算盘到芯片</h1><blockquote>
+<p>历史上，人们为了简化数学运算，发明了很多精巧的工具和机器。</p>
+</blockquote>
+<p>早期人类社会使用如下工具计算：</p>
+<ul>
+<li>古希腊和美洲土著：小卵石或谷粒</li>
+</ul>
+<ul>
+<li>欧洲：计数板</li>
+</ul>
+<ul>
+<li>中东和中国：算盘</li>
+</ul>
+<p>由于这些工具无法做乘法和除法，苏格兰数学家发明了<strong>对数</strong>：A乘以B等于A和B对数之和，即先在对数表查找这2个值，相加后再在对数表逆向寻找其乘积。</p>
+<p>随后的400年里，人们致力于建立对数表的工作，也有一些人设计出一些小装置代替对数表：<strong>带对数刻度的滑尺</strong>。</p>
+<p>其次<strong>手持计算器</strong>出现，利用由刻在骨头、牛角、象牙上的数字条组成的乘法辅助器，从而制造出最早的机械计算器。但一个加法器的关键是处理进位能否成功。直到19世纪后半叶，机械计算器才得以出现并使用。</p>
+<p>而在18世纪初，人类发明了自动织布机，使用<strong>打孔的金属卡片</strong>控制织物的图案，这对计算的历史产生了深远的影响。</p>
+<p>在18世纪，人类依赖计算器的计算功能，但是此时的对数表使用起来耗费时间，英国数学家和经济学家发明了选择性的对数计算，即<strong>差分法</strong>，然后其设计出了<strong>差分机</strong>，其本质就是一个大型机械加法器，但这个差分机没有完成过。随后，这个数学家有了更好的想法，这就是<strong>解析机</strong>，解析机包含一个存储部件（类似存储器的概念）和一个运算部件（类似算数逻辑单元），乘法可以通过重复加法求解，除法通过重复减法求解。</p>
+<p>此解析机可以使用改造后的织布机的卡片来编程，解析机编织出了代数的结构模型。</p>
+<p>这个英国数学家是第一个意识到<strong>条件跳转</strong>在计算机中重要性的人。</p>
+<p>但到18世纪中期，差分机最终由一对父子制造出来，人们已经遗忘了之前的英国数学家设计的差分机。</p>
+<p>计算史另一个转折点源于美国宪法，其中有一条要求每10年进行一次人口普查，此时的人口普查数据采集工作大约要花费7年以上的时间，这个时间太久了，因此有人开始研究<strong>自动系统</strong>可能性。此时使用了穿孔卡片记录每个人的特征，但这不是二进制编码的，原因是：对于此时的人来说，将年龄转换为二进制数要求太高了，而且真正的二进制系统是可以将所有孔打穿的，这将会使卡片破裂。</p>
+<p>之后，为了对人口数据进行统计，人们发明了<strong>制表机</strong>。</p>
+<p>在当时的人口普查中使用这种自动化技术实验取得了重大成就，在实验中使用超过6200万张卡片，是人口普查的2倍，但时间却缩短了三分之一。</p>
+<p>这个创造这种机器设备的人1896年创办了<strong>制表机公司</strong>，租借并出售穿孔卡片设备。到1911年公司合并，公司更名为<strong>计算制表记录公司</strong>，也叫<strong>C-T-R公司</strong>。再到1915年，托马斯·J·华盛顿成为这个公司的总裁，在1924年将公司更名为<strong>国际商业机器公司</strong>，即<strong>IBM</strong>。</p>
+<p>在1928年，人口普查使用的卡片逐渐演变为IBM卡片，之后使用了将近50年。</p>
+<p>第一台<strong>继电式计算机</strong>在1935年被制造出来，使用了二进制数，到了1937年，贝尔实验室的一个人在厨房中连接了一个1位加法器，称为K机器，这促使1939年贝尔实验室中复数计算机的诞生。</p>
+<p>同一时期，哈佛大学研究生与IBM合作，在1943年创造出一台<strong>自动连续可控计算机</strong>，也就是闻名世界的<strong>Harvard Mark I</strong>，这是一台可以打印表格的数字计算机。</p>
+<p>但继电器不是最完美的设备，频繁工作会导致断裂，如果其中有污垢也会导致失效。</p>
+<p>在20世纪40年代，真空管已被广泛引用于放大电话信号，真空管同样可以连接成<strong>与门、或门、与非门、与或门</strong>，那么就可以制造出<strong>加法器、选择器、解码器、触发器、计数器</strong>。</p>
+<p>但真空管同样存在价格昂贵、耗电量大、产生热量多等缺点，但好处是真空管可以在百万分之一秒内发生转变，要比继电器快1000倍。</p>
+<p>到了20世纪40年代初期，新设计的计算机使用真空管取代继电器。</p>
+<p>1937年<strong>艾伦·M·图灵</strong>在破译德国代码生成器生成的代码项目中，发表2篇论文，首次提出<strong>可计算性概念</strong>和<strong>测试机器智能的方法</strong>，这对计算机的发展产生深远影响。</p>
+<p>1945年人们设计出了曾经最大的计算机，但设计的并不理想，到1946年，<strong>约翰·冯·诺依曼</strong>提出计算机应该使用二进制，并且应当拥有<strong>存储器</strong>，并且可以在存储器中进行寻址操作取得代码执行并保存数据，也允许<strong>条件跳转</strong>，这就是著名的<strong>存储程序概念</strong>，这个阶段被称为<strong>冯·诺依曼结构</strong>。但这个结构也有问题，因为在执行命令中，<strong>从存储器取指令</strong>要花费3/4的时间。</p>
+<p>考虑到成本效益，人们开发出了<strong>磁芯存储器</strong>。</p>
+<p>1948年在贝尔实验室工作的<strong>克劳德·香农</strong>发表文章，首次将<strong>“位”</strong>的概念介绍给世界，并开创了<strong>“信息论”</strong>研究领域。</p>
+<p>与此同时，哈佛大学的<strong>诺博尔特·韦纳</strong>提出了<strong>控制论</strong>，表示计算机和机器人的机械原理之间的关系。</p>
+<p>1948年IBM发布了第一个商用计算机系统，代号701。</p>
+<p>而在1947年，贝尔实验室的两个物理学家制造出<strong>晶体管</strong>，晶体管开创了固态电子器件的时代。但晶体管刚开始是商用与助听器。</p>
+<p>1956年，肖克利离开了贝尔实验室，成立了半导体实验室，地点在加利福尼亚帕罗奥图市，其他半导体和计算机公司相继再此建立基业，这个地方就是<strong>硅谷</strong>。</p>
+<p>晶体管同样可以连接成<strong>振荡器、加法器、选择器、解码器</strong>，振荡器可以组成<strong>锁存器或RAM阵列</strong>。</p>
+<p>1958年，人们想到了可以在一块硅片制造出多个晶体管、电阻和其他电子元件的方法，由此演化出<strong>集成电路</strong>。之后便有了<strong>摩尔定律：每18个月同一块芯片上集成晶体管数目会翻一倍</strong>。</p>
+<p>影响集成电路性能的最重要因素是<strong>传播时间</strong>，即输入端发生变化引起输出端发生变化所需要的时间，传播时间单位是<strong>纳秒(ns)</strong>。</p>
+<ul>
+<li>1秒 = 1000毫秒(千分之一秒)</li>
+</ul>
+<ul>
+<li>1秒 = 1000000微妙(百万分之一秒)</li>
+</ul>
+<ul>
+<li>1秒 = 10亿分之一秒</li>
+</ul>
+<p>通常情况下，每秒至少震荡一百万个周期，称为1兆<strong>赫兹(MHz)</strong>。</p>
+<p>1970年，真正在使用集成电路在一块电路板上制造出完整的计算机处理器的公司是<strong>英特尔</strong>公司，发布的第一款产品是一个可以存储1024位数据的芯片。</p>
+<p>英特尔为了做出通用性的计算机，然后制造出了Intel 4004，它是第一块<strong>微处理器</strong>。</p>
+<p>它是一个4位微处理器，其每秒的最大时钟频率为108KHz，最大时钟频率也叫<strong>主频</strong>，时钟频率决定了执行一条指令所需要的时间，处理器的<strong>位数</strong>也影响处理器的速度。</p>
+<p>到了1972年4月，英特尔发布了<strong>8008芯片</strong>，时钟频率200KHz、可寻址空间16KB的8位处理器。</p>
+<p>再后来到了1974年5月，英特尔和摩托罗拉同时发布了8008微处理器的改进版——<strong>8080处理器和6800处理器</strong>，这两款芯片改变了整个世界。</p>
+<h1 id="19、两种典型的微处理器"><a href="#19、两种典型的微处理器" class="headerlink" title="19、两种典型的微处理器"></a>19、两种典型的微处理器</h1><p>1974年英特尔和摩托罗拉分别推出了8080处理器和6800处理器，这两个都是8位的微处理器，运行时钟频率分别为2MHz和1MHz，寻址空间都是64KB。</p>
+<p>这两个微处理器都是40个管脚的集成电路，其中包括：<strong>电源输入、输入信号、输出信号、控制信号</strong>。</p>
+<p>微处理器只会读取二进制数，计算，然后输出二进制数。</p>
+<p>为了方便编程和记忆，可以为每个处理器操作码指派一个<strong>助记符</strong>，其中加载、保存和内容转移的助记符分别为<strong>STA、LDA、MOV</strong>，8080微处理器内部还设置了6个8位寄存器，这些寄存器本质上都是锁存器。</p>
+<p>处理器中有寄存器的好处是，当计算机程序同时用到多个数据，这些数据存放在寄存器比存放在存储器更方便访问，速度更快。</p>
+<p>微处理器的寻址方式分为：</p>
+<ul>
+<li>直接寻址</li>
+</ul>
+<ul>
+<li>间接寻址</li>
+</ul>
+<ul>
+<li>立即数寻址</li>
+</ul>
+<p>8080处理器也包含了<strong>标志位寄存器</strong>，并可以通过运算改变标志位的值，这些标志位可以帮助处理器完成各种<strong>运算逻辑和跳转逻辑</strong>。</p>
+<p>微处理器可以寻址的存储器叫做<strong>随机存储器（RAM）</strong>，主要原因是：只要提供了存储器地址，微处理器就可以用非常简便的方式访问存储器的任意存储单元，RAM就像一本书，可以翻到它的任意一页。</p>
+<p>在某些情况下，使用不同的寻址方式访问存储器也是有好处的，例如一项工作既不是随机也不是顺序的，解决这种工作的存储方式叫做<strong>堆栈(stack)</strong>，特点是：<strong>最先保存的数据最后取出，最后保存的数据最先取出</strong>，对应的操作分别为<strong>压栈(push)和弹栈(pop)</strong>。</p>
+<p>在编写汇编程序时，使用<strong>堆栈和标志位</strong>，就可以完成<strong>函数的调用和返回</strong>。</p>
+<p>微处理器并不是只连接存储器，完整的计算机系统需要<strong>输入/输出设备(I/O)</strong>以实现人机交互。微处理器与外设通信，是<strong>通过与外设对应的特定地址(接口)对其进行读写操作</strong>。</p>
+<p>外设操作时，是如何引起微处理器的注意呢？也就是说，外设的行为需要马上得到处理器的响应，这个过程叫做<strong>中断</strong>。</p>
+<p>以上介绍的均为8080微处理器，下面来看摩托罗拉的6800处理。</p>
+<p>6800微处理器与8080非常相似，也有40个管脚进行输入、输出、控制。6800处理器有一个16位的程序计数器PC、一个16位的堆栈指针SP、一个8位的状态寄存器，以及两个8位的累加器A、B。但6800没有设置其他的8位寄存器。</p>
+<p>6800同样可以时间加载、保存、跳转，但其<strong>操作码对应的助记符完全不同</strong>，而且其标志位也与8080不同。</p>
+<p>还有一个很重要的区别是：<strong>两个微处理器在保存多字节数据时，地址排序不同，分别为从小到大和从大到小</strong>。</p>
+<p>两种微处理器的操作码不同，导致的问题就是处理器的汇编语言不同。</p>
+<p>1975年，英特尔8080处理器被应用在<strong>第一台个人电脑上</strong>。</p>
+<p>在8080之后，英特尔又推出<strong>8085芯片</strong>，而其竞争对手也推出了<strong>Z-80芯片</strong>，Z-80与8080完全兼容，而且增加了很多非常有用的指令。</p>
+<p>同样，在1977年，由<strong>斯蒂夫·乔布斯和史蒂芬·沃兹内卡</strong>创立的<strong>苹果</strong>计算机公司推出了新一代产品<strong>Apple II</strong>，但它没有使用8080和6800，而是使用了基于MOS技术更加便宜的<strong>6502芯片</strong>，它是<strong>6800的改进增强版本</strong>。</p>
+<p>1978年6月，英特尔推出<strong>8086芯片，它是一个16位的微处理器，寻址空间1MB</strong>。但8086与8080操作码不兼容，但它包含了<strong>乘法和除法指令</strong>。</p>
+<p>一年后，英特尔又推出了<strong>8088芯片</strong>，内部结构与8086完全相同，但外部仍以字节为单位访问存储器。</p>
+<p>IBM在个人计算机中使用了8088芯片，这种计算机叫做<strong>IBM PC</strong>。</p>
+<p>IBM大举进军个人计算机市场，使用的都是英特尔处理器。英特尔相继发布了<strong>186芯片、286芯片、386芯片、486芯片</strong>，到了1993年，发布<strong>Intel奔腾系列微处理器</strong>。这些芯片的指令集都是兼容8086操作码的。</p>
+<p>苹果公司的<strong>Macintosh</strong>发布于1984年，采用<strong>68000微处理器</strong>，它是16位微处理器，是6800的下一代产品。</p>
+<p>到了1994年，Macintosh计算机开始使用<strong>PowerPC微处理器</strong>，此处理器由摩托罗拉、IBM以及苹果联合开发。</p>
+<p><strong>PowerPC采用RISC（精简指令集计算机）微处理器体系结构设计。</strong>其内部设置了大量的寄存器，运算速度非常快。</p>
+<p>微处理器发展到现代，采用多种技术来提高运行速度。其中一种就是<strong>流水线技术</strong>，还有<strong>高速缓存技术</strong>。</p>
+<h1 id="20、ASCII码和字符转换"><a href="#20、ASCII码和字符转换" class="headerlink" title="20、ASCII码和字符转换"></a>20、ASCII码和字符转换</h1><blockquote>
+<p>计算机中存储器唯一可以存储的是比特，因此如果想要在计算机中处理信息，必须按位存储。那么计算机是如何用它来存储文本的？</p>
+</blockquote>
+<p>为了将文本表示数字形式，我们需要构建一种系统为每一个字母赋予一个唯一的编码，包括数字和标点符号。具有这种功能的系统被称为<strong>字符编码集</strong>，系统内每个独立编码称为<strong>字符编码</strong>。</p>
+<p>那么构建这些编码需要多少比特？</p>
+<p>就英语而言，所有大小写字母一共需要52个编码，0-9数字需要10个编码，一共62个编码，加上标点符号，数量超过64个，也就是说，一个编码至少需要6个比特。但无论如何字符数应该不超过128个，而且远远不够128个，也就是说编码长度不会超过<strong>8位</strong>。</p>
+<p>所以答案就是<strong>7位</strong>编码时，不需要转义字符，而且可以区分大小写字母。</p>
+<p>如何指派这些编码？当然，自己造一台计算机，可以任意指定字符对应的编码。但是这是不通用的，也与其他计算机不兼容。</p>
+<p>这样一来，随意编码就不合适了。如果在处理文本时，字母表的编码是按<strong>顺序</strong>来的，那么工作起来就会很便利，优点是：<strong>字母排序和分类将变得简单</strong>。</p>
+<p>于是就产生了一种标准，被称为<strong>美国信息交换标准码，简称ASCII码</strong>。</p>
+<p>ASCII码是7位编码，二进制取值范围是0000000<del>1111111，对应十六进制是00h</del>7Fh。</p>
+<p><strong>在ASCII码中，大写字母与其对应的小写字母ASCII码相差20h。（大写字母=小写字母-20h）</strong></p>
+<p>这种规律大大简化了程序代码的编写。</p>
+<p>ASCII码中有95个编码称为<strong>图形文字</strong>，因为其可以显示出来，还有33个<strong>控制字符</strong>，它们用来执行某一特定功能，因而不用显示出来。</p>
+<p>其中，<strong>回车符</strong>使打印头换行并转移至当前页的最前端，<strong>换行符</strong>使打印头转移至当前位置下一行。</p>
+<p>尽管ASCII码是计算机领域最重要的标准，但其缺点是：只能用于美国。其他国家有太多字符无法表示。</p>
+<p>于是就想到一种<strong>扩展ASCII字符集</strong>的方案，计算机采用8位编码存储字符，这样就可以保存256个字符。在这个字符集中，编码00h<del>7Fh与原ASCII码保持一致。编码80h</del>FFh用来引入其他字符：例如重音字母以及非拉丁字母。</p>
+<p>但是这种扩展ASCII码的思想开始被滥用，随之而来就产生了不同版本扩展的ASCII码，导致编码不一致。</p>
+<p>由此，业界打算建立一个独一无二的字符编码系统，它可以用于全世界所有的语言文字。</p>
+<p>1988年开始，几大著名计算机公司合作研究一种替代ASCII码的编码系统，取名<strong>Unicode码</strong>。</p>
+<p>Unicode码采用16位编码，每一个字符需要2个字节，00000h~FFFFh共计65536个不同字符，全世界所有人类语言，都可以使用同一个编码系统，而且具有很高的扩展性。</p>
+<p>Unicode码前128字符编码是与ASCII码一致的，也就是兼容ASCII码。</p>
+<p><strong>Unicode码优点是可以表示世界所有语言，但缺点是存储空间比ASCII码要大一倍。</strong></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/06/24/code-note-18-25/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/06/20/assembly-note-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/06/20/assembly-note-2/" class="post-title-link" itemprop="url">汇编总结(2)：中断、端口、直接定址表</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-06-20 22:13:27" itemprop="dateCreated datePublished" datetime="2016-06-20T22:13:27+00:00">2016-06-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B1%87%E7%BC%96/" itemprop="url" rel="index"><span itemprop="name">汇编</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/06/20/assembly-note-2/" class="post-meta-item leancloud_visitors" data-flag-title="汇编总结(2)：中断、端口、直接定址表" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/06/20/assembly-note-2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/06/20/assembly-note-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h2 id="1、中断"><a href="#1、中断" class="headerlink" title="1、中断"></a>1、中断</h2><p>CPU具有一种能力，可以在执行完当前指令之后，检测从内部产生或外部发来的特殊信息，并立即对其进行处理，这种特殊的信息，叫做<strong>中断信息</strong>。</p>
+<p><strong>中断</strong>即CPU不再接着刚执行完的指令向下执行，而是转去处理特殊信息。</p>
+<p>中断分为：</p>
+<ul>
+<li>内中断，CPU内部产生的特殊信息</li>
+<li>外中断，CPU外部产生的特殊信息</li>
+</ul>
+<h3 id="1-1、内中断"><a href="#1-1、内中断" class="headerlink" title="1.1、内中断"></a>1.1、内中断</h3><p>中断信息必须包含标识来源的编码，叫做<strong>中断类型码</strong>。中断类型码为一个字节型数据，可表示256种中断信息来源。</p>
+<p>产生中断信息的事件，即中断信息的来源，叫做<strong>中断源</strong>。</p>
+<p>内中断分类：</p>
+<ul>
+<li>除法错误，类型码0，如div指令产生溢出</li>
+<li>单步执行，类型码1，即单步调试</li>
+<li>into指令，类型码4</li>
+<li>int指令，指令格式为<code>int n</code>，类型码为n</li>
+</ul>
+<p>CPU在收到中断信息后，需要对中断信息进行处理，这可以由我们编程来决定，我们编写的处理中断信息的程序叫做<strong>中断处理程序</strong>。</p>
+<p>CPU要想执行中断处理程序，则必须知道这个程序的入口，即CS:IP指向这个入口，CPU用8位中断类型码通过<strong>中断向量表</strong>找到对应中断程序的入口地址。</p>
+<p><strong>中断向量表</strong>在内存中保存，对于8086CPU机，其必须存放在0000:0000~0000:03FF处，这是规定好的。</p>
+<p>中断向量表中每个中断类型码对应中断程序的<strong>段地址和偏移地址</strong>，共占2个字节。</p>
+<p>CPU通过中断类型码，然后在中断向量表中找到中断处理程序的段地址和偏移地址，设置CS和IP，CPU开始执行中断处理程序。这个操作是CPU自动完成的，这个过程叫做<strong>中断过程</strong>。</p>
+<p>具体过程如下：</p>
+<ul>
+<li>从中断信息中取得中断类型码N</li>
+<li><code>pushf</code>：标志寄存器的值入栈(中断过程中会改变标志寄存器的值，所以先保存之前的值)</li>
+<li><code>TF=0,IF=0</code>：设置标志寄存器<code>第8位TF</code>和<code>第9位IF</code>的值为0</li>
+<li><code>PUSH CS</code>：<code>CS</code>内容入栈</li>
+<li><code>PUSH IP</code>：<code>IP</code>内容入栈</li>
+<li><code>(IP)=(N*4),(CS)=(N*4+2)</code>：从内存地址为<code>中断类型码*4</code>和<code>中断类型码*4+2</code>的两个字中读取中断处理程序入口地址，设置CS和IP</li>
+<li>执行中断处理程序</li>
+</ul>
+<p><strong>中断处理程序编写步骤</strong>：</p>
+<ul>
+<li>保存用到的寄存器</li>
+<li>处理中断</li>
+<li>恢复用到的寄存器</li>
+<li>用<code>iret</code>指令返回</li>
+</ul>
+<p><strong><code>iret</code>指令功能：</strong></p>
+<ul>
+<li><code>pop IP</code></li>
+<li><code>pop CS</code></li>
+<li><code>popf</code></li>
+</ul>
+<p>引发中断的具体事件：</p>
+<ul>
+<li>除法错误：如果在执行<code>div</code>指令时，发生溢出错误，将产生中断类型码为0的中断信息，CPU检测到此信息然后引发中断过程，转去执行0号中断所对应的中断处理程序；</li>
+<li>单步中断：CPU执行完一条指令后，如果检测到<code>TF</code>位是1，则产生单步中断，转去执行1号中断处理程序，<strong>CPU提供单步中断功能，为单步跟踪程序执行过程提供了实现机制；</strong></li>
+</ul>
+<ul>
+<li>int指令引发中断：可自定义调用中断处理程序，例如<code>int n</code>将调用n号中断处理程序；</li>
+</ul>
+<p>在主板的ROM中存放的程序，叫做<code>BIOS</code>(基本输入输出系统)，主要包含以下内容：</p>
+<ul>
+<li>硬件系统的检测和初始化程序；</li>
+<li>外部中断和内部中断的中断例程；</li>
+<li>用于对硬件设备进行I/O操作的中断例程；</li>
+<li>其他和硬件系统相关的中断例程；</li>
+</ul>
+<p>操作系统DOS也提供了中断例程，DOS中断例程就是操作系统向程序员提供的编程资源。<code>int 21h</code>中断例程就是DOS提供的，即程序返回功能。</p>
+<blockquote>
+<p>在执行完向<code>ss</code>寄存器传送数据指令后，即使发生中断，CPU也不会响应。因为<code>ss:sp</code>联合指向栈顶，应该持续完成，否则将发生错误。</p>
+</blockquote>
+<h3 id="1-2、外中断"><a href="#1-2、外中断" class="headerlink" title="1.2、外中断"></a>1.2、外中断</h3><p>CPU能响应外设的输入，并向它们进行输出，这个过程叫做<strong>外中断</strong>。</p>
+<p>外设的输入不直接送入内存和CPU，而是送入相关的接口芯片端口中。CPU向外设输出也不是直接送入外设，而是先送入端口，再由芯片送到外设。CPU通过端口和外设进行联系。</p>
+<p>外中断源分为2类：</p>
+<ul>
+<li>可屏蔽中断：CPU可以不响应的外中断，由标志寄存器<code>IF</code>决定，如果<code>IF=1</code>则响应，否则屏蔽中断；<ul>
+<li>中断过程将IF设置为0，就是保证在进入中断处理程序后，禁止其他的可屏蔽中断</li>
+<li>8086CPU提供修改IF的指令：<code>sti</code>：IF=1， <code>cli</code>：IF=0</li>
+</ul>
+</li>
+<li>不可屏蔽中断：<ul>
+<li>CPU必须响应的外中断</li>
+<li>中断类型码固定为2</li>
+</ul>
+</li>
+</ul>
+<p><strong>几乎所有由外设引发的外中断，都是可屏蔽中断。</strong></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/06/20/assembly-note-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/06/03/assembly-note-1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/06/03/assembly-note-1/" class="post-title-link" itemprop="url">汇编总结(1)：基础、存储器、寄存器、汇编程序</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-06-03 23:43:32" itemprop="dateCreated datePublished" datetime="2016-06-03T23:43:32+00:00">2016-06-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B1%87%E7%BC%96/" itemprop="url" rel="index"><span itemprop="name">汇编</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/06/03/assembly-note-1/" class="post-meta-item leancloud_visitors" data-flag-title="汇编总结(1)：基础、存储器、寄存器、汇编程序" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/06/03/assembly-note-1/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/06/03/assembly-note-1/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>11 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>以下所述的汇编指令均以8086CPU为基础所讲述。</p>
+</blockquote>
+<h2 id="1、基础"><a href="#1、基础" class="headerlink" title="1、基础"></a>1、基础</h2><h3 id="1-1、机器语言"><a href="#1-1、机器语言" class="headerlink" title="1.1、机器语言"></a>1.1、机器语言</h3><p>如果要介绍汇编语言，首先要说一下<strong>机器语言</strong>，机器语言的定义如下：</p>
+<blockquote>
+<p>机器语言是机器指令的集合，机器指令就是一台机器可以正确执行的命令，计算机的机器指令是一列二进制数字，计算机将之转变为一列高低电平，以驱动计算机硬件进行运算。</p>
+</blockquote>
+<p>每一种CPU都有自己的指令集，早期程序员通过用0、1数字编写的程序打在纸带或卡片上，然后输入计算机完成运算。</p>
+<h3 id="1-2、汇编语言"><a href="#1-2、汇编语言" class="headerlink" title="1.2、汇编语言"></a>1.2、汇编语言</h3><p>正是由于机器语言的难以辨别和记忆，于是就产生了汇编语言。</p>
+<p>程序员通过汇编代码编写程序，通过汇编编译器，最终还是转化为机器语言，最终让计算机执行。</p>
+<p><strong>编写汇编代码 –&gt; 汇编编译器(编译) –&gt; 机器码 –&gt; 计算机(执行)</strong></p>
+<p>汇编有3类指令：</p>
+<ul>
+<li>汇编指令：机器码助记符，是<strong>汇编语言的核心</strong>，有对应的机器码</li>
+<li>伪指令：由编译器执行，没有对应机器码</li>
+<li>其他符号：如+、-、*、/，编译器识别，没有对应机器码</li>
+</ul>
+<h3 id="1-3、存储器与总线"><a href="#1-3、存储器与总线" class="headerlink" title="1.3、存储器与总线"></a>1.3、存储器与总线</h3><p>CPU要想执行指令，必须由存储器(内存)提供指令和数据。</p>
+<p>指令和数据在内存或磁盘上没有任何区别，都是二进制信息。</p>
+<p>内存的一个存储单元可以存储1个字节，即8个二进制位。</p>
+<p>CPU要想进行数据的读写，必须进行下面3类信息交互：</p>
+<ul>
+<li>存储单元的地址(地址信息)</li>
+<li>读/写的命令(控制信息)</li>
+<li>读/写的数据(数据信息)</li>
+</ul>
+<p>CPU与存储器分别通过<strong>地址总线、控制总线、数据总线</strong>进行信息交互。</p>
+<ul>
+<li>地址总线：地址总线宽度决定CPU寻址能力</li>
+<li>控制总线：控制总线决定CPU对其他器件的控制能力</li>
+<li>数据总线：数据总线宽度觉得CPU与其他器件数据传送一次数据传送量</li>
+</ul>
+<h2 id="2、存储器"><a href="#2、存储器" class="headerlink" title="2、存储器"></a>2、存储器</h2><h3 id="2-1、内存地址空间"><a href="#2-1、内存地址空间" class="headerlink" title="2.1、内存地址空间"></a>2.1、内存地址空间</h3><p>假如一个CPU地址总线宽度为10，那么可寻址1024个内存单元，这1024个内存单元就是这个CPU的<strong>内存地址空间</strong>。</p>
+<h3 id="2-2、控制外设"><a href="#2-2、控制外设" class="headerlink" title="2.2、控制外设"></a>2.2、控制外设</h3><p>在计算机系统中，所有可用程序控制其工作的设备，都必须受到CPU的控制。</p>
+<p>但是CPU不能直接控制外设，直接控制这些设备的是插在扩展插槽的接口卡。</p>
+<p>这些扩展插槽通过总线与CPU相连，即接口卡通过总线连接CPU，CPU控制接口卡，从而实现CPU对外设的间接控制。</p>
+<p><strong>CPU –&gt; 接口卡 –&gt; 外设</strong></p>
+<h3 id="2-3、RAM和ROM"><a href="#2-3、RAM和ROM" class="headerlink" title="2.3、RAM和ROM"></a>2.3、RAM和ROM</h3><p>存储器分为<strong>随机存储器(RAM)和只读存储器(ROM)</strong>，使用如下：</p>
+<ul>
+<li>RAM：存放CPU使用的程序和数据</li>
+<li>装有BIOS的ROM</li>
+<li>接口卡上的RAM</li>
+</ul>
+<p>不管是上述的哪种类型，CPU控制它们的时候，都是当做内存对待，即当做由若干存储单元组成的<strong>逻辑存储器</strong>，这个逻辑存储器就是<strong>内存地址空间</strong>。</p>
+<h2 id="3、寄存器"><a href="#3、寄存器" class="headerlink" title="3、寄存器"></a>3、寄存器</h2><p>寄存器是CPU中程序员可以读写的部件，通过改变寄存器的内容来实现对CPU的控制。</p>
+<p>8086CPU有14个寄存器：<code>AX、BX、CX、DX、SI、DI、SP、BP、IP、CS、SS、DS、ES、PSW</code>。</p>
+<h3 id="3-1、通用寄存器"><a href="#3-1、通用寄存器" class="headerlink" title="3.1、通用寄存器"></a>3.1、通用寄存器</h3><p>其中<code>AX、BX、CX、DX</code>是通用寄存器，存放一般性数据。1个16位寄存器可以存储16位的数据。</p>
+<p>为了向上一代CPU兼容，这4个寄存器可以分为<code>AH、AL，BH、BL，CH、CL，DH、DL</code>。</p>
+<h3 id="3-2、物理地址"><a href="#3-2、物理地址" class="headerlink" title="3.2、物理地址"></a>3.2、物理地址</h3><p>CPU要想访问内存单元，就要给出内存单元的物理地址，内存是一个一维的线性空间，每一个内存单元都有唯一的地址，这个地址就是<strong>物理地址</strong>。</p>
+<p>8086CPU是16位结构的，其数据总线是16位宽，但地址总线是20位，1MB寻址能力。</p>
+<p>但内部是16位结构，内部一次性处理、传输地址为16位，所以在内部采用2个16位地址合成方式形成一个20位的物理地址进行内存寻址。</p>
+<p><strong>物理地址 = 段地址 * 16 + 偏移地址(段地址*16即左移4位)</strong></p>
+<p><strong>其本质含义是：CPU在访问内存时，用一个基础地址(段地址*16)和相对于基础地址的偏移地址相加，得到物理地址。</strong></p>
+<p>由于偏移地址为16位，16位地址的寻址能力是64KB，所以一个段的长度最大为64K。</p>
+<p>CPU可以用不同的段地址和偏移地址形成同一个物理地址。</p>
+<h3 id="3-3、段寄存器"><a href="#3-3、段寄存器" class="headerlink" title="3.3、段寄存器"></a>3.3、段寄存器</h3><p>8086CPU有4个段寄存器：<code>CS、DS、SS、ES</code>。</p>
+<p><code>CS</code>为代码段寄存器，<code>IP</code>为指令指针寄存器。</p>
+<p><strong>任意时刻，CPU将CS:IP指向的内容当做当前指令执行。</strong></p>
+<p>8086CPU工作过程：</p>
+<ul>
+<li>从CS:IP指向的内存单元读指令，指令进指令缓冲器</li>
+<li>IP指向下一条指令</li>
+<li>执行指令，跳到步骤1，重复这个过程</li>
+</ul>
+<p><strong>CPU根据什么将内存中的信息看做指令？答案是CPU将CS:IP指向的内存单元的内容看做指令。</strong></p>
+<p>使用<code>jmp 段地址:偏移地址</code>或<code>jmp 寄存器</code>修改CS:IP或IP的地址。</p>
+<p>在编程时，根据需要可以将长度为N的一组代码，存在一组连续的内存单元中，这段内存单元叫做<strong>代码段</strong>。</p>
+<p>同样的，可以根据需要将长度为N的一组内存单元，专门存储数据，这段内存单元叫做<strong>数据段</strong>。</p>
+<p><strong>8086CPU自动取<code>DS</code>寄存器中的数据为内存单元的段地址。</strong></p>
+<p>例如<code>mov [0] cs</code>表示将寄存器<code>cs</code>的值复制到段地址为DS便宜地址为0的内存单元中。</p>
+<p>字在内存中存储时，用2个地址连续的内存单元存放，字的低字节放在低地址单元，高字节放在高地址单元。</p>
+<h3 id="3-4、栈"><a href="#3-4、栈" class="headerlink" title="3.4、栈"></a>3.4、栈</h3><p><strong>栈是一种特殊的访问方式的存储空间，特点是：后进数据先出去。</strong></p>
+<p>8086CPU提供入栈和出栈的指令：<code>PUSH</code>和<code>POP</code>。</p>
+<p>任意时刻，寄存器<code>SS:SP</code>指向栈顶元素。</p>
+<p>push指令执行：</p>
+<ul>
+<li>SP=SP-2</li>
+<li>向SS:SP指向的字单元送入数据</li>
+</ul>
+<p>pop指令执行：</p>
+<ul>
+<li>从SS:SP指向的字单元读数据</li>
+<li>SP=SP+2</li>
+</ul>
+<p>在编程时，要时刻注意栈顶越界的问题。</p>
+<p><strong>用栈来可以暂存以后需要恢复的寄存器中的内容。</strong></p>
+<p><code>push和pop</code>实质上是一种内存传送指令。</p>
+<p>同样的，编程时我们可以将长度为N的一组连续内存单元当做栈空间使用，叫做<strong>栈段</strong>。</p>
+<p>一个栈段的容量最大为64KB。</p>
+<h3 id="3-5、标志寄存器"><a href="#3-5、标志寄存器" class="headerlink" title="3.5、标志寄存器"></a>3.5、标志寄存器</h3><p>标志寄存器作用：</p>
+<ul>
+<li>存储相关指令某些执行结果</li>
+<li>为CPU执行相关指令提供行为依据</li>
+<li>控制CPU相关工作方式</li>
+</ul>
+<p>8086CPU中有个叫flag寄存器，共16位，每一位代表专门的含义：</p>
+<ul>
+<li>第6位<code>ZF</code>，<strong>零标志位</strong>：相关指令执行后，结果为0则zf=1，不为0则zf=0</li>
+<li>第2位<code>PF</code>，<strong>奇偶标志位</strong>：相关指令执行后，结果所有bit位中1的个数为偶数，pf=1，否则pf=0</li>
+<li>第7位<code>SF</code>，<strong>符号标志位</strong>：相关指令执行后，结果是否为负，结果为负sf=1，否则sf=0</li>
+<li>第0位<code>CF</code>，<strong>进位标志位</strong>：对于无符号数运算，CF记录运算结果最高有效位向更高位的进位值/借位值</li>
+<li>第11位<code>OF</code>，<strong>溢出标志位</strong>：对于有符号数运算，是否发生溢出，溢出则of=1，否则of=0</li>
+<li>第10位<code>DF</code>，<strong>方向标志位</strong>：在串处理指令中，控制操作后si、di增减，df=0每次操作后si、di递增，否则递减</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/06/03/assembly-note-1/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/05/28/code-note-11-17/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/05/28/code-note-11-17/" class="post-title-link" itemprop="url">《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-05-28 22:41:52" itemprop="dateCreated datePublished" datetime="2016-05-28T22:41:52+00:00">2016-05-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/05/28/code-note-11-17/" class="post-meta-item leancloud_visitors" data-flag-title="《编码：隐匿在计算机软硬件背后的语言》读书笔记11-17" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/05/28/code-note-11-17/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/05/28/code-note-11-17/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="11、门"><a href="#11、门" class="headerlink" title="11、门"></a>11、门</h1><p>通过串联或并联的开关组成继电器完成简单的逻辑任务，继电器的组合叫做<strong>逻辑门</strong>，逻辑门一般有<strong>两个或多个输入</strong>。</p>
+<p>继电器的优点是：<strong>可以被其他继电器控制，而不需要人工控制，意味着简单的逻辑门组合起来可以完成复杂的功能。</strong></p>
+<p>如何连接继电器，是逻辑门的关键：</p>
+<ul>
+<li>继电器串联：与门(AND)</li>
+<li>继电器并联：或门(OR)</li>
+<li>反向器：NOT</li>
+<li>只有1-1输出0：或与门(NAND)</li>
+<li>只有0-0输出1：或非门(NOR)</li>
+<li>延迟信号：缓冲器</li>
+</ul>
+<p>利用4个门与2个反向器连接的电路叫做<strong>2-4译码器</strong>：2个输入，输出4种不同的信号。</p>
+<p>同样的原理可以制造出3-8译码器或4-16译码器。</p>
+<p><strong>由缓冲器、反向器、四种基本逻辑门可以组成复杂电路。</strong></p>
+<h1 id="12、二进制加法器"><a href="#12、二进制加法器" class="headerlink" title="12、二进制加法器"></a>12、二进制加法器</h1><p>一对二进制数相加的结果，有2个数位：<strong>加法位、进位位</strong>，这2个数位计算是分别进行的。</p>
+<ul>
+<li><strong>进位位逻辑：与门</strong></li>
+<li><strong>加法位逻辑：或门 + 与非门 = 异或门(XOR)</strong></li>
+</ul>
+<p>2个输入 –&gt; 异或门 –&gt; 结果 –&gt; 与门 = 半加器</p>
+<p>2个半加器 + 或门 = 全加器</p>
+<ul>
+<li>组成与门、或门、与非门(3 * 2 = 6个继电器)</li>
+<li>异或门 + 与门 = 半加器(8个继电器)</li>
+<li>2个半加器 + 或门 = 全加器(18个继电器)</li>
+<li>8个全加器= 8位二进制加法器(144个继电器)</li>
+</ul>
+<p>全加器的计算原理就是计算机的加法原理，但这种进位方式叫行<strong>波进位(脉冲进位)</strong>，更快的加法器使用<strong>前置进位</strong>提高运算速度。</p>
+<p>现如今的计算机使用晶体管，耗能低、价格低、体积小，但如果搭建一个8位加法器依然需要144个晶体管，如果使用<strong>前置进位</strong>法，将用到更多的晶体管，但电路是体积非常小。</p>
+<h1 id="13、如何实现减法"><a href="#13、如何实现减法" class="headerlink" title="13、如何实现减法"></a>13、如何实现减法</h1><p>十进制减法计算步骤：</p>
+<ul>
+<li>减数大于被减数：<strong>被减数 - 减数 = 减数位个9 - 减数 + 被减数 + 1 - 10^减数位数</strong></li>
+<li>减数小于被减数：<strong>被减数 - 减数 = -(减数位个9 - (减数位个9 - 减数 + 被减数))</strong></li>
+</ul>
+<p>二进制减法计算步骤：</p>
+<ul>
+<li>减数大于被减数：<strong>被减数 - 减数 = 减数位个1 - 减数 + 被减数 + 1 - 2^减数位数</strong></li>
+<li>减数小于被减数：<strong>被减数 - 减数 = -(减数位个1 - (减数位个1 - 减数 + 被减数))</strong></li>
+</ul>
+<p>8个异或门连接为<strong>求补器</strong>，<strong>1个求补器+1个8位加法器+1个异或门形成可完成加法和减法的电路。</strong></p>
+<p><strong>用2的补码来表示二进制中的负数，最高位代表符号位。</strong></p>
+<h1 id="14、反馈与触发器"><a href="#14、反馈与触发器" class="headerlink" title="14、反馈与触发器"></a>14、反馈与触发器</h1><p>2开关+电池+磁铁可以完成一个循环电路，如果连上金属簧片可以形成一个蜂鸣器，也可以叫<strong>振荡器</strong>。</p>
+<p>振荡器可以在不需要人干涉的情况下，自发工作。</p>
+<p>振荡器在0和1之间交替规律变化，又称为<strong>时钟</strong>。</p>
+<p>振荡器从某个初始状态开始，经过一段时间又回到初始状态的间隔，称为<strong>周期</strong>。</p>
+<p>周期的倒数就是振荡器的<strong>频率</strong>，也叫<strong>赫兹</strong>。</p>
+<p>2个或非门+2个开关+1个灯泡的电路，左边或非门的输出是右边或非门的输入，而右边或非门的输出是左边或非门的输入，这种连接方式称之为<strong>反馈</strong>。</p>
+<p>而当2个开关都断开时，电路有2个稳定态，这类电路统称为<strong>触发器</strong>。<strong>触发器</strong>可以“记住”某些信息，这类电路叫做<strong>R-S(复位/置位)触发器</strong>，这类触发器的特点在于：<strong>可以记住哪个输入端最终状态为1</strong>。</p>
+<p>现在把2个输入分别叫做<strong>数据端和保持位</strong>，经过分析，保持位为0意味着输出不被数据端所影响，那么电路演变可以为：<strong>增加2个与门</strong>，变成3个输入：<strong>复位、保持位、置位</strong>，此时的电路和之前电路功能是相同的。</p>
+<p>但是我们只想要2个输入，继续分析电路后得出：2个输入端同时为0是无意义的，而同时为1是非法的，因此只要将<strong>保持位设置为0</strong>，即可完成相同功能，电路演变为：<strong>复位和置位变为1个数据端+反向器</strong>代替，这样就有2个输入了：保持位+数据端。</p>
+<p>此时的电路称为<strong>电平触发的D型触发器</strong>，即当保持位输入为某一特定电平，触发器保存数据端的输入。</p>
+<p>通常情况下，保持位又叫做<strong>时钟</strong>，它可以在0和1之间规律来回变化，但此时的时钟仅用来指示什么时候保存数据。</p>
+<p>至此，此电路就是电平触发的<strong>D型锁存器</strong>，也叫<strong>1位存储器</strong>，它可以锁存住1位数据并保持它，以便将来使用。</p>
+<p>由2级R-S触发器连接的电路，时钟端既控制第一级R-S触发器，也控制着第二级，只有当时钟信号由0变为1时，数据端的输入才被保存下来，输出0到1或1到0，而下级触发器的频率正好是上级触发器频率的一半，这种电路叫<strong>分频器</strong>，就这样多个振荡器连接下去，就形成了<strong>计数器</strong>。</p>
+<p>至此，我们可以通过使用继电器形成的电路来<strong>加法、减法和计数</strong>了。</p>
+<h1 id="15、字节与十六进制"><a href="#15、字节与十六进制" class="headerlink" title="15、字节与十六进制"></a>15、字节与十六进制</h1><p><strong>8位代表1个字节(byte)</strong>，追溯历史原因，8位可以表示0-255共256种不同的事物，而最早的书面语言的基本字符都少于256个，所以使用8位表示1个字节是比较理想的手段，通用1个字节也可以表示RGB256种颜色值。</p>
+<p>如果要表达的事物1个字节不够用，则可以扩展字节，采用2个字节甚至更多字节来表示，表示起来也很方便(扩展方便)。</p>
+<p>把1个字节分为每4位为1组，进而演化出16进制，1个16进制位表示4位，表达起来也很方便。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/05/28/code-note-11-17/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/04/20/code-note-01-10/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/04/20/code-note-01-10/" class="post-title-link" itemprop="url">《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-20 23:04:03" itemprop="dateCreated datePublished" datetime="2016-04-20T23:04:03+00:00">2016-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/04/20/code-note-01-10/" class="post-meta-item leancloud_visitors" data-flag-title="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/04/20/code-note-01-10/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/04/20/code-note-01-10/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>由于最近正在看《编码：隐匿在计算机软硬件背后的语言》，整理并记下读书笔记。</p>
+</blockquote>
+<h2 id="1、至亲密友"><a href="#1、至亲密友" class="headerlink" title="1、至亲密友"></a>1、至亲密友</h2><p>2个人远距离交流，可以通过手电筒开和关进行通信，但想表达的文字太复杂，手电筒开关次数太多，难度非常大。</p>
+<p>引出<strong>莫尔斯电码</strong>，使用点和划（短闪和长闪）通信。</p>
+<p>结论：</p>
+<ul>
+<li><p>编码是用来在机器和人之间信息传递的方式，编码就是交流。</p>
+</li>
+<li><p>编码无处不在，手电筒的闪烁，英语词汇，空气中的比划，手语，布莱叶盲文。</p>
+</li>
+<li><p>计算机里存储和传递数字、声音、音乐、图片和电影，处理后呈现出信息与人类沟通。</p>
+</li>
+</ul>
+<h2 id="2、编码与组合"><a href="#2、编码与组合" class="headerlink" title="2、编码与组合"></a>2、编码与组合</h2><p>莫尔斯码发送简单，但是接收后解析困难，解决方案：<strong>构建信息与编码的图表</strong>。</p>
+<p>结论：</p>
+<ul>
+<li><p><strong>码字的数目 = 2^编码位数</strong></p>
+</li>
+<li><p>编码进行适合的组合，得出完整的信息表示。</p>
+</li>
+</ul>
+<h2 id="3、布莱叶盲文与二进制码"><a href="#3、布莱叶盲文与二进制码" class="headerlink" title="3、布莱叶盲文与二进制码"></a>3、布莱叶盲文与二进制码</h2><p>布莱叶觉得最初的盲文编码过于复杂，不利于长文本阅读，随之改造盲文编码，使用2*3的矩阵，利用凸/平点表示一个字母信息。此标准沿用至今，改造后有了二级布莱叶盲文（使用很多缩写,一个2*3矩阵表示一个单词）</p>
+<p>结论：<strong>使用6位二进制码表示出2^6=64种编码表示，并且根据上下文有双重身份。</strong></p>
+<h2 id="4、手电筒的剖析"><a href="#4、手电筒的剖析" class="headerlink" title="4、手电筒的剖析"></a>4、手电筒的剖析</h2><p><strong>原子构成：中子、质子、电子。</strong></p>
+<p>一个原子的中电子数=质子数，如果电子从原子中脱离，就会产生<strong>电流</strong>。</p>
+<p>当质子与电子出现失衡，就会自我修复，从其他物体带走电子，例如地毯带走脚上的电子，自己感觉被静电电到了。</p>
+<p>电路中的电子不断从一个原子移动到下一个原子，就形成了<strong>电流</strong>。</p>
+<p>电池内部经过化学反应，能够使多余的自由电子聚集到负极(阴极)，正极(阳极)变得急需电子，<strong>化学能转为电能</strong>。</p>
+<p>电池为电路提供电能，反过来，电路为电池内化学反应提供条件，化学反应持续进行，化学物质被消耗完，电池没电。</p>
+<p>导体：最外层电子容易逃逸。绝缘体：阻抗性很大(电阻)。</p>
+<p>交代出：电流、电压、电阻、功率。</p>
+<p>白炽灯发光原理：<strong>钨丝电阻非常小，电流经过后钨丝变热达到燃点，由于存在真空中，不会燃烧，所以发亮！</strong></p>
+<h2 id="5、绕过拐角的通信"><a href="#5、绕过拐角的通信" class="headerlink" title="5、绕过拐角的通信"></a>5、绕过拐角的通信</h2><p>远距离如何通信？通过电源+导线的方式，实现远距离通信。</p>
+<p>距离越远，需要的导线越长，成本高并且电阻大，需要强电压。</p>
+<p>如果电压足够强，电池足够大，通信2方只需要一端接地，另一端使用一根导线即可，减少成本。</p>
+<p>结论：<strong>使用导线可以构建出绕过拐角、视线之外的发报系统，不受距离限制，涉及问题：电流、电阻等。</strong></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/04/20/code-note-01-10/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/04/06/expect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/04/06/expect/" class="post-title-link" itemprop="url">堡垒机Expect登陆服务器</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-06 22:46:48" itemprop="dateCreated datePublished" datetime="2016-04-06T22:46:48+00:00">2016-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/04/06/expect/" class="post-meta-item leancloud_visitors" data-flag-title="堡垒机Expect登陆服务器" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/04/06/expect/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/04/06/expect/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>最近公司线上服务器都换上了堡垒机登陆，这样每个开发人员都只分配堡垒机账号，然后运维人员划分对应的权限机器就好了，相比之前的跳板机登陆要有很多优点：</p>
+<ul>
+<li>只需给开发人员分配一个账号和密码，避免机器过多账号繁多的情况；</li>
+<li>运维人员分配机器权限便捷，只需给开发人员账号分配权限机器即可；</li>
+<li>相对跳板机来说更安全，堡垒机登陆到线上服务器后，可以记录每个用户的所有操作记录；</li>
+</ul>
+<p>大概说下堡垒机的使用机制：</p>
+<ul>
+<li>开发人员使用自己的账号登陆堡垒机，输入账号和密码</li>
+<li>登陆成功后，堡垒机会列出该账户下有权限可操作的服务器列表，每个服务器对应一个数字</li>
+<li>开发人员输入对应的服务器数字或者选择搜索选项搜索服务器</li>
+<li>如果是直接选择了服务器，则会列出可用的账户，如果是搜索服务器，则需输入服务器IP</li>
+<li>然后堡垒机会列出可用的账号列表，每个账户对应一个数字</li>
+<li>输入账户对应的数字，选择使用哪个账户操作服务器，进入服务器，登陆完成</li>
+</ul>
+<p>其实说白了，和很多客服电话原理差不多，列出来多个选项菜单供你选择，然后一步步选择，最终进入服务器。</p>
+<p>也就是说我进入一台线上服务器，需要输入<code>账号密码-&gt;选择/搜索服务器-&gt;选择操作账户-&gt;登陆成功</code>这几个步骤。每次登陆服务器只是IP不同，但都需要频繁输入相同的数字进行选择，肯定受不了，最好的方式是，能不能通过一个脚本，根据命令行的提示信息，自动选择，最终进到服务器。当然，答案是可以的，这里就使用到了<code>Expect</code>工具。</p>
+<p>简单介绍下Expect：</p>
+<blockquote>
+<p>Expect是Unix系统中用来进行自动化控制和测试的软件工具，该工具利用Unix伪终端包装其子进程，允许任意程序通过终端接入进行自动化控制。</p>
+</blockquote>
+<p>现在很多终端工具客户端都提供这些操作，例如<code>SecureCRT</code>、<code>XShell</code>都是支持的，最终都是使用的Expect。</p>
+<p>这些工具的使用就不介绍了，这里主要介绍一下不借助工具，在终端编写脚本来完成此功能，例如在Linux、Mac终端下进行登录操作。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/04/06/expect/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/6/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/8/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

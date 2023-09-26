@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="如果你看过比较优秀的 Python 开源框架，肯定见到过元类的身影。例如，在一个类中定义了类属性 __metaclass__，这就说明这个类使用了元类来创建。 那元类的实现原理究竟是怎样的？使用元类能帮我们在开发中解决什么样的问题？ 这篇文章，我们就来看一下 Python 元类的来龙去脉。 什么是元类？我们都知道，定义一个类，然后调用它的构造方法，就可以初始化出一个实例出来，就像下面这样： 123">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶——什么是元类？">
+<meta property="og:url" content="http://kaito-kidd.com/2018/04/19/python-advance-metaclass/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="如果你看过比较优秀的 Python 开源框架，肯定见到过元类的身影。例如，在一个类中定义了类属性 __metaclass__，这就说明这个类使用了元类来创建。 那元类的实现原理究竟是怎样的？使用元类能帮我们在开发中解决什么样的问题？ 这篇文章，我们就来看一下 Python 元类的来龙去脉。 什么是元类？我们都知道，定义一个类，然后调用它的构造方法，就可以初始化出一个实例出来，就像下面这样： 123">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-19T12:34:12.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/04/19/python-advance-metaclass/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python进阶——什么是元类？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/19/python-advance-metaclass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python进阶——什么是元类？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-19 12:34:12" itemprop="dateCreated datePublished" datetime="2018-04-19T12:34:12+00:00">2018-04-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/19/python-advance-metaclass/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是元类？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/19/python-advance-metaclass/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/19/python-advance-metaclass/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如果你看过比较优秀的 Python 开源框架，肯定见到过元类的身影。例如，在一个类中定义了类属性 <code>__metaclass__</code>，这就说明这个类使用了元类来创建。</p>
+<p>那元类的实现原理究竟是怎样的？使用元类能帮我们在开发中解决什么样的问题？</p>
+<p>这篇文章，我们就来看一下 Python 元类的来龙去脉。</p>
+<h1 id="什么是元类？"><a href="#什么是元类？" class="headerlink" title="什么是元类？"></a>什么是元类？</h1><p>我们都知道，定义一个类，然后调用它的构造方法，就可以初始化出一个实例出来，就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">    <span class="title">def</span> <span class="title">__init__</span><span class="params">(name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p = Person(<span class="string">'zhangsan'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>那你有没有想过，我们平时定义的类，它是如何创建出来的？</p>
+<p>别着急，我们先来看一个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">1</span>               <span class="comment"># 创建a的类是int a是int的实例</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__class__</span><br><span class="line">&lt;type <span class="string">'int'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="string">'abc'</span>           <span class="comment"># 创建b的类是str b是str的实例</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b.__class__</span><br><span class="line">&lt;type <span class="string">'str'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">c</span><span class="params">()</span>:</span>            <span class="comment"># 创建c的类是function 方法c是function的实例</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c.__class__</span><br><span class="line">&lt;type <span class="string">'function'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">D</span><span class="params">(object)</span>:</span>    <span class="comment"># 创建d的类是D d是D的实例</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d.__class__</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">__main__</span>.<span class="title">D</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了 <code>int</code>、<code>str</code>、<code>function</code>、<code>class</code>，然后分别调用了它们的<code>__class__</code> 方法，这个 <code>__class__</code> 方法可以返回实例是如何创建出来的。</p>
+<p>从方法返回的结果我们可以看到：</p>
+<ul>
+<li>创建整数 <code>a</code> 的类是 <code>int</code>，也就是说 <code>a</code> 是 <code>int</code> 的一个实例</li>
+<li>创建字符串 <code>b</code> 的类是 <code>str</code>，也就是说 <code>b</code> 是 <code>str</code> 的一个实例</li>
+<li>创建函数 <code>c</code> 的类是 <code>function</code>，也就是说 <code>c</code> 是 <code>function</code> 的一个实例</li>
+<li>创建实例 <code>d</code> 的类是 <code>class</code>，也就是说 <code>d</code> 是 <code>class</code> 的一个实例</li>
+</ul>
+<p>除了这些之外，我们在开发中使用到的例如 <code>list</code>、<code>dict</code> 也类似，你可以测试观察一下结果。</p>
+<p>现在我们已经得知，创建这些实例的类是 <code>int</code>、<code>str</code>、<code>function</code>、<code>class</code>，那进一步思考一下，这些类又是怎么创建出来的呢？</p>
+<p>同样地，我们也调用这些类的 <code>__class__</code> 方法，观察结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="string">'abc'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">c</span><span class="params">()</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">D</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d = D()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>从结果我们可以看到，创建这些类的类，都是 <code>type</code>，所以 <code>type</code> 就是创建所有类的「元类」。也就是说，<strong>元类的作用就是用来创建类的</strong>。</p>
+<p>你可以这样理解：</p>
+<ol>
+<li>元类 -&gt; 类 </li>
+<li>类 -&gt; 实例</li>
+</ol>
+<p>用伪代码表示，就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">klass = MetaClass()     <span class="comment"># 元类创建类</span></span><br><span class="line">obj = klass()           <span class="comment"># 类创建实例</span></span><br></pre></td></tr></table></figure>
+
+<p>是不是很有意思？</p>
+<p>在这里，你也可以感受一下这句话的含义：<strong>Python 中一切皆对象！</strong></p>
+<p>无论是普通类型、方法、实例，还是类，都可以统一看作对象，它们的起源就是元类。</p>
+<p>其实，在 Python 中，使用 <code>type</code> 方法，我们可就以创建出一个类，<code>type</code> 方法的语法如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type(class_name, (base_class, ...), &#123;attr_key: attr_value, ...&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>例如，像下面这样，我们使用 <code>type</code> 方法创建 MyClass 类，并且让它继承 <code>object</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>A = type(<span class="string">'MyClass'</span>, (object, ), &#123;&#125;) <span class="comment"># type创建一个类，继承object</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>A</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">__main__</span>.<span class="title">MyClass</span>'&gt;</span></span><br><span class="line"><span class="class">&gt;&gt;&gt; <span class="title">A</span><span class="params">()</span></span></span><br><span class="line"><span class="class">&lt;<span class="title">__main__</span>.<span class="title">MyClass</span> <span class="title">object</span> <span class="title">at</span> 0<span class="title">x10d905950</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们还可以使用 <code>type</code> 创建一个包含属性和方法的类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">return</span> <span class="string">'foo'</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>name = <span class="string">'zhangsan'</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="comment"># type 创建类B 继承object 包含 name 属性和 foo 方法</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>B = type(<span class="string">'MyClass'</span>, (object, ), &#123;<span class="string">'name'</span>: name, <span class="string">'foo'</span>: foo&#125;) </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>B.name          <span class="comment"># 打印 name 属性</span></span><br><span class="line"><span class="string">'zhangsan'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">print</span> B().foo() <span class="comment"># 调用 foo 方法</span></span><br><span class="line">foo</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>type</code> 方法创建的类，和我们自己定义一个类，在使用上没有任何区别。</p>
+<p>其实，除了使用 <code>type</code> 方法创建一个类之外，我们还可以使用类属性 <code>__metaclass__</code> 创建一个类，这就是下面要讲的「自定义元类」。</p>
+<a id="more"></a>
+
+<h1 id="自定义元类"><a href="#自定义元类" class="headerlink" title="自定义元类"></a>自定义元类</h1><p>我们可以使用类属性 <code>__metaclass__</code> 把一个类的创建过程，转交给其它地方，可以像下面这样写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    __metaclass__ = ... <span class="comment"># 这个类的创建转交给其他地方</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子中，我们先定义了类 A，然后定义了一个类属性 <code>__metaclass__</code>，这个属性表示创建类 A 的过程，转交给其它地方处理。</p>
+<p>那么，这个类属性 <code>__metaclass__</code> 需要怎么写呢？</p>
+<p>其实，它可以是一个方法，也可以是一个类。</p>
+<h2 id="用方法创建类"><a href="#用方法创建类" class="headerlink" title="用方法创建类"></a>用方法创建类</h2><p>如果类属性 <code>__metaclass__</code> 赋值的是一个方法，那么创建类的过程，就交给了一个方法来执行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_class</span><span class="params">(name, bases, attr)</span>:</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'create class by method...'</span></span><br><span class="line">    <span class="comment"># 什么事都没做 直接用type创建了一个类</span></span><br><span class="line">    <span class="keyword">return</span> type(name, bases, attr)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 创建类的过程交给了一个方法</span></span><br><span class="line">    __metaclass__ = create_class</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:    </span></span><br><span class="line"><span class="comment"># create class by method ...</span></span><br></pre></td></tr></table></figure>
+
+<p>我们定义了 <code>create_class</code> 方法，然后赋值给 <code>__metaclass__</code>，那么类 A 被创建时，就会调用 <code>create_class</code> 方法。</p>
+<p>而 <code>create_class</code> 方法中的逻辑，就是我们上面所讲到的，使用 <code>type</code> 方法创建出一个类，然后返回。</p>
+<h2 id="用类创建类"><a href="#用类创建类" class="headerlink" title="用类创建类"></a>用类创建类</h2><p>明白了用方法创建类之后，我们来看一下用类来创建另一个类。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span><span class="params">(type)</span>:</span></span><br><span class="line">    <span class="comment"># 必须定义 __new__ 方法 返回一个类</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, name, bases, attr)</span>:</span></span><br><span class="line">        <span class="keyword">print</span> <span class="string">'create class by B ...'</span></span><br><span class="line">        <span class="keyword">return</span> type(name, bases, attr)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 创建类的过程交给了B</span></span><br><span class="line">    __metaclass__ = B</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># create class by B ...</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了类 B，然后把它赋值给了 A 的类变量 <code>__metaclass__</code>，这就表示创建 A 的过程，交给了类 B。</p>
+<p>B 在定义时，首先继承了 <code>type</code>，然后定义了 <code>__new__</code> 方法，最后调用 <code>type</code> 方法返回了一个类，这样当创建类 A 时，会自动调用类 B 的 <code>__new__</code> 方法，然后得到一个类实例。</p>
+<h2 id="创建类的过程"><a href="#创建类的过程" class="headerlink" title="创建类的过程"></a>创建类的过程</h2><p>好了，上面我们演示了通过元类创建一个类的两种方式，分别是通过方法创建和通过类创建。</p>
+<p>其实创建一个类的完整流程如下：</p>
+<ol>
+<li>检查类中是否有 <code>__metaclass__</code> 属性，如果有，则调用 <code>__metaclass__</code> 指定的方法或类创建</li>
+<li>如果类中没有 <code>__metaclass__</code> 属性，那么会继续在父类中寻找</li>
+<li>如果任何父类中都没有，那么就用 <code>type</code> 创建这个类</li>
+</ol>
+<p>也就是说，如果我们没有指定 <code>__metaclass__</code>，那么所有的类都是默认由 <code>type</code> 创建，这种情况是我们大多数定义类时的流程。</p>
+<p>如果类中指定了 <code>__metaclass__</code>，那么这个类的创建就会交给外部来做，外部可以定义具体的创建逻辑。</p>
+<h2 id="哪种创建类的方式更好？"><a href="#哪种创建类的方式更好？" class="headerlink" title="哪种创建类的方式更好？"></a>哪种创建类的方式更好？</h2><p>虽然有两种方式可以创建类，那么哪种方式更好呢？</p>
+<p>一般我们建议使用类的方式创建，它的优点如下：</p>
+<ul>
+<li>使用类更能清楚地表达意图</li>
+<li>使用类更加 OOP，因为类可以继承其他类，而且可以更友好地使用面向对象特性</li>
+<li>使用类可以更好地组织代码结构</li>
+</ul>
+<p>另外，使用类创建一个类时，这里有一个优化点：在 <code>__new__</code> 方法中不建议直接调用 <code>type</code> 方法，而是建议调用 <code>super</code> 的 <code>__new__</code> 来创建类，执行结果与 <code>type</code> 方法是一样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span><span class="params">(type)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, name, bases, attr)</span>:</span></span><br><span class="line">        <span class="comment"># 使用 super.__new__ 创建类</span></span><br><span class="line">        <span class="keyword">return</span> super(B, cls).__new__(cls, name, bases, attr)</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建类时自定义行为"><a href="#创建类时自定义行为" class="headerlink" title="创建类时自定义行为"></a>创建类时自定义行为</h2><p>前面我们用元类创建一个类时，它的功能非常简单。现在我们来看一下，使用元类创建类时，如何定义一些自己的逻辑，然后改变类的属性或行为。</p>
+<p>我们看下面这个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Meta</span><span class="params">(type)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, name, bases, attr)</span>:</span></span><br><span class="line">        <span class="comment"># 通过 Meta 创建的类 属性会都变成大写</span></span><br><span class="line">        <span class="keyword">for</span> k, v <span class="keyword">in</span> attr.items():</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> k.startswith(<span class="string">'__'</span>):</span><br><span class="line">                attr[k] = v.upper()</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                attr[k] = v</span><br><span class="line">        <span class="keyword">return</span> type(name, bases, attr)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 通过 Meta 创建类</span></span><br><span class="line">    __metaclass__ = Meta</span><br><span class="line"></span><br><span class="line">    name = <span class="string">'zhangsan'</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">B</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 通过 Meta 创建类</span></span><br><span class="line">    __metaclass__ = Meta</span><br><span class="line"></span><br><span class="line">    name = <span class="string">'lisi'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 打印类属性 会自动变成大写</span></span><br><span class="line"><span class="keyword">print</span> A.name    <span class="comment"># ZHANGSAN</span></span><br><span class="line"><span class="keyword">print</span> B.name    <span class="comment"># LISI</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了一个元类 <code>Meta</code>，然后在定义类 A 和 B 时，把创建类的过程交给了  <code>Meta</code>，在 <code>Meta</code> 类中，我们可以拿到 A 和 B 的属性，然后把它们的属性都转换成了大写。</p>
+<p>所以当我们打印 A 和 B 的属性时，虽然定义的变量是小写的，但输出结果都变成了大写，这就是元类发挥的作用。</p>
+<h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><p>了解了元类的实现原理，那么元类都会用在哪些场景呢？</p>
+<p>我们在开发中其实用的并不多，元类的使用，经常会出现在一些框架中，例如<code>Django ORM</code>、<code>peewee</code>，下面是使用 <code>Django ORM</code> 定义一个数据表映射类的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(models.Model)</span>:</span></span><br><span class="line">    <span class="comment"># 注意: name 和 age 是类属性</span></span><br><span class="line">    name = models.CharField(max_length=<span class="number">30</span>)</span><br><span class="line">    age = models.IntegerField()</span><br><span class="line">    </span><br><span class="line">person = Person(name=<span class="string">'zhangsan'</span>, age=<span class="number">20</span>)</span><br><span class="line"><span class="keyword">print</span> person.name   <span class="comment"># zhangsan</span></span><br><span class="line"><span class="keyword">print</span> person.age    <span class="comment"># 20</span></span><br></pre></td></tr></table></figure>
+
+<p>仔细看在这段代码中，我们定义了一个 <code>Person</code> 类，然后在类中定义了类属性 <code>name</code> 和 <code>age</code>，它们的类型分别是 <code>CharField</code> 和 <code>IntegerField</code>，之后我们初始化 <code>Person</code> 实例，然后通过实例获取 <code>name</code> 和 <code>age</code> 属性，输出的却是 <code>str</code> 和 <code>int</code>，而不再是 <code>CharField</code> 和 <code>IntegerField</code>。</p>
+<p>能做到这样的秘密就在于，<code>Person</code> 类在创建时，它的逻辑交给了另一个类，这个类针对类属性进行了转换，最终变成对象与数据表的映射，通过转换映射，我们就可以通过实例属性的方式，友好地访问表中对应的字段值了。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，这篇文章我们讲了元类的实现原理，了解到元类是创建所有类的根源，我们可以通过 <code>type</code> 方法，或者在类中定义 <code>__metaclass__</code> 的方式，把创建类的过程交给外部。</p>
+<p>当使用 <code>__metaclass__</code> 创建类时，它可以是一个方法，也可以是一个类。我们通常会使用类的方式去实现一个元类，这样做更方便我们组织代码，实现面向对象。</p>
+<p>在使用元类创建一个类时，我们可以修改创建类的细节，例如对属性做统一的转换，或者增加新的方法等等，这对于我们开发一个复杂功能的类很友好，它可以把创建类的细节屏蔽在元类中，所以元类常常用在优秀的开源框架中。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/04/19/python-advance-metaclass/" title="Python进阶——什么是元类？">http://kaito-kidd.com/2018/04/19/python-advance-metaclass/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/18/python-advance-iterator-generator/" rel="prev" title="Python进阶——迭代器和可迭代对象有什么区别？">
+      <i class="fa fa-chevron-left"></i> Python进阶——迭代器和可迭代对象有什么区别？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/26/python-advance-global-interpreter-lock/" rel="next" title="Python进阶——为什么GIL让多线程变得如此鸡肋？">
+      Python进阶——为什么GIL让多线程变得如此鸡肋？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是元类？"><span class="nav-number">1.</span> <span class="nav-text">什么是元类？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自定义元类"><span class="nav-number">2.</span> <span class="nav-text">自定义元类</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#用方法创建类"><span class="nav-number">2.1.</span> <span class="nav-text">用方法创建类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#用类创建类"><span class="nav-number">2.2.</span> <span class="nav-text">用类创建类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建类的过程"><span class="nav-number">2.3.</span> <span class="nav-text">创建类的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#哪种创建类的方式更好？"><span class="nav-number">2.4.</span> <span class="nav-text">哪种创建类的方式更好？</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建类时自定义行为"><span class="nav-number">2.5.</span> <span class="nav-text">创建类时自定义行为</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用场景"><span class="nav-number">3.</span> <span class="nav-text">使用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

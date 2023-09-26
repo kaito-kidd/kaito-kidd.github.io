@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在 Python 开发中，我们经常会使用到 with 语法块，例如在读写文件时，保证文件描述符的正确关闭，避免资源泄露问题。 你有没有思考过， with 背后是如何实现的？我们常常听到的上下文管理器究竟是什么？ 这篇文章我们就来学习一下 Python 上下文管理器，以及 with 的运行原理。 with语法块在讲解 with 语法之前，我们先来看一下不使用 with 的代码如何写？ 我们在操作一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶——什么是上下文管理器？">
+<meta property="og:url" content="http://kaito-kidd.com/2018/04/17/python-advance-context-manager/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在 Python 开发中，我们经常会使用到 with 语法块，例如在读写文件时，保证文件描述符的正确关闭，避免资源泄露问题。 你有没有思考过， with 背后是如何实现的？我们常常听到的上下文管理器究竟是什么？ 这篇文章我们就来学习一下 Python 上下文管理器，以及 with 的运行原理。 with语法块在讲解 with 语法之前，我们先来看一下不使用 with 的代码如何写？ 我们在操作一个">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-17T11:33:10.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/04/17/python-advance-context-manager/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python进阶——什么是上下文管理器？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/17/python-advance-context-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python进阶——什么是上下文管理器？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-17 11:33:10" itemprop="dateCreated datePublished" datetime="2018-04-17T11:33:10+00:00">2018-04-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/17/python-advance-context-manager/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是上下文管理器？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/17/python-advance-context-manager/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/17/python-advance-context-manager/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 Python 开发中，我们经常会使用到 <code>with</code> 语法块，例如在读写文件时，保证文件描述符的正确关闭，避免资源泄露问题。</p>
+<p>你有没有思考过， <code>with</code> 背后是如何实现的？我们常常听到的上下文管理器究竟是什么？</p>
+<p>这篇文章我们就来学习一下 Python 上下文管理器，以及 <code>with</code> 的运行原理。</p>
+<h1 id="with语法块"><a href="#with语法块" class="headerlink" title="with语法块"></a>with语法块</h1><p>在讲解 <code>with</code> 语法之前，我们先来看一下不使用 <code>with</code> 的代码如何写？</p>
+<p>我们在操作一个文件时，代码可以这么写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打开文件</span></span><br><span class="line">f = open(<span class="string">'file.txt'</span>)</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">    <span class="comment"># 读取文件内容 执行其他操作</span></span><br><span class="line">    <span class="comment"># do_something...</span></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<p>这个例子非常简单，就是打开一个文件，然后读取文件中的内容，最后关闭文件释放资源。</p>
+<p>但是，代码这么写会有一个问题：在打开文件后，如果要对读取到的内容进行其他操作，在这操作期间发生了异常，这就会导致文件句柄无法被释放，进而导致资源的泄露。</p>
+<p>如何解决这个问题？</p>
+<p>也很简单，我们使用 <code>try ... finally</code> 来优化代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打开文件</span></span><br><span class="line">f = open(<span class="string">'file.txt'</span>)</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">        <span class="comment"># 读取文件内容 执行其他操作</span></span><br><span class="line">        <span class="comment"># do_something...</span></span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="comment"># 保证关闭文件</span></span><br><span class="line">    f.close()</span><br></pre></td></tr></table></figure>
+
+<p>这么写的好处是，在读取文件内容和操作期间，无论是否发生异常，都可以保证最后能释放文件资源。</p>
+<p>但这么优化，代码结构会变得很繁琐，每次都要给代码逻辑增加 <code>try ... finally</code> 才可以，可读性变得很差。</p>
+<p>针对这种情况，我们就可以使用 <code>with</code> 语法块来解决这个问题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">'file.txt'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">        <span class="comment"># do_something...</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>with</code> 语法块可以完成之前相同的功能，而且这么写的好处是，代码结构变得非常清晰，可读性也很好。</p>
+<p>明白了 <code>with</code> 的作用，那么 <code>with</code> 究竟是如何运行的呢？</p>
+<h1 id="上下文管理器"><a href="#上下文管理器" class="headerlink" title="上下文管理器"></a>上下文管理器</h1><p>首先，我们来看一下 <code>with</code> 的语法格式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> context_expression [<span class="keyword">as</span> target(s)]:</span><br><span class="line">    <span class="keyword">with</span>-body</span><br></pre></td></tr></table></figure>
+
+<p><code>with</code> 语法非常简单，我们只需要 <code>with</code> 一个表达式，然后就可以执行自定义的业务逻辑。</p>
+<p>但是，<code>with</code> 后面的表达式是可以任意写的吗？</p>
+<p>答案是否定的。要想使用 <code>with</code> 语法块，<code>with</code> 后面的的对象需要实现「上下文管理器协议」。</p>
+<p>什么是「上下文管理器协议」？</p>
+<p>一个类在 Python 中，只要实现以下方法，就实现了「上下文管理器协议」：</p>
+<ul>
+<li><code>__enter__</code>：在进入 <code>with</code> 语法块之前调用，返回值会赋值给 <code>with</code> 的 <code>target</code></li>
+<li><code>__exit__</code>：在退出 <code>with</code> 语法块时调用，一般用作异常处理</li>
+</ul>
+<a id="more"></a>
+
+<p>我们来看实现了这 2 个方法的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">TestContext</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">'__enter__'</span>)</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_value, exc_tb)</span>:</span></span><br><span class="line">        print(<span class="string">'exc_type: %s'</span> % exc_type)</span><br><span class="line">        print(<span class="string">'exc_value: %s'</span> % exc_value)</span><br><span class="line">        print(<span class="string">'exc_tb: %s'</span> % exc_tb)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> TestContext() <span class="keyword">as</span> t:</span><br><span class="line">    print(<span class="string">'t: %s'</span> % t)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># __enter__</span></span><br><span class="line"><span class="comment"># t: 1</span></span><br><span class="line"><span class="comment"># exc_type: None</span></span><br><span class="line"><span class="comment"># exc_value: None</span></span><br><span class="line"><span class="comment"># exc_tb: None</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了 <code>TestContext</code> 类，它分别实现了 <code>__enter__</code> 和 <code>__exit__</code> 方法。</p>
+<p>这样一来，我们就可以把 <code>TestContext</code> 当做一个「上下文管理器」来使用，也就是通过 <code>with TestContext() as t</code> 方式来执行。</p>
+<p>从输出结果我们可以看到，具体的执行流程如下：</p>
+<ul>
+<li><code>__enter__</code> 在进入 <code>with</code> 语句块之前被调用，这个方法的返回值赋给了 <code>with</code> 后的 <code>t</code> 变量</li>
+<li><code>__exit__</code> 在执行完 <code>with</code> 语句块之后被调用</li>
+</ul>
+<p>如果在 <code>with</code> 语句块内发生了异常，那么 <code>__exit__</code> 方法可以拿到关于异常的详细信息：</p>
+<ul>
+<li><code>exc_type</code>：异常类型</li>
+<li><code>exc_value</code>：异常对象</li>
+<li><code>exc_tb</code>：异常堆栈信息</li>
+</ul>
+<p>我们来看一个发生异常的例子，观察 <code>__exit__</code> 方法拿到的异常信息是怎样的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> TestContext() <span class="keyword">as</span> t:</span><br><span class="line">    <span class="comment"># 这里会发生异常</span></span><br><span class="line">    a = <span class="number">1</span> / <span class="number">0</span> </span><br><span class="line">    print(<span class="string">'t: %s'</span> % t)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># __enter__</span></span><br><span class="line"><span class="comment"># exc_type: &lt;type 'exceptions.ZeroDivisionError'&gt;</span></span><br><span class="line"><span class="comment"># exc_value: integer division or modulo by zero</span></span><br><span class="line"><span class="comment"># exc_tb: &lt;traceback object at 0x10d66dd88&gt;</span></span><br><span class="line"><span class="comment"># Traceback (most recent call last):</span></span><br><span class="line"><span class="comment">#   File "base.py", line 16, in &lt;module&gt;</span></span><br><span class="line"><span class="comment">#     a = 1 / 0</span></span><br><span class="line"><span class="comment"># ZeroDivisionError: integer division or modulo by zero</span></span><br></pre></td></tr></table></figure>
+
+<p>从输出结果我们可以看到，当 <code>with</code> 语法块内发生异常后，<code>__exit__</code> 输出了这个异常的详细信息，其中包括异常类型、异常对象、异常堆栈。</p>
+<p>如果我们需要对异常做特殊处理，就可以在这个方法中实现自定义逻辑。</p>
+<p>回到最开始我们讲的，使用 <code>with</code> 读取文件的例子。之所以 <code>with</code> 能够自动关闭文件资源，就是因为内置的文件对象实现了「上下文管理器协议」，这个文件对象的 <code>__enter__</code> 方法返回了文件句柄，并且在 <code>__exit__</code> 中实现了文件资源的关闭，另外，当 <code>with</code> 语法块内有异常发生时，会抛出异常给调用者。</p>
+<p>伪代码可以这么写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">File</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> file_obj</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_value, exc_tb)</span>:</span></span><br><span class="line">        <span class="comment"># with 退出时释放文件资源</span></span><br><span class="line">        file_obj.close()</span><br><span class="line">        <span class="comment"># 如果 with 内有异常发生 抛出异常</span></span><br><span class="line">        <span class="keyword">if</span> exc_type <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> exception</span><br></pre></td></tr></table></figure>
+
+<p>这里我们小结一下，通过对 <code>with</code> 的学习，我们了解到，<code>with</code> 非常适合用需要对于上下文处理的场景，例如操作文件、Socket，这些场景都需要在执行完业务逻辑后，释放资源。</p>
+<h1 id="contextlib模块"><a href="#contextlib模块" class="headerlink" title="contextlib模块"></a>contextlib模块</h1><p>对于需要上下文管理的场景，除了自己实现 <code>__enter__</code> 和 <code>__exit__</code> 之外，还有更简单的方式来做吗？</p>
+<p>答案是肯定的。我们可以使用 Python 标准库提供的 <code>contextlib</code> 模块，来简化我们的代码。</p>
+<p>使用 <code>contextlib</code> 模块，我们可以把上下文管理器当成一个「装饰器」来使用。</p>
+<p>其中，<code>contextlib</code> 模块提供了 <code>contextmanager</code> 装饰器和 <code>closing</code> 方法。</p>
+<p>下面我们通过例子来看一下它们是如何使用的。</p>
+<h2 id="contextmanager装饰器"><a href="#contextmanager装饰器" class="headerlink" title="contextmanager装饰器"></a>contextmanager装饰器</h2><p>我们先来看 <code>contextmanager</code> 装饰器的使用：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager</span><br><span class="line"></span><br><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'before'</span>)</span><br><span class="line">    <span class="keyword">yield</span> <span class="string">'hello'</span></span><br><span class="line">    print(<span class="string">'after'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> test() <span class="keyword">as</span> t:</span><br><span class="line">    print(t)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># before</span></span><br><span class="line"><span class="comment"># hello</span></span><br><span class="line"><span class="comment"># after</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们使用 <code>contextmanager</code> 装饰器和 <code>yield</code>配合，实现了和前面上下文管理器相同的功能，它的执行流程如下：</p>
+<ol>
+<li>执行 <code>test()</code> 方法，先打印出 <code>before</code></li>
+<li>执行 <code>yield &#39;hello&#39;</code>，<code>test</code> 方法返回，<code>hello</code> 返回值会赋值给 <code>with</code> 语句块的 <code>t</code> 变量</li>
+<li>执行 <code>with</code> 语句块内的逻辑，打印出 <code>t</code> 的值 <code>hello</code></li>
+<li>又回到 <code>test</code> 方法中，执行 <code>yield</code> 后面的逻辑，打印出 <code>after</code></li>
+</ol>
+<p>这样一来，当我们使用这个 <code>contextmanager</code> 装饰器后，就不用再写一个类来实现上下文管理协议，只需要用一个方法装饰对应的方法，就可以实现相同的功能。</p>
+<p>不过有一点需要我们注意：在使用 <code>contextmanager</code> 装饰器时，<strong>如果被装饰的方法内发生了异常，那么我们需要在自己的方法中进行异常处理，否则将不会执行 <code>yield</code> 之后的逻辑。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">test</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">'before'</span>)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">yield</span> <span class="string">'hello'</span></span><br><span class="line">        <span class="comment"># 这里发生异常 必须自己处理异常逻辑 否则不会向下执行</span></span><br><span class="line">        a = <span class="number">1</span> / <span class="number">0</span> </span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        print(<span class="string">'after'</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">with</span> test() <span class="keyword">as</span> t:</span><br><span class="line">    print(t)</span><br></pre></td></tr></table></figure>
+
+<h2 id="closing方法"><a href="#closing方法" class="headerlink" title="closing方法"></a>closing方法</h2><p>我们再来看 <code>contextlib</code> 提供的 <code>closing</code> 方法如何使用。</p>
+<p><code>closing</code> 主要用在已经实现 <code>close</code> 方法的资源对象上：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> closing</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Test</span><span class="params">()</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定义了 close 方法才可以使用 closing 装饰器</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">close</span><span class="params">(self)</span>:</span></span><br><span class="line">        print(<span class="string">'closed'</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># with 块执行结束后 自动执行 close 方法</span></span><br><span class="line"><span class="keyword">with</span> closing(Test()):</span><br><span class="line">    print(<span class="string">'do something'</span>)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># do something</span></span><br><span class="line"><span class="comment"># closed</span></span><br></pre></td></tr></table></figure>
+
+<p>从执行结果我们可以看到，<code>with</code> 语句块执行结束后，会自动调用 <code>Test</code> 实例的 <code>close</code> 方法。</p>
+<p>所以，对于需要自定义关闭资源的场景，我们可以使用这个方法配合 <code>with</code> 来完成。</p>
+<h2 id="contextlib的实现"><a href="#contextlib的实现" class="headerlink" title="contextlib的实现"></a>contextlib的实现</h2><p>学习完了 <code>contextlib</code> 模块的使用，最后我们来看一下 <code>contextlib</code> 模块是究竟是如何实现的？</p>
+<p><code>contextlib</code> 模块相关的源码如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_GeneratorContextManagerBase</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func, args, kwds)</span>:</span></span><br><span class="line">        <span class="comment"># 接收一个生成器对象 (方法内包含 yield 的方法就是一个生成器)</span></span><br><span class="line">        self.gen = func(*args, **kwds)</span><br><span class="line">        self.func, self.args, self.kwds = func, args, kwds</span><br><span class="line">        doc = getattr(func, <span class="string">"__doc__"</span>, <span class="literal">None</span>)</span><br><span class="line">        <span class="keyword">if</span> doc <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            doc = type(self).__doc__</span><br><span class="line">        self.__doc__ = doc</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_GeneratorContextManager</span><span class="params">(_GeneratorContextManagerBase,</span></span></span><br><span class="line"><span class="class"><span class="params">                               AbstractContextManager,</span></span></span><br><span class="line"><span class="class"><span class="params">                               ContextDecorator)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="comment"># 执行生成器 代码会运行生成器方法的 yield 处</span></span><br><span class="line">            <span class="keyword">return</span> next(self.gen)</span><br><span class="line">        <span class="keyword">except</span> StopIteration:</span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"generator didn't yield"</span>) <span class="keyword">from</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, type, value, traceback)</span>:</span></span><br><span class="line">        <span class="comment"># with 内没有异常发生</span></span><br><span class="line">        <span class="keyword">if</span> type <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="comment"># 继续执行生成器</span></span><br><span class="line">                next(self.gen)</span><br><span class="line">            <span class="keyword">except</span> StopIteration:</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">raise</span> RuntimeError(<span class="string">"generator didn't stop"</span>)</span><br><span class="line">        <span class="comment"># with 内发生了异常</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">if</span> value <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">                value = type()</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="comment"># 抛出异常</span></span><br><span class="line">                self.gen.throw(type, value, traceback)</span><br><span class="line">            <span class="keyword">except</span> StopIteration <span class="keyword">as</span> exc:</span><br><span class="line">                <span class="keyword">return</span> exc <span class="keyword">is</span> <span class="keyword">not</span> value</span><br><span class="line">            <span class="keyword">except</span> RuntimeError <span class="keyword">as</span> exc:</span><br><span class="line">                <span class="keyword">if</span> exc <span class="keyword">is</span> value:</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">                <span class="keyword">if</span> type <span class="keyword">is</span> StopIteration <span class="keyword">and</span> exc.__cause__ <span class="keyword">is</span> value:</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">                <span class="keyword">raise</span></span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                <span class="keyword">if</span> sys.exc_info()[<span class="number">1</span>] <span class="keyword">is</span> value:</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">                <span class="keyword">raise</span></span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"generator didn't stop after throw()"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">contextmanager</span><span class="params">(func)</span>:</span></span><br><span class="line"><span class="meta">    @wraps(func)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">helper</span><span class="params">(*args, **kwds)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> _GeneratorContextManager(func, args, kwds)</span><br><span class="line">    <span class="keyword">return</span> helper</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">closing</span><span class="params">(AbstractContextManager)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, thing)</span>:</span></span><br><span class="line">        self.thing = thing</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.thing</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, *exc_info)</span>:</span></span><br><span class="line">        self.thing.close()</span><br></pre></td></tr></table></figure>
+
+<p>源码中我已经添加好了注释，你可以详细看一下。</p>
+<p><code>contextlib</code> 源码中逻辑其实比较简单，其中 <code>contextmanager</code> 装饰器实现逻辑如下：</p>
+<ol>
+<li>初始化一个 <code>_GeneratorContextManager</code> 类，构造方法接受了一个生成器 <code>gen</code></li>
+<li>这个类实现了上下文管理器协议 <code>__enter__</code> 和 <code>__exit__</code></li>
+<li>执行 <code>with</code> 时会进入到 <code>__enter__</code> 方法，然后执行这个生成器，执行时会运行到 <code>with</code> 语法块内的 <code>yield</code> 处</li>
+<li><code>__enter__</code> 返回 <code>yield</code> 的结果</li>
+<li>如果 <code>with</code> 语法块没有发生异常，<code>with</code> 执行结束后，会进入到 <code>__exit__</code> 方法，再次执行生成器，这时会运行 <code>yield</code> 之后的代码逻辑</li>
+<li>如果 <code>with</code> 语法块发生了异常，<code>__exit__</code> 会把这个异常通过生成器，传入到 <code>with</code> 语法块内，也就是把异常抛给调用者</li>
+</ol>
+<p>再来看 <code>closing</code> 的实现，<code>closing</code> 方法就是在 <code>__exit__</code> 方法中调用了自定义对象的 <code>close</code>，这样当 <code>with</code> 结束后就会执行我们定义的 <code>close</code> 方法。</p>
+<h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><p>学习完了上下文管理器，那么它们具体会用在什么场景呢？</p>
+<p>下面我举几个常用的例子来演示下，你可以参考一下结合自己的场景使用。</p>
+<h2 id="Redis分布式锁"><a href="#Redis分布式锁" class="headerlink" title="Redis分布式锁"></a>Redis分布式锁</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager</span><br><span class="line"></span><br><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lock</span><span class="params">(redis, lock_key, expire)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        locked = redis.set(lock_key, <span class="string">'locked'</span>, expire)</span><br><span class="line">        <span class="keyword">yield</span> locked</span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        redis.delete(lock_key)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 业务调用 with 代码块执行结束后 自动释放锁资源</span></span><br><span class="line"><span class="keyword">with</span> lock(redis, <span class="string">'locked'</span>, <span class="number">3</span>) <span class="keyword">as</span> locked:</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> locked:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># do something ...</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们实现了 <code>lock</code> 方法，用于在 Redis 上申请一个分布式锁，然后使用 <code>contextmanager</code> 装饰器装饰了这个方法。</p>
+<p>之后我们业务在调用 <code>lock</code> 方法时，就可以使用 <code>with</code> 语法块了。</p>
+<p><code>with</code> 语法块的第一步，首先判断是否申请到了分布式锁，如果申请失败，则业务逻辑直接返回。如果申请成功，则执行具体的业务逻辑，当业务逻辑执行完成后，<code>with</code> 退出时会自动释放分布式锁，就不需要我们每次都手动释放锁了。</p>
+<h2 id="Redis事物和管道"><a href="#Redis事物和管道" class="headerlink" title="Redis事物和管道"></a>Redis事物和管道</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> contextlib <span class="keyword">import</span> contextmanager</span><br><span class="line"></span><br><span class="line"><span class="meta">@contextmanager</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pipeline</span><span class="params">(redis)</span>:</span></span><br><span class="line">    pipe = redis.pipeline()</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">yield</span> pipe</span><br><span class="line">        pipe.execute()</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> exc:</span><br><span class="line">        pipe.reset()</span><br><span class="line">            </span><br><span class="line"><span class="comment"># 业务调用 with 代码块执行结束后 自动执行 execute 方法</span></span><br><span class="line"><span class="keyword">with</span> pipeline(redis) <span class="keyword">as</span> pipe:</span><br><span class="line">    pipe.set(<span class="string">'key1'</span>, <span class="string">'a'</span>, <span class="number">30</span>)</span><br><span class="line">    pipe.zadd(<span class="string">'key2'</span>, <span class="string">'a'</span>, <span class="number">1</span>)</span><br><span class="line">    pipe.sadd(<span class="string">'key3'</span>, <span class="string">'a'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了 <code>pipeline</code> 方法，并使用装饰器 <code>contextmanager</code> 让它变成了一个上下文管理器。</p>
+<p>之后在调用 <code>with pipeline(redis) as pipe</code> 时，就可以开启一个事物和管道，然后在 <code>with</code> 语法块内向这个管道中添加命令，最后 <code>with</code> 退出时会自动执行 <code>pipeline</code> 的 <code>execute</code> 方法，把这些命令批量发送给 Redis 服务端。</p>
+<p>如果在执行命令时发生了异常，则会自动调用 <code>pipeline</code> 的 <code>reset</code> 方法，放弃这个事物的执行。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，这篇文章我们主要介绍了 Python 上下文管理器的使用及实现。</p>
+<p>首先我们介绍了不使用 <code>with</code> 和使用 <code>with</code> 操作文件的代码差异，然后了解到使用 <code>with</code> 可以让我们的代码结构更加简洁。之后我们探究了 <code>with</code> 的实现原理，只要实现 <code>__enter__</code> 和 <code>__exit__</code> 方法的实例，就可以配合 <code>with</code> 语法块来使用。</p>
+<p>之后我们介绍了 Python 标准库的 <code>contextlib</code> 模块，它提供了实现上下文管理更好的使用方式，我们可以使用 <code>contextmanager</code> 装饰器和 <code>closing</code> 方法来操作我们的资源。</p>
+<p>最后我举了两个例子，来演示上下文管理器的具体使用场景，例如在 Redis 中使用分布式锁和事物管道，用上下文管理器帮我们管理资源，执行前置和后置逻辑。</p>
+<p>所以，如果我们在开发中把操作资源的前置和后置逻辑，通过上下文管理器来实现，那么我们的代码结构和可维护性也会有所提高，推荐使用起来。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/04/17/python-advance-context-manager/" title="Python进阶——什么是上下文管理器？">http://kaito-kidd.com/2018/04/17/python-advance-context-manager/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/04/16/python-advance-descriptor/" rel="prev" title="Python进阶——什么是描述符？">
+      <i class="fa fa-chevron-left"></i> Python进阶——什么是描述符？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/18/python-advance-iterator-generator/" rel="next" title="Python进阶——迭代器和可迭代对象有什么区别？">
+      Python进阶——迭代器和可迭代对象有什么区别？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#with语法块"><span class="nav-number">1.</span> <span class="nav-text">with语法块</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#上下文管理器"><span class="nav-number">2.</span> <span class="nav-text">上下文管理器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#contextlib模块"><span class="nav-number">3.</span> <span class="nav-text">contextlib模块</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#contextmanager装饰器"><span class="nav-number">3.1.</span> <span class="nav-text">contextmanager装饰器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#closing方法"><span class="nav-number">3.2.</span> <span class="nav-text">closing方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#contextlib的实现"><span class="nav-number">3.3.</span> <span class="nav-text">contextlib的实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用场景"><span class="nav-number">4.</span> <span class="nav-text">使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis分布式锁"><span class="nav-number">4.1.</span> <span class="nav-text">Redis分布式锁</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Redis事物和管道"><span class="nav-number">4.2.</span> <span class="nav-text">Redis事物和管道</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

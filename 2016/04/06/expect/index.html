@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="最近公司线上服务器都换上了堡垒机登陆，这样每个开发人员都只分配堡垒机账号，然后运维人员划分对应的权限机器就好了，相比之前的跳板机登陆要有很多优点：  只需给开发人员分配一个账号和密码，避免机器过多账号繁多的情况； 运维人员分配机器权限便捷，只需给开发人员账号分配权限机器即可； 相对跳板机来说更安全，堡垒机登陆到线上服务器后，可以记录每个用户的所有操作记录；  大概说下堡垒机的使用机制：  开发人员">
+<meta property="og:type" content="article">
+<meta property="og:title" content="堡垒机Expect登陆服务器">
+<meta property="og:url" content="http://kaito-kidd.com/2016/04/06/expect/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="最近公司线上服务器都换上了堡垒机登陆，这样每个开发人员都只分配堡垒机账号，然后运维人员划分对应的权限机器就好了，相比之前的跳板机登陆要有很多优点：  只需给开发人员分配一个账号和密码，避免机器过多账号繁多的情况； 运维人员分配机器权限便捷，只需给开发人员账号分配权限机器即可； 相对跳板机来说更安全，堡垒机登陆到线上服务器后，可以记录每个用户的所有操作记录；  大概说下堡垒机的使用机制：  开发人员">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-04-06T22:46:48.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="效率">
+<meta property="article:tag" content="shell">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/04/06/expect/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>堡垒机Expect登陆服务器 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/04/06/expect/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          堡垒机Expect登陆服务器
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-04-06 22:46:48" itemprop="dateCreated datePublished" datetime="2016-04-06T22:46:48+00:00">2016-04-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/04/06/expect/" class="post-meta-item leancloud_visitors" data-flag-title="堡垒机Expect登陆服务器" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/04/06/expect/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/04/06/expect/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>最近公司线上服务器都换上了堡垒机登陆，这样每个开发人员都只分配堡垒机账号，然后运维人员划分对应的权限机器就好了，相比之前的跳板机登陆要有很多优点：</p>
+<ul>
+<li>只需给开发人员分配一个账号和密码，避免机器过多账号繁多的情况；</li>
+<li>运维人员分配机器权限便捷，只需给开发人员账号分配权限机器即可；</li>
+<li>相对跳板机来说更安全，堡垒机登陆到线上服务器后，可以记录每个用户的所有操作记录；</li>
+</ul>
+<p>大概说下堡垒机的使用机制：</p>
+<ul>
+<li>开发人员使用自己的账号登陆堡垒机，输入账号和密码</li>
+<li>登陆成功后，堡垒机会列出该账户下有权限可操作的服务器列表，每个服务器对应一个数字</li>
+<li>开发人员输入对应的服务器数字或者选择搜索选项搜索服务器</li>
+<li>如果是直接选择了服务器，则会列出可用的账户，如果是搜索服务器，则需输入服务器IP</li>
+<li>然后堡垒机会列出可用的账号列表，每个账户对应一个数字</li>
+<li>输入账户对应的数字，选择使用哪个账户操作服务器，进入服务器，登陆完成</li>
+</ul>
+<p>其实说白了，和很多客服电话原理差不多，列出来多个选项菜单供你选择，然后一步步选择，最终进入服务器。</p>
+<p>也就是说我进入一台线上服务器，需要输入<code>账号密码-&gt;选择/搜索服务器-&gt;选择操作账户-&gt;登陆成功</code>这几个步骤。每次登陆服务器只是IP不同，但都需要频繁输入相同的数字进行选择，肯定受不了，最好的方式是，能不能通过一个脚本，根据命令行的提示信息，自动选择，最终进到服务器。当然，答案是可以的，这里就使用到了<code>Expect</code>工具。</p>
+<p>简单介绍下Expect：</p>
+<blockquote>
+<p>Expect是Unix系统中用来进行自动化控制和测试的软件工具，该工具利用Unix伪终端包装其子进程，允许任意程序通过终端接入进行自动化控制。</p>
+</blockquote>
+<p>现在很多终端工具客户端都提供这些操作，例如<code>SecureCRT</code>、<code>XShell</code>都是支持的，最终都是使用的Expect。</p>
+<p>这些工具的使用就不介绍了，这里主要介绍一下不借助工具，在终端编写脚本来完成此功能，例如在Linux、Mac终端下进行登录操作。</p>
+<a id="more"></a>
+
+<p>使用背景：</p>
+<ul>
+<li>堡垒机IP：192.168.0.50</li>
+<li>堡垒机账号密码：test_dev / test_passwd</li>
+<li>服务器A IP：192.168.0.100</li>
+<li>服务器B IP：192.168.0.200</li>
+</ul>
+<p>通过堡垒机登录到服务器A/B，使用方式最好是这样:</p>
+<ul>
+<li>执行go_servera –&gt; 登录到服务器A</li>
+<li>执行go_serverb –&gt; 登录到服务器B</li>
+</ul>
+<p>可以编写<code>login.sh</code>脚本如下：</p>
+<pre><code>#!/usr/bin/expect
+
+# 定义堡垒机账号/密码/IP
+set user test_dev
+set passwd test_passwd
+set bastion_host 192.168.0.50
+
+# 如果参数少于1个,提示错误并退出
+if { $argc != 1 } {
+    puts stdout &quot;useage: ./login.sh \$host\n&quot;
+    exit 1
+}
+
+# 把第一个参数赋值给dest_host
+set dest_host [lindex $argv 0]
+
+# 执行ssh操作,登录到堡垒机
+spawn ssh $user@$bastion_host
+# 检测命令行的返回的信息,匹配Password关键字
+expect &quot;*Password:&quot;
+# 自动输入密码 回车
+send &quot;$passwd\r&quot;
+# 检测命令行的返回的信息,匹配Choice关键字    
+expect &quot;*Choice:&quot;
+# 假设命令行提示信息输入s表示根据IP搜索服务器
+send &quot;s\r&quot;
+# 检测命令行的返回的信息,匹配IP关键字        
+expect &quot;*IP:&quot;
+# 自动输入dest_host变量内容 回车
+send &quot;$dest_host\r&quot;
+# 检测命令行的返回的信息,匹配Choice关键字        
+expect &quot;*Choice:&quot;
+# 假设命令行提示信息输入1表示选择某个账户进行操作
+send &quot;1\r&quot;
+# 自动交互结束,控制权交给终端,用户可以进行操作
+interact</code></pre><p>此脚本编写完成后，并增加可执行权限<code>chmod +x login.sh</code>后，可以这样使用：</p>
+<pre><code># 登陆到服务器A
+$ ./login.sh 192.168.0.100
+# 登陆到服务器B
+$ ./login.sh 192.168.0.200
+# 如果任何参数都没有
+$ ./login.sh
+# 提示：useage: ./login.sh \$host</code></pre><p>该方法可以执行一个脚本，并使用IP地址为参数，最终完成通过堡垒机登陆服务器的操作。</p>
+<p>不过这样做不是最佳方法，因为这样还需要输入机器的IP，很麻烦，我希望最好是通过一条命令，就如上面所述，执行<code>go_servera</code>登陆到服务器A，执行<code>go_serverb</code>登陆到服务器B，这样就方便很多！</p>
+<p>可以这样来达到目的：</p>
+<ul>
+<li>把<code>login.sh</code>放到自己的用户目录<code>~/</code>下</li>
+<li>在<code>~/.bashrc</code>中加2个别名：<ul>
+<li><code>alias go_servera=&#39;./login.sh 192.168.0.100&#39;</code></li>
+<li><code>alias go_serverb=&#39;./login.sh 192.168.0.200&#39;</code></li>
+</ul>
+</li>
+</ul>
+<p>重新登陆终端或执行<code>source ~/.bashrc</code>命令，然后试试<code>go_servera</code>、<code>go_serverb</code>命令，是不是可以直接登陆到服务器了，而且不用记服务器IP，通过别名的方式执行脚本，更加便捷！    </p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/04/06/expect/" title="堡垒机Expect登陆服务器">http://kaito-kidd.com/2016/04/06/expect/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E6%95%88%E7%8E%87/" rel="tag"><i class="fa fa-tag"></i> 效率</a>
+              <a href="/tags/shell/" rel="tag"><i class="fa fa-tag"></i> shell</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/03/15/varmilo/" rel="prev" title="终于等到你，还好我没放弃！">
+      <i class="fa fa-chevron-left"></i> 终于等到你，还好我没放弃！
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/04/20/code-note-01-10/" rel="next" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10">
+      《编码：隐匿在计算机软硬件背后的语言》读书笔记01-10 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

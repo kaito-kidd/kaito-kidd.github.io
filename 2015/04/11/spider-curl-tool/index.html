@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="解析页面肯定是写爬虫遇到的最常见的工作，但不要小看这个这个过程，有时它也会令你抓狂。这次写一下关于curl工具的使用，主要介绍一下平时很常用的几项。   curl是利用URL语法在命令行方式下工作的开源文件传输工具，使用这个工具，就能在命令行发起请求，获得响应，而且其命令简单且强大，非常适合用作写爬虫时，解析页面前的模拟工作。  基础# 发起HTTP请求，并把返回的网页内容显示在屏幕 curl">
+<meta property="og:type" content="article">
+<meta property="og:title" content="爬虫工具之curl">
+<meta property="og:url" content="http://kaito-kidd.com/2015/04/11/spider-curl-tool/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="解析页面肯定是写爬虫遇到的最常见的工作，但不要小看这个这个过程，有时它也会令你抓狂。这次写一下关于curl工具的使用，主要介绍一下平时很常用的几项。   curl是利用URL语法在命令行方式下工作的开源文件传输工具，使用这个工具，就能在命令行发起请求，获得响应，而且其命令简单且强大，非常适合用作写爬虫时，解析页面前的模拟工作。  基础# 发起HTTP请求，并把返回的网页内容显示在屏幕 curl">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-04-11T00:25:08.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="curl">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2015/04/11/spider-curl-tool/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>爬虫工具之curl | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/04/11/spider-curl-tool/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          爬虫工具之curl
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-04-11 00:25:08" itemprop="dateCreated datePublished" datetime="2015-04-11T00:25:08+00:00">2015-04-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/04/11/spider-curl-tool/" class="post-meta-item leancloud_visitors" data-flag-title="爬虫工具之curl" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/04/11/spider-curl-tool/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/04/11/spider-curl-tool/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>解析页面肯定是写爬虫遇到的最常见的工作，但不要小看这个这个过程，有时它也会令你抓狂。这次写一下关于<code>curl</code>工具的使用，主要介绍一下平时很常用的几项。</p>
+</blockquote>
+<blockquote>
+<p><code>curl</code>是利用<code>URL</code>语法在命令行方式下工作的开源文件传输工具，使用这个工具，就能在命令行发起请求，获得响应，而且其命令简单且强大，非常适合用作写爬虫时，解析页面前的模拟工作。</p>
+</blockquote>
+<h1 id="基础"><a href="#基础" class="headerlink" title="基础"></a>基础</h1><pre><code># 发起HTTP请求，并把返回的网页内容显示在屏幕
+curl &quot;http://www.example.com&quot;
+
+# 发起HTTP请求，并把返回的网页内容输出到文件
+curl &quot;http://www.example.com&quot; &gt; test.html
+
+# 或者用命令-o参数也可达到同样的效果
+curl -o test.html &quot;http://www.example.com&quot;</code></pre><p><strong>注意：URL地址带上双引号是比较好的习惯，防止URL中带有特殊符号，导致不能解析报错情况。</strong></p>
+<h1 id="伪装头信息"><a href="#伪装头信息" class="headerlink" title="伪装头信息"></a>伪装头信息</h1><p>有时<code>curl</code>直接访问页面，会得到与浏览器打开不同的结果，所以此时就要伪装头信息，来模拟浏览器的行为，这样返回的数据就跟浏览器看到的一样了。</p>
+<pre><code># 使用-A参数定义User-Agent，模拟浏览器行为
+curl -A &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2272.118 Safari/537.36&quot; &quot;http://www.example.com&quot;
+
+# 使用-e参数定义Referer，表示从哪个页面跳过来的，解决防盗链问题
+curl -e &quot;http://www.example.com&quot; &quot;http://detail.example.com&quot;
+
+# 或者使用-H参数自定义头信息，也可定义User-Agent、Referer、Content-Type等信息
+curl -H &quot;my-header:xxxxx&quot; &quot;http://www.example.com&quot;</code></pre><h1 id="代理访问"><a href="#代理访问" class="headerlink" title="代理访问"></a>代理访问</h1><p>或者你用程序频繁访问某个网站，结果人家把你<code>IP</code>封禁了，这时就可以用<code>代理</code>来进行访问。</p>
+<pre><code># 使用-x参数使用代理访问
+curl -x &quot;123.45.67.89:8102&quot; &quot;http://www.example.com&quot;</code></pre><a id="more"></a>
+
+<h1 id="自动跳转"><a href="#自动跳转" class="headerlink" title="自动跳转"></a>自动跳转</h1><p>有时访问某个网页，这个网页会返回<code>302</code>状态码，表示重定向某个页面，页面地址会写在头的<code>Location</code>中。如果是浏览器访问，则会自动跳转到指定页面并展示，同样用<code>curl</code>也可以完成这个工作。</p>
+<pre><code># 使用-L参数自动重定向
+curl -L &quot;http://www.example.com&quot;</code></pre><h1 id="显示响应头信息"><a href="#显示响应头信息" class="headerlink" title="显示响应头信息"></a>显示响应头信息</h1><p>如果想详细了解上述重定向的情况，可以使用<code>-i</code>参数显示响应头信息，也可以使用<code>-D</code>参数把响应头信息写入文件，用来更方便的观察响应数据中的其他信息，进行下一步分析解析。</p>
+<pre><code># 使用-i参数显示响应头信息和内容，使用-I则只显示头信息
+curl -i &quot;http://www.example.com&quot;
+
+# 使用-D参数把响应头信息写到文件中
+curl -D &quot;http://www.example.com&quot;</code></pre><h1 id="POST访问"><a href="#POST访问" class="headerlink" title="POST访问"></a>POST访问</h1><p>以上访问方式都是默认<code>GET</code>方式访问的，但很多页面都需要带有参数信息，所以<code>GET</code>方式访问只能将参数拼在<code>URL</code>后面，但其参数是有长度限制的，此时建议使用<code>POST</code>方式访问。</p>
+<pre><code># GET方式访问带有参数的页面
+curl &quot;http://www.example.com?p1=a&amp;p2=b&amp;p3=c&quot;
+
+# POST方式访问
+curl -d &quot;p1=a&amp;p2=b&amp;p3=c&quot; &quot;http://www.example.com&quot;
+
+# POST方式访问，参数带有中文或空格，将参数编码
+curl --data-urlencode &quot;name=张三&quot; --data-urlencode &quot;date=April 1&quot; &quot;http://www.example.com&quot;</code></pre><p>以上方式就可以模拟一个<code>表单</code>提交了，使用最多的就是用来模拟登录。</p>
+<h1 id="文件上传"><a href="#文件上传" class="headerlink" title="文件上传"></a>文件上传</h1><p><code>curl</code>同样也支持文件上传操作，实际上也还是模拟了一个表单，等同于一个页面表单是这样的：<code>&lt;form method=&quot;POST&quot; enctype=&#39;multipart/form-data&#39;&gt;</code>。</p>
+<pre><code># 模拟表单上传文件
+curl -F uploadfile=@test.txt -F title=xxx &quot;http://example.com/upload&quot;</code></pre><h1 id="Cookie"><a href="#Cookie" class="headerlink" title="Cookie"></a>Cookie</h1><p>有时有些网站是需要根据<code>Cookie</code>来进行校验身份或状态的，这时只需发送服务端需要的值即可。</p>
+<pre><code># 发送Cookie，键值方式
+curl -b &quot;name=xxx&quot; &quot;http://example.com/index&quot;
+
+# 发送Cookie，读取cookie文件方式
+curl -b cookie.txt &quot;http://example.com/index&quot;</code></pre><h1 id="下载文件"><a href="#下载文件" class="headerlink" title="下载文件"></a>下载文件</h1><p>同样<code>curl</code>也支持下载文件，可根据<code>-o</code>，<code>-O</code>参数来进行文件的下载，前提是<code>URL</code>对应的一个文件资源。</p>
+<pre><code># 类似第一个例子，把文件数据输出到指定文件中
+curl -o &quot;test.jpg&quot; &quot;http://example.com/test.jpg&quot;
+
+# 使用-O参数就不用指定文件名，默认是URL里的资源名称 
+curl -O &quot;http://example.com/test.jpg&quot;
+
+# 批量下载
+curl -O &quot;http://example.com/test[1-10].jpg&quot;</code></pre><blockquote>
+<p>有了这些功能，就不用每次解析或调试页面都在代码里debug了。直接用这个工具在命令行中测试即可，基本上能模仿浏览器90%或更多。更详细的命令可参考<a href="http://baike.baidu.com/link?url=FkaB8_zagdr7hYrPW272shZnx_OHXK9dYNP8K8hVIVTAyHkSGB6DARVFdgJS3A3ixtzAetaZtYQQxXw3XSPJya#2" target="_blank">这里</a>。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2015/04/11/spider-curl-tool/" title="爬虫工具之curl">http://kaito-kidd.com/2015/04/11/spider-curl-tool/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/curl/" rel="tag"><i class="fa fa-tag"></i> curl</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/04/08/fast-translation-tool/" rel="prev" title="基于命令行的快速翻译工具">
+      <i class="fa fa-chevron-left"></i> 基于命令行的快速翻译工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/10/09/search-engine-skill/" rel="next" title="搜索引擎搜索技巧">
+      搜索引擎搜索技巧 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#基础"><span class="nav-number">1.</span> <span class="nav-text">基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#伪装头信息"><span class="nav-number">2.</span> <span class="nav-text">伪装头信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#代理访问"><span class="nav-number">3.</span> <span class="nav-text">代理访问</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自动跳转"><span class="nav-number">4.</span> <span class="nav-text">自动跳转</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#显示响应头信息"><span class="nav-number">5.</span> <span class="nav-text">显示响应头信息</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#POST访问"><span class="nav-number">6.</span> <span class="nav-text">POST访问</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#文件上传"><span class="nav-number">7.</span> <span class="nav-text">文件上传</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cookie"><span class="nav-number">8.</span> <span class="nav-text">Cookie</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载文件"><span class="nav-number">9.</span> <span class="nav-text">下载文件</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

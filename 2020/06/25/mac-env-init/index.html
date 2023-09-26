@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="背景用了5年的MacBook Pro 13寸，以零故障的记录光荣退役了。不得不说，前几年的MacBook品控做的是真好，整机非常耐用。 但后来的MacBook由于在硬件层面做了很多调整，之后的机器或多或少都出现过各种问题，身边的同事和朋友都遇到过一些，例如键盘故障、触控板问题，当然苹果售后也很给力，只要检查出故障就会马上换新，甚至连主板都直接换掉。 不过这次，我也终于入手了最新款的MacBook，">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac新机环境初始化">
+<meta property="og:url" content="http://kaito-kidd.com/2020/06/25/mac-env-init/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="背景用了5年的MacBook Pro 13寸，以零故障的记录光荣退役了。不得不说，前几年的MacBook品控做的是真好，整机非常耐用。 但后来的MacBook由于在硬件层面做了很多调整，之后的机器或多或少都出现过各种问题，身边的同事和朋友都遇到过一些，例如键盘故障、触控板问题，当然苹果售后也很给力，只要检查出故障就会马上换新，甚至连主板都直接换掉。 不过这次，我也终于入手了最新款的MacBook，">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973233.jpeg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973240.jpeg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973974.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973981.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973990.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974002.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974008.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974013.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974018.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974023.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974028.png">
+<meta property="article:published_time" content="2020-06-25T16:15:38.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="效率">
+<meta property="article:tag" content="Mac">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973233.jpeg">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/06/25/mac-env-init/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mac新机环境初始化 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/06/25/mac-env-init/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac新机环境初始化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-25 16:15:38" itemprop="dateCreated datePublished" datetime="2020-06-25T16:15:38+00:00">2020-06-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/06/25/mac-env-init/" class="post-meta-item leancloud_visitors" data-flag-title="Mac新机环境初始化" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/06/25/mac-env-init/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/06/25/mac-env-init/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>用了5年的MacBook Pro 13寸，以零故障的记录光荣退役了。不得不说，前几年的MacBook品控做的是真好，整机非常耐用。</p>
+<p>但后来的MacBook由于在硬件层面做了很多调整，之后的机器或多或少都出现过各种问题，身边的同事和朋友都遇到过一些，例如键盘故障、触控板问题，当然苹果售后也很给力，只要检查出故障就会马上换新，甚至连主板都直接换掉。</p>
+<p>不过这次，我也终于入手了最新款的MacBook，更换的原因是因为之前的电脑性能实在跟不上了，常年在公司办公，已经变得越来越慢，Chrome打开的网页一多就能感觉到明显的卡顿情况。</p>
+<p>这次入手的这款MacBook Pro是16寸的，配置为i9 CPU + 64G内存 + 1T固态硬盘 + 5300M独立显卡，除了硬盘和显卡之外，其他项选择的都是顶配。</p>
+<p>有朋友觉得内存没必要选这么大的，我之前的13寸MacBook Pro只有8G内存，小的可怜，这次直接一步到位，再也不会受到内存瓶颈的影响。另外这台新电脑也计划准备陪我再战4-5年，选这个配置也足够为我未来工作和学习的变化提供足够的支撑。</p>
+<p>拿到手里第一个感觉真的是：大！视觉冲击很棒！13寸的用了太久，这次尝试体验一下16寸的，新鲜感十足！</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973233.jpeg" alt="MacBook Pro 16寸"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973240.jpeg" alt="MacBook Pro 16寸"></p>
+<a id="more"></a>
+
+<p>拿到新电脑的第一步，就是做一些初始化设置，这样用起来才更加顺手。这篇文章就记录一下Mac新机的一些基本的环境初始化。</p>
+<p>以下配置的顺序，是按照我最推荐的顺序排列，越靠前的设置，越推荐给大家。</p>
+<h1 id="触控板"><a href="#触控板" class="headerlink" title="触控板"></a>触控板</h1><h2 id="触控板单指轻点"><a href="#触控板单指轻点" class="headerlink" title="触控板单指轻点"></a>触控板单指轻点</h2><p>新电脑拿到之后，你会发现打开任何应用，都需要在触控板上用力按下去才能触发点击，这样每次操作都比较麻烦。</p>
+<p>我们可以通过【系统偏好设置】-【触控板】- 打开【单指轻点】功能，这样以后只需轻点触控板就可以实现点击的功能了，打开这个功能一般是必选项。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973974.png" alt="打开触摸板单指轻按"></p>
+<h2 id="三指拖拽"><a href="#三指拖拽" class="headerlink" title="三指拖拽"></a>三指拖拽</h2><p>同样，如果你想拖动某个应用的窗口来回移动，默认只能是一根手指按下触摸板，另一只手指移动方向，这样操作也很不方便。</p>
+<p>我们可以通过【系统偏好设置】-【辅助功能】-【指针控制】-【触控板选项】中，打开【三指拖拽】功能，打开之后只需要把三只手指同时移动，就可以实现对窗口的拖动。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973981.png" alt="打开三指拖拽功能"></p>
+<h1 id="访达"><a href="#访达" class="headerlink" title="访达"></a>访达</h1><p>访达是Mac的文件管理器，所有的文件访问都要通过访达来处理。但默认的访达并没有提供一个很好的设置支持，我们需要通过一些设置让我们使用它更方便。</p>
+<h2 id="显示常用文件夹"><a href="#显示常用文件夹" class="headerlink" title="显示常用文件夹"></a>显示常用文件夹</h2><p>默认访达是不会显示下载、文稿、图片、影片这些常用文件夹的，需要在设置中打开才可以。</p>
+<p>通过【访达】-【偏好设置】-【边栏】打开显示我们常用的文件夹。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790973990.png" alt="显示常用文件夹"><br>这样在打开访达之后，就能在左侧看到这些常用的文件夹了。</p>
+<h2 id="在文件夹下搜索"><a href="#在文件夹下搜索" class="headerlink" title="在文件夹下搜索"></a>在文件夹下搜索</h2><p>打开访达，在右上角的搜索框中，输入想要搜索的文件名，默认是整个访达下搜索的，范围比较大。</p>
+<p>而很多情况下，我们只想在某个文件夹下搜索想要的文件，可以通过【访达】-【偏好设置】-【高级】设置搜索时只搜索当前文件夹。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974002.png" alt="本文件夹下搜索"></p>
+<h2 id="打开访达显示默认文件夹"><a href="#打开访达显示默认文件夹" class="headerlink" title="打开访达显示默认文件夹"></a>打开访达显示默认文件夹</h2><p>很多时候多次我们打开访达，都是为了在同一个文件夹下找文件，那么我们就设置设置打开访达后，默认就显示这个固定的文件夹。</p>
+<p>例如每次我打开访达的需求就是找到刚刚下载好的文件，我这里设置的就是打开访达，默认打开下载文件夹。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974008.png" alt="打开访达后默认显示的文件夹"></p>
+<h1 id="程序坞"><a href="#程序坞" class="headerlink" title="程序坞"></a>程序坞</h1><h2 id="程序坞位置、自动显示-隐藏"><a href="#程序坞位置、自动显示-隐藏" class="headerlink" title="程序坞位置、自动显示/隐藏"></a>程序坞位置、自动显示/隐藏</h2><p>程序坞相当于Mac默认的任务状态栏，它默认在屏幕的底部，但在底部就会占用屏幕很长一块的使用空间，尤其在你打开网页时，网页无法铺满整个屏幕。</p>
+<p>我一般的个人习惯是把程序坞放在屏幕左边，并且设置为自动隐藏/显示，在需要使用，鼠标划到屏幕左侧就可以自动显示出来，这样可以充分利用我们的屏幕空间！</p>
+<p>同时，如果双击某个应用的标题栏，默认是会把这个窗口最小化，这不太符合我们的使用习惯，我们可以设置双击缩放。</p>
+<p>通过【访达】-【偏好设置】-【程序坞】如下设置即可。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974013.png" alt="程序坞设置"></p>
+<h1 id="键盘控制窗口焦点"><a href="#键盘控制窗口焦点" class="headerlink" title="键盘控制窗口焦点"></a>键盘控制窗口焦点</h1><p>有时在操作某个应用时，会跳出例如确认弹窗的小窗口需要我们确认或取消，默认我们只能使用触控板移动光标去点击确认按钮，如何用键盘快速操作呢？</p>
+<p>通过【系统偏好设置】-【键盘】-【快捷键】勾选【使用键盘导航在控制间移动焦点】即可。</p>
+<p>这样我们就可以使用<code>Tab</code>键来移动窗口的焦点进行选择，不用再依赖触控板点击操作，大大提高效率。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974018.png" alt="键盘控制窗口焦点"></p>
+<h1 id="触发角"><a href="#触发角" class="headerlink" title="触发角"></a>触发角</h1><p>有一些常用的操作，例如显示桌面、启动屏幕保护等等，我们想快速打开，Mac提供了触发角可以设置一些快捷的操作。</p>
+<p>通过【系统偏好设置】-【桌面与屏幕保护程序】-【屏幕保护程序】-【触发角】设置屏幕4个角对应的动作，这样我们只需要把光标移动到一个屏幕角落，就可以立即触发我们设置好的动作，非常方便。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974023.png" alt="屏幕触发角设置"></p>
+<h1 id="重复按键无延迟"><a href="#重复按键无延迟" class="headerlink" title="重复按键无延迟"></a>重复按键无延迟</h1><p>作为程序员，对终端的使用非常频繁，并且会频繁使用左右键移动终端中的光标，如果你是Vim重度使用者，也非常依赖全键盘操作。</p>
+<p>这种情况下，我们经常会需要长按某个键，需要重复输出这个按键对应的操作。</p>
+<p>默认情况下，重复按键的响应是有延迟和滞后的，这样我们在重复按下某个按键后，需要等待一会才会给予响应，对我来说很不方便。</p>
+<p>这里可以通过【系统偏好设置】-【键盘】来设置重复按键的响应速度和延迟，我把这两项都调到了最高，这样重复按下键盘时，系统能快速响应我们的键盘触发需求！</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15930790974028.png" alt="重复按键无延迟"></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上总结了我认为非常常用而且可以提升我们工作效率的一些基础设置，希望对你也有所帮助。</p>
+<p>Mac有非常漂亮的外设设计和强悍的性能，如果我们对它稍加优化，它就会更符合我们的使用习惯，提高我们的生产力！</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/06/25/mac-env-init/" title="Mac新机环境初始化">http://kaito-kidd.com/2020/06/25/mac-env-init/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E6%95%88%E7%8E%87/" rel="tag"><i class="fa fa-tag"></i> 效率</a>
+              <a href="/tags/Mac/" rel="tag"><i class="fa fa-tag"></i> Mac</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/09/06/computer-system-virtual-memory/" rel="prev" title="计算机系统基础（八）虚拟存储器">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（八）虚拟存储器
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/25/redis-randomkey-issue/" rel="next" title="randomkey导致Redis阻塞的问题分析">
+      randomkey导致Redis阻塞的问题分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#背景"><span class="nav-number">1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#触控板"><span class="nav-number">2.</span> <span class="nav-text">触控板</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#触控板单指轻点"><span class="nav-number">2.1.</span> <span class="nav-text">触控板单指轻点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三指拖拽"><span class="nav-number">2.2.</span> <span class="nav-text">三指拖拽</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#访达"><span class="nav-number">3.</span> <span class="nav-text">访达</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#显示常用文件夹"><span class="nav-number">3.1.</span> <span class="nav-text">显示常用文件夹</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#在文件夹下搜索"><span class="nav-number">3.2.</span> <span class="nav-text">在文件夹下搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#打开访达显示默认文件夹"><span class="nav-number">3.3.</span> <span class="nav-text">打开访达显示默认文件夹</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#程序坞"><span class="nav-number">4.</span> <span class="nav-text">程序坞</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#程序坞位置、自动显示-隐藏"><span class="nav-number">4.1.</span> <span class="nav-text">程序坞位置、自动显示&#x2F;隐藏</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#键盘控制窗口焦点"><span class="nav-number">5.</span> <span class="nav-text">键盘控制窗口焦点</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#触发角"><span class="nav-number">6.</span> <span class="nav-text">触发角</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#重复按键无延迟"><span class="nav-number">7.</span> <span class="nav-text">重复按键无延迟</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

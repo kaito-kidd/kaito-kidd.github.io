@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在上篇文章：Scrapy源码分析（一）架构概览，我们主要从整体上了解了 Scrapy 的架构和数据流转，并没有深入分析每个模块。从这篇文章开始，我将带你详细剖析 Scrapy 的运行原理。 这篇文章，我们先从最基础的运行入口来讲，来看一下 Scrapy 究竟是如何运行起来的。 scrapy 命令从哪来？当我们基于 Scrapy 写好一个爬虫后，想要把我们的爬虫运行起来，怎么做？非常简单，只需要执行">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy源码分析（二）运行入口">
+<meta property="og:url" content="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在上篇文章：Scrapy源码分析（一）架构概览，我们主要从整体上了解了 Scrapy 的架构和数据流转，并没有深入分析每个模块。从这篇文章开始，我将带你详细剖析 Scrapy 的运行原理。 这篇文章，我们先从最基础的运行入口来讲，来看一下 Scrapy 究竟是如何运行起来的。 scrapy 命令从哪来？当我们基于 Scrapy 写好一个爬虫后，想要把我们的爬虫运行起来，怎么做？非常简单，只需要执行">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1478618222.png">
+<meta property="article:published_time" content="2016-11-09T20:35:31.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="scrapy">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1478618222.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Scrapy源码分析（二）运行入口 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy源码分析（二）运行入口
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-09 20:35:31" itemprop="dateCreated datePublished" datetime="2016-11-09T20:35:31+00:00">2016-11-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/09/scrapy-code-analyze-entrance/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（二）运行入口" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/09/scrapy-code-analyze-entrance/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/09/scrapy-code-analyze-entrance/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>23 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上篇文章：<a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a>，我们主要从整体上了解了 Scrapy 的架构和数据流转，并没有深入分析每个模块。从这篇文章开始，我将带你详细剖析 Scrapy 的运行原理。</p>
+<p>这篇文章，我们先从最基础的运行入口来讲，来看一下 Scrapy 究竟是如何运行起来的。</p>
+<h1 id="scrapy-命令从哪来？"><a href="#scrapy-命令从哪来？" class="headerlink" title="scrapy 命令从哪来？"></a>scrapy 命令从哪来？</h1><p>当我们基于 Scrapy 写好一个爬虫后，想要把我们的爬虫运行起来，怎么做？非常简单，只需要执行以下命令就可以了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy crawl &lt;spider_name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个命令，我们的爬虫就真正开始工作了。那么从命令行到执行爬虫逻辑，这个过程中到底发生了什么？</p>
+<p>在开始之前，不知道你有没有和我一样的疑惑，我们执行的 <code>scrapy</code> 命令从何而来？</p>
+<p>实际上，当你成功安装好 Scrapy 后，使用如下命令，就能找到这个命令文件，这个文件就是 Scrapy 的运行入口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ which scrapy</span><br><span class="line">&#x2F;usr&#x2F;local&#x2F;bin&#x2F;scrapy</span><br></pre></td></tr></table></figure>
+
+<p>使用编辑打开这个文件，你会发现，它其实它就是一个 Python 脚本，而且代码非常少。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> scrapy.cmdline <span class="keyword">import</span> execute</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    sys.argv[<span class="number">0</span>] = re.sub(<span class="string">r'(-script\.pyw|\.exe)?$'</span>, <span class="string">''</span>, sys.argv[<span class="number">0</span>])</span><br><span class="line">    sys.exit(execute())</span><br></pre></td></tr></table></figure>
+
+<p>安装好 Scrapy 后，为什么入口点是这里呢？</p>
+<p>答案就在于 Scrapy 的安装文件 <code>setup.py</code> 中，我们找到这个文件，就会发现在这个文件里，已经声明好了程序的运行入口处：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> os.path <span class="keyword">import</span> dirname, join</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'Scrapy'</span>,</span><br><span class="line">    version=version,</span><br><span class="line">    url=<span class="string">'http://scrapy.org'</span>,</span><br><span class="line">    ...</span><br><span class="line">    entry_points=&#123;      <span class="comment"># 运行入口在这里：scrapy.cmdline:execute</span></span><br><span class="line">        <span class="string">'console_scripts'</span>: [<span class="string">'scrapy = scrapy.cmdline:execute'</span>]</span><br><span class="line">    &#125;,</span><br><span class="line">    classifiers=[</span><br><span class="line">        ...</span><br><span class="line">    ],</span><br><span class="line">    install_requires=[</span><br><span class="line">        ...</span><br><span class="line">    ],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>我们需要关注的是 <code>entry_points</code> 配置，它就是调用 Scrapy 开始的地方，也就是<code>cmdline.py</code> 的 <code>execute</code> 方法。</p>
+<p>也就是说，我们在安装 Scrapy 的过程中，<code>setuptools</code> 这个包管理工具，就会把上述代码生成好并放在可执行路径下，这样当我们调用 <code>scrapy</code> 命令时，就会调用 Scrapy 模块下的 <code>cmdline.py</code> 的 <code>execute</code> 方法。</p>
+<p>而且在这这里，我们可以学到一个小技巧——如何用 Python 编写一个可执行文件？其实非常简单，模仿上面的思路，只需要以下几步即可完成：</p>
+<ol>
+<li>编写一个带有 <code>main</code> 方法的 Python 模块（首行必须注明 Python 执行路径）</li>
+<li>去掉<code>.py</code>后缀名</li>
+<li>修改权限为可执行（<code>chmod +x</code> 文件名）</li>
+<li>直接用文件名就可以执行这个 Python 文件</li>
+</ol>
+<p>例如，我们创建一个文件 <code>mycmd</code>，在这个文件中编写一个 <code>main</code> 方法，这个方法编写我们想要的执行的逻辑，之后执行 <code>chmod +x mycmd</code> 把这个文件权限变成可执行，最后通过 <code>./mycmd</code> 就可以执行这段代码了，而不再需要通过 <code>python &lt;file.py&gt;</code> 方式就可以执行了，是不是很简单？</p>
+<h1 id="运行入口（execute-py）"><a href="#运行入口（execute-py）" class="headerlink" title="运行入口（execute.py）"></a>运行入口（execute.py）</h1><p>现在，我们已经知道了 Scrapy 的运行入口是 <code>scrapy/cmdline.py</code> 的 <code>execute</code> 方法，那我们就看一下这个方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(argv=None, settings=None)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> argv <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        argv = sys.argv</span><br><span class="line"></span><br><span class="line">    <span class="comment"># --- 兼容低版本scrapy.conf.settings的配置 ---</span></span><br><span class="line">    <span class="keyword">if</span> settings <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="string">'scrapy.conf'</span> <span class="keyword">in</span> sys.modules:</span><br><span class="line">        <span class="keyword">from</span> scrapy <span class="keyword">import</span> conf</span><br><span class="line">        <span class="keyword">if</span> hasattr(conf, <span class="string">'settings'</span>):</span><br><span class="line">            settings = conf.settings</span><br><span class="line">    <span class="comment"># -----------------------------------------</span></span><br><span class="line"></span><br><span class="line">	<span class="comment"># 初始化环境、获取项目配置参数 返回settings对象</span></span><br><span class="line">    <span class="keyword">if</span> settings <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        settings = get_project_settings()</span><br><span class="line">    <span class="comment"># 校验弃用的配置项</span></span><br><span class="line">    check_deprecated_settings(settings)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># --- 兼容低版本scrapy.conf.settings的配置 ---</span></span><br><span class="line">    <span class="keyword">import</span> warnings</span><br><span class="line">    <span class="keyword">from</span> scrapy.exceptions <span class="keyword">import</span> ScrapyDeprecationWarning</span><br><span class="line">    <span class="keyword">with</span> warnings.catch_warnings():</span><br><span class="line">        warnings.simplefilter(<span class="string">"ignore"</span>, ScrapyDeprecationWarning)</span><br><span class="line">        <span class="keyword">from</span> scrapy <span class="keyword">import</span> conf</span><br><span class="line">        conf.settings = settings</span><br><span class="line">    <span class="comment"># ---------------------------------------</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 执行环境是否在项目中 主要检查scrapy.cfg配置文件是否存在</span></span><br><span class="line">    inproject = inside_project()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取commands文件夹 把所有的命令类转换为&#123;cmd_name: cmd_instance&#125;的字典</span></span><br><span class="line">    cmds = _get_commands_dict(settings, inproject)</span><br><span class="line">    <span class="comment"># 从命令行解析出执行的是哪个命令</span></span><br><span class="line">    cmdname = _pop_command_name(argv)</span><br><span class="line">    parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), \</span><br><span class="line">        conflict_handler=<span class="string">'resolve'</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> cmdname:</span><br><span class="line">        _print_commands(settings, inproject)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">elif</span> cmdname <span class="keyword">not</span> <span class="keyword">in</span> cmds:</span><br><span class="line">        _print_unknown_command(settings, cmdname, inproject)</span><br><span class="line">        sys.exit(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 根据命令名称找到对应的命令实例</span></span><br><span class="line">    cmd = cmds[cmdname]</span><br><span class="line">    parser.usage = <span class="string">"scrapy %s %s"</span> % (cmdname, cmd.syntax())</span><br><span class="line">    parser.description = cmd.long_desc()</span><br><span class="line">    <span class="comment"># 设置项目配置和级别为command</span></span><br><span class="line">    settings.setdict(cmd.default_settings, priority=<span class="string">'command'</span>)</span><br><span class="line">    cmd.settings = settings</span><br><span class="line">    <span class="comment"># 添加解析规则</span></span><br><span class="line">    cmd.add_options(parser)</span><br><span class="line">    <span class="comment"># 解析命令参数，并交由Scrapy命令实例处理</span></span><br><span class="line">    opts, args = parser.parse_args(args=argv[<span class="number">1</span>:])</span><br><span class="line">    _run_print_help(parser, cmd.process_options, args, opts)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化CrawlerProcess实例 并给命令实例添加crawler_process属性</span></span><br><span class="line">    cmd.crawler_process = CrawlerProcess(settings)</span><br><span class="line">    <span class="comment"># 执行命令实例的run方法</span></span><br><span class="line">    _run_print_help(parser, _run_command, cmd, args, opts)</span><br><span class="line">    sys.exit(cmd.exitcode)</span><br></pre></td></tr></table></figure>
+
+<p>这块代码就是 Scrapy 执行的运行入口了，我们根据注释就能看到，这里的主要工作包括配置初始化、命令解析、爬虫类加载、运行爬虫这几步。</p>
+<p>了解了整个入口的流程，下面我会对每个步骤进行详细的分析。</p>
+<a id="more"></a>
+
+<h1 id="初始化项目配置"><a href="#初始化项目配置" class="headerlink" title="初始化项目配置"></a>初始化项目配置</h1><p>首先第一步，根据环境初始化配置，在这里有一些兼容低版本 Scrapy 配置的代码，我们忽略就好。我们重点来看配置是如何初始化的。这主要和环境变量和 <code>scrapy.cfg</code> 有关，通过调用  <code>get_project_settings</code> 方法，最终生成一个 <code>Settings</code> 实例。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_project_settings</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 环境变量中是否有SCRAPY_SETTINGS_MODULE配置</span></span><br><span class="line">    <span class="keyword">if</span> ENVVAR <span class="keyword">not</span> <span class="keyword">in</span> os.environ:</span><br><span class="line">        project = os.environ.get(<span class="string">'SCRAPY_PROJECT'</span>, <span class="string">'default'</span>)</span><br><span class="line">        <span class="comment"># 初始化环境 找到用户配置文件settings.py 设置到环境变量SCRAPY_SETTINGS_MODULE中</span></span><br><span class="line">        init_env(project)</span><br><span class="line">    <span class="comment"># 加载默认配置文件default_settings.py 生成settings实例</span></span><br><span class="line">    settings = Settings()</span><br><span class="line">    <span class="comment"># 取得用户配置文件</span></span><br><span class="line">    settings_module_path = os.environ.get(ENVVAR)</span><br><span class="line">    <span class="comment"># 如果有用户配置 则覆盖默认配置</span></span><br><span class="line">    <span class="keyword">if</span> settings_module_path:</span><br><span class="line">        settings.setmodule(settings_module_path, priority=<span class="string">'project'</span>)</span><br><span class="line">    <span class="comment"># 如果环境变量中有其他scrapy相关配置也覆盖</span></span><br><span class="line">    pickled_settings = os.environ.get(<span class="string">"SCRAPY_PICKLED_SETTINGS_TO_OVERRIDE"</span>)</span><br><span class="line">    <span class="keyword">if</span> pickled_settings:</span><br><span class="line">        settings.setdict(pickle.loads(pickled_settings), priority=<span class="string">'project'</span>)</span><br><span class="line">    env_overrides = &#123;k[<span class="number">7</span>:]: v <span class="keyword">for</span> k, v <span class="keyword">in</span> os.environ.items() <span class="keyword">if</span></span><br><span class="line">                     k.startswith(<span class="string">'SCRAPY_'</span>)&#125;</span><br><span class="line">    <span class="keyword">if</span> env_overrides:</span><br><span class="line">        settings.setdict(env_overrides, priority=<span class="string">'project'</span>)</span><br><span class="line">    <span class="keyword">return</span> settings</span><br></pre></td></tr></table></figure>
+
+<p>在初始配置时，会加载默认的配置文件 <code>default_settings.py</code>，主要逻辑在 <code>Settings</code> 类中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Settings</span><span class="params">(BaseSettings)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, values=None, priority=<span class="string">'project'</span>)</span>:</span></span><br><span class="line">        <span class="comment"># 调用父类构造初始化</span></span><br><span class="line">        super(Settings, self).__init__()</span><br><span class="line">        <span class="comment"># 把default_settings.py的所有配置set到settings实例中</span></span><br><span class="line">        self.setmodule(default_settings, <span class="string">'default'</span>)</span><br><span class="line">        <span class="comment"># 把attributes属性也set到settings实例中</span></span><br><span class="line">        <span class="keyword">for</span> name, val <span class="keyword">in</span> six.iteritems(self):</span><br><span class="line">            <span class="keyword">if</span> isinstance(val, dict):</span><br><span class="line">                self.set(name, BaseSettings(val, <span class="string">'default'</span>), <span class="string">'default'</span>)</span><br><span class="line">        self.update(values, priority)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，首先把默认配置文件 <code>default_settings.py</code> 中的所有配置项设置到 <code>Settings</code> 中，而且这个配置是有优先级的。</p>
+<p>这个默认配置文件 <code>default_settings.py</code> 是非常重要的，我们读源码时有必要重点关注一下里面的内容，这里包含了所有组件的默认配置，以及每个组件的类模块，例如调度器类、爬虫中间件类、下载器中间件类、下载处理器类等等。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 下载器类</span></span><br><span class="line">DOWNLOADER = <span class="string">'scrapy.core.downloader.Downloader'</span></span><br><span class="line"><span class="comment"># 调度器类</span></span><br><span class="line">CHEDULER = <span class="string">'scrapy.core.scheduler.Scheduler'</span></span><br><span class="line"><span class="comment"># 调度队列类</span></span><br><span class="line">SCHEDULER_DISK_QUEUE = <span class="string">'scrapy.squeues.PickleLifoDiskQueue'</span></span><br><span class="line">SCHEDULER_MEMORY_QUEUE = <span class="string">'scrapy.squeues.LifoMemoryQueue'</span></span><br><span class="line">SCHEDULER_PRIORITY_QUEUE = <span class="string">'scrapy.pqueues.ScrapyPriorityQueue'</span></span><br></pre></td></tr></table></figure>
+
+<p>有没有感觉比较奇怪，默认配置中配置了这么多类模块，这是为什么？</p>
+<p>这其实是 Scrapy 特性之一，它这么做的好处是：<strong>任何模块都是可替换的</strong>。</p>
+<p>什么意思呢？例如，你觉得默认的调度器功能不够用，那么你就可以按照它定义的接口标准，自己实现一个调度器，然后在自己的配置文件中，注册自己的调度器类，那么 Scrapy 运行时就会加载你的调度器执行了，这极大地提高了我们的灵活性！</p>
+<p>所以，只要在默认配置文件中配置的模块类，都是可替换的。</p>
+<h1 id="检查运行环境是否在项目中"><a href="#检查运行环境是否在项目中" class="headerlink" title="检查运行环境是否在项目中"></a>检查运行环境是否在项目中</h1><p>初始化完配置之后，下面一步是检查运行环境是否在爬虫项目中。我们知道，<code>scrapy</code> 命令有的是依赖项目运行的，有的命令则是全局的。这里主要通过就近查找 <code>scrapy.cfg</code> 文件来确定是否在项目环境中，主要逻辑在 <code>inside_project</code> 方法中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">inside_project</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 检查此环境变量是否存在(上面已设置)</span></span><br><span class="line">    scrapy_module = os.environ.get(<span class="string">'SCRAPY_SETTINGS_MODULE'</span>)</span><br><span class="line">    <span class="keyword">if</span> scrapy_module <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            import_module(scrapy_module)</span><br><span class="line">        <span class="keyword">except</span> ImportError <span class="keyword">as</span> exc:</span><br><span class="line">            warnings.warn(<span class="string">"Cannot import scrapy settings module %s: %s"</span> % (scrapy_module, exc))</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">	<span class="comment"># 如果环境变量没有 就近查找scrapy.cfg 找得到就认为是在项目环境中</span></span><br><span class="line">    <span class="keyword">return</span> bool(closest_scrapy_cfg())</span><br></pre></td></tr></table></figure>
+
+<p>运行环境是否在爬虫项目中的依据就是能否找到 <code>scrapy.cfg</code> 文件，如果能找到，则说明是在爬虫项目中，否则就认为是执行的全局命令。</p>
+<h1 id="组装命令实例集合"><a href="#组装命令实例集合" class="headerlink" title="组装命令实例集合"></a>组装命令实例集合</h1><p>再向下看，就到了加载命令的逻辑了。我们知道 <code>scrapy</code> 包括很多命令，例如 <code>scrapy crawl</code> 、 <code>scrapy fetch</code> 等等，那这些命令是从哪来的？答案就在 <code>_get_commands_dict</code> 方法中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_commands_dict</span><span class="params">(settings, inproject)</span>:</span></span><br><span class="line">    <span class="comment"># 导入commands文件夹下的所有模块 生成&#123;cmd_name: cmd&#125;的字典集合</span></span><br><span class="line">    cmds = _get_commands_from_module(<span class="string">'scrapy.commands'</span>, inproject)</span><br><span class="line">    cmds.update(_get_commands_from_entry_points(inproject))</span><br><span class="line">    <span class="comment"># 如果用户自定义配置文件中有COMMANDS_MODULE配置 则加载自定义的命令类</span></span><br><span class="line">    cmds_module = settings[<span class="string">'COMMANDS_MODULE'</span>]</span><br><span class="line">    <span class="keyword">if</span> cmds_module:</span><br><span class="line">        cmds.update(_get_commands_from_module(cmds_module, inproject))</span><br><span class="line">    <span class="keyword">return</span> cmds</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_commands_from_module</span><span class="params">(module, inproject)</span>:</span></span><br><span class="line">    d = &#123;&#125;</span><br><span class="line">    <span class="comment"># 找到这个模块下所有的命令类(ScrapyCommand子类)</span></span><br><span class="line">    <span class="keyword">for</span> cmd <span class="keyword">in</span> _iter_command_classes(module):</span><br><span class="line">        <span class="keyword">if</span> inproject <span class="keyword">or</span> <span class="keyword">not</span> cmd.requires_project:</span><br><span class="line">            <span class="comment"># 生成&#123;cmd_name: cmd&#125;字典</span></span><br><span class="line">            cmdname = cmd.__module__.split(<span class="string">'.'</span>)[<span class="number">-1</span>]</span><br><span class="line">            d[cmdname] = cmd()</span><br><span class="line">    <span class="keyword">return</span> d</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_iter_command_classes</span><span class="params">(module_name)</span>:</span></span><br><span class="line">    <span class="comment"># 迭代这个包下的所有模块 找到ScrapyCommand的子类</span></span><br><span class="line">    <span class="keyword">for</span> module <span class="keyword">in</span> walk_modules(module_name):</span><br><span class="line">        <span class="keyword">for</span> obj <span class="keyword">in</span> vars(module).values():</span><br><span class="line">            <span class="keyword">if</span> inspect.isclass(obj) <span class="keyword">and</span> \</span><br><span class="line">                    issubclass(obj, ScrapyCommand) <span class="keyword">and</span> \</span><br><span class="line">                    obj.__module__ == module.__name__:</span><br><span class="line">                <span class="keyword">yield</span> obj</span><br></pre></td></tr></table></figure>
+
+<p>这个过程主要是，导入 <code>commands</code> 文件夹下的所有模块，最终生成一个 <code>{cmd_name: cmd}</code> 字典集合，如果用户在配置文件中也配置了自定义的命令类，也会追加进去。也就是说，我们自己也可以<strong>编写自己的命令类</strong>，然后追加到配置文件中，之后就可以使用自己定义的命令了。</p>
+<h1 id="解析命令"><a href="#解析命令" class="headerlink" title="解析命令"></a>解析命令</h1><p>加载好命令类后，就开始解析我们具体执行的哪个命令了，解析逻辑比较简单：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_pop_command_name</span><span class="params">(argv)</span>:</span></span><br><span class="line">    i = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> arg <span class="keyword">in</span> argv[<span class="number">1</span>:]:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> arg.startswith(<span class="string">'-'</span>):</span><br><span class="line">            <span class="keyword">del</span> argv[i]</span><br><span class="line">            <span class="keyword">return</span> arg</span><br><span class="line">        i += <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>这个过程就是解析命令行，例如执行 <code>scrapy crawl &lt;spider_name&gt;</code>，这个方法会解析出 <code>crawl</code>，通过上面生成好的命令类的字典集合，就能找到 <code>commands</code> 目录下的 <code>crawl.py</code>文件，最终执行的就是它的 <code>Command</code> 类。</p>
+<h1 id="解析命令行参数"><a href="#解析命令行参数" class="headerlink" title="解析命令行参数"></a>解析命令行参数</h1><p>找到对应的命令实例后，调用 <code>cmd.process_options</code> 方法解析我们的参数：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">process_options</span><span class="params">(self, args, opts)</span>:</span></span><br><span class="line">    <span class="comment"># 首先调用了父类的process_options 解析统一固定的参数</span></span><br><span class="line">    ScrapyCommand.process_options(self, args, opts)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 命令行参数转为字典</span></span><br><span class="line">        opts.spargs = arglist_to_dict(opts.spargs)</span><br><span class="line">    <span class="keyword">except</span> ValueError:</span><br><span class="line">        <span class="keyword">raise</span> UsageError(<span class="string">"Invalid -a value, use -a NAME=VALUE"</span>, print_help=<span class="literal">False</span>)</span><br><span class="line">    <span class="keyword">if</span> opts.output:</span><br><span class="line">        <span class="keyword">if</span> opts.output == <span class="string">'-'</span>:</span><br><span class="line">            self.settings.set(<span class="string">'FEED_URI'</span>, <span class="string">'stdout:'</span>, priority=<span class="string">'cmdline'</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            self.settings.set(<span class="string">'FEED_URI'</span>, opts.output, priority=<span class="string">'cmdline'</span>)</span><br><span class="line">        feed_exporters = without_none_values(</span><br><span class="line">            self.settings.getwithbase(<span class="string">'FEED_EXPORTERS'</span>))</span><br><span class="line">        valid_output_formats = feed_exporters.keys()</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> opts.output_format:</span><br><span class="line">            opts.output_format = os.path.splitext(opts.output)[<span class="number">1</span>].replace(<span class="string">"."</span>, <span class="string">""</span>)</span><br><span class="line">        <span class="keyword">if</span> opts.output_format <span class="keyword">not</span> <span class="keyword">in</span> valid_output_formats:</span><br><span class="line">            <span class="keyword">raise</span> UsageError(<span class="string">"Unrecognized output format '%s', set one"</span></span><br><span class="line">                             <span class="string">" using the '-t' switch or as a file extension"</span></span><br><span class="line">                             <span class="string">" from the supported list %s"</span> % (opts.output_format,</span><br><span class="line">                                                              		tuple(valid_output_formats)))</span><br><span class="line">        self.settings.set(<span class="string">'FEED_FORMAT'</span>, opts.output_format, priority=<span class="string">'cmdline'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>这个过程就是解析命令行其余的参数，<strong>固定参数</strong>解析交给<strong>父类</strong>处理，例如输出位置等。其余不同的参数由不同的命令类解析。</p>
+<h1 id="初始化CrawlerProcess"><a href="#初始化CrawlerProcess" class="headerlink" title="初始化CrawlerProcess"></a>初始化CrawlerProcess</h1><p>一切准备就绪，最后初始化 <code>CrawlerProcess</code> 实例，然后运行对应命令实例的 <code>run</code> 方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cmd.crawler_process = CrawlerProcess(settings)</span><br><span class="line">_run_print_help(parser, _run_command, cmd, args, opts)</span><br></pre></td></tr></table></figure>
+
+<p>我们开始运行一个爬虫一般使用的是 <code>scrapy crawl &lt;spider_name&gt;</code>，也就是说最终调用的是 <code>commands/crawl.py</code> 的 <code>run</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">run</span><span class="params">(self, args, opts)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> len(args) &lt; <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">raise</span> UsageError()</span><br><span class="line">    <span class="keyword">elif</span> len(args) &gt; <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">raise</span> UsageError(<span class="string">"running 'scrapy crawl' with more than one spider is no longer supported"</span>)</span><br><span class="line">    spname = args[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">    self.crawler_process.crawl(spname, **opts.spargs)</span><br><span class="line">    self.crawler_process.start()</span><br></pre></td></tr></table></figure>
+
+<p><code>run</code> 方法中调用了 <code>CrawlerProcess</code> 实例的 <code>crawl</code> 和 <code>start</code> 方法，就这样整个爬虫程序就会运行起来了。</p>
+<p>我们先来看<code>CrawlerProcess</code>初始化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CrawlerProcess</span><span class="params">(CrawlerRunner)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, settings=None)</span>:</span></span><br><span class="line">        <span class="comment"># 调用父类初始化</span></span><br><span class="line">        super(CrawlerProcess, self).__init__(settings)</span><br><span class="line">        <span class="comment"># 信号和log初始化</span></span><br><span class="line">        install_shutdown_handlers(self._signal_shutdown)</span><br><span class="line">        configure_logging(self.settings)</span><br><span class="line">        log_scrapy_info(self.settings)</span><br></pre></td></tr></table></figure>
+
+<p>其中，构造方法中调用了父类 <code>CrawlerRunner</code> 的构造方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CrawlerRunner</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, settings=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(settings, dict) <span class="keyword">or</span> settings <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            settings = Settings(settings)</span><br><span class="line">        self.settings = settings</span><br><span class="line">        <span class="comment"># 获取爬虫加载器</span></span><br><span class="line">        self.spider_loader = _get_spider_loader(settings)</span><br><span class="line">        self._crawlers = set()</span><br><span class="line">        self._active = set()</span><br></pre></td></tr></table></figure>
+
+<p>初始化时，调用了 <code>_get_spider_loader</code>方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_spider_loader</span><span class="params">(settings)</span>:</span></span><br><span class="line">    <span class="comment"># 读取配置文件中的SPIDER_MANAGER_CLASS配置项</span></span><br><span class="line">    <span class="keyword">if</span> settings.get(<span class="string">'SPIDER_MANAGER_CLASS'</span>):</span><br><span class="line">        warnings.warn(</span><br><span class="line">            <span class="string">'SPIDER_MANAGER_CLASS option is deprecated. '</span></span><br><span class="line">            <span class="string">'Please use SPIDER_LOADER_CLASS.'</span>,</span><br><span class="line">            category=ScrapyDeprecationWarning, stacklevel=<span class="number">2</span></span><br><span class="line">        )</span><br><span class="line">    cls_path = settings.get(<span class="string">'SPIDER_MANAGER_CLASS'</span>,</span><br><span class="line">                            settings.get(<span class="string">'SPIDER_LOADER_CLASS'</span>))</span><br><span class="line">    loader_cls = load_object(cls_path)</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        verifyClass(ISpiderLoader, loader_cls)</span><br><span class="line">    <span class="keyword">except</span> DoesNotImplement:</span><br><span class="line">        warnings.warn(</span><br><span class="line">            <span class="string">'SPIDER_LOADER_CLASS (previously named SPIDER_MANAGER_CLASS) does '</span></span><br><span class="line">            <span class="string">'not fully implement scrapy.interfaces.ISpiderLoader interface. '</span></span><br><span class="line">            <span class="string">'Please add all missing methods to avoid unexpected runtime errors.'</span>,</span><br><span class="line">            category=ScrapyDeprecationWarning, stacklevel=<span class="number">2</span></span><br><span class="line">        )</span><br><span class="line">    <span class="keyword">return</span> loader_cls.from_settings(settings.frozencopy())</span><br></pre></td></tr></table></figure>
+
+<p>这里会读取默认配置文件中的 <code>spider_loader</code>项，默认配置是 <code>spiderloader.SpiderLoader</code>类，从名字我们也能看出来，这个类是用来加载我们编写好的爬虫类的，下面看一下这个类的具体实现。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@implementer(ISpiderLoader)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpiderLoader</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, settings)</span>:</span></span><br><span class="line">        <span class="comment"># 配置文件获取存放爬虫脚本的路径</span></span><br><span class="line">        self.spider_modules = settings.getlist(<span class="string">'SPIDER_MODULES'</span>)</span><br><span class="line">        self._spiders = &#123;&#125;</span><br><span class="line">        <span class="comment"># 加载所有爬虫</span></span><br><span class="line">        self._load_all_spiders()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_load_spiders</span><span class="params">(self, module)</span>:</span></span><br><span class="line">        <span class="comment"># 组装成&#123;spider_name: spider_cls&#125;的字典</span></span><br><span class="line">        <span class="keyword">for</span> spcls <span class="keyword">in</span> iter_spider_classes(module):</span><br><span class="line">            self._spiders[spcls.name] = spcls</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_load_all_spiders</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">for</span> name <span class="keyword">in</span> self.spider_modules:</span><br><span class="line">            <span class="keyword">for</span> module <span class="keyword">in</span> walk_modules(name):</span><br><span class="line">                self._load_spiders(module)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，在这里爬虫加载器会加载所有的爬虫脚本，最后生成一个 <code>{spider_name: spider_cls}</code> 的字典，所以我们在执行 <code>scarpy crawl &lt;spider_name&gt;</code> 时，Scrapy 就能找到我们的爬虫类。</p>
+<h1 id="运行爬虫"><a href="#运行爬虫" class="headerlink" title="运行爬虫"></a>运行爬虫</h1><p><code>CrawlerProcess</code> 初始化完之后，调用它的 <code>crawl</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, crawler_or_spidercls, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="comment"># 创建crawler</span></span><br><span class="line">    crawler = self.create_crawler(crawler_or_spidercls)</span><br><span class="line">    <span class="keyword">return</span> self._crawl(crawler, *args, **kwargs)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_crawl</span><span class="params">(self, crawler, *args, **kwargs)</span>:</span></span><br><span class="line">    self.crawlers.add(crawler)</span><br><span class="line">    <span class="comment"># 调用Crawler的crawl方法</span></span><br><span class="line">    d = crawler.crawl(*args, **kwargs)</span><br><span class="line">    self._active.add(d)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_done</span><span class="params">(result)</span>:</span></span><br><span class="line">        self.crawlers.discard(crawler)</span><br><span class="line">        self._active.discard(d)</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line">    <span class="keyword">return</span> d.addBoth(_done)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_crawler</span><span class="params">(self, crawler_or_spidercls)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(crawler_or_spidercls, Crawler):</span><br><span class="line">        <span class="keyword">return</span> crawler_or_spidercls</span><br><span class="line">    <span class="keyword">return</span> self._create_crawler(crawler_or_spidercls)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_crawler</span><span class="params">(self, spidercls)</span>:</span></span><br><span class="line">    <span class="comment"># 如果是字符串 则从spider_loader中加载这个爬虫类</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(spidercls, six.string_types):</span><br><span class="line">        spidercls = self.spider_loader.load(spidercls)</span><br><span class="line">    <span class="comment"># 否则创建Crawler</span></span><br><span class="line">    <span class="keyword">return</span> Crawler(spidercls, self.settings)</span><br></pre></td></tr></table></figure>
+
+<p>这个过程会创建 <code>Cralwer</code> 实例，然后调用它的 <code>crawl</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="keyword">not</span> self.crawling, <span class="string">"Crawling already taking place"</span></span><br><span class="line">    self.crawling = <span class="literal">True</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 到现在 才是实例化一个爬虫实例</span></span><br><span class="line">        self.spider = self._create_spider(*args, **kwargs)</span><br><span class="line">        <span class="comment"># 创建引擎</span></span><br><span class="line">        self.engine = self._create_engine()</span><br><span class="line">        <span class="comment"># 调用爬虫类的start_requests方法</span></span><br><span class="line">        start_requests = iter(self.spider.start_requests())</span><br><span class="line">        <span class="comment"># 执行引擎的open_spider 并传入爬虫实例和初始请求</span></span><br><span class="line">        <span class="keyword">yield</span> self.engine.open_spider(self.spider, start_requests)</span><br><span class="line">        <span class="keyword">yield</span> defer.maybeDeferred(self.engine.start)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            exc_info = sys.exc_info()</span><br><span class="line"></span><br><span class="line">        self.crawling = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> self.engine <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">yield</span> self.engine.close()</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            six.reraise(*exc_info)</span><br><span class="line">        <span class="keyword">raise</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_spider</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> self.spidercls.from_crawler(self, *args, **kwargs)</span><br></pre></td></tr></table></figure>
+
+<p>到这里，才会对我们的爬虫类创建一个实例对象，然后创建引擎，之后调用爬虫类的 <code>start_requests</code> 方法获取种子 URL，最后交给引擎执行。</p>
+<p>最后来看 <code>Cralwer</code> 是如何开始运行的额，也就是它的 <code>start</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start</span><span class="params">(self, stop_after_crawl=True)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> stop_after_crawl:</span><br><span class="line">        d = self.join()</span><br><span class="line">        <span class="keyword">if</span> d.called:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        d.addBoth(self._stop_reactor)</span><br><span class="line">    reactor.installResolver(self._get_dns_resolver())</span><br><span class="line">    <span class="comment"># 配置reactor的池子大小(可修改REACTOR_THREADPOOL_MAXSIZE调整)</span></span><br><span class="line">    tp = reactor.getThreadPool()</span><br><span class="line">    tp.adjustPoolsize(maxthreads=self.settings.getint(<span class="string">'REACTOR_THREADPOOL_MAXSIZE'</span>))</span><br><span class="line">    reactor.addSystemEventTrigger(<span class="string">'before'</span>, <span class="string">'shutdown'</span>, self.stop)</span><br><span class="line">    <span class="comment"># 开始执行</span></span><br><span class="line">    reactor.run(installSignalHandlers=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这里有一个叫做 <code>reactor</code> 的模块。<code>reactor</code> 是个什么东西呢？它是 <code>Twisted</code> 模块的事件管理器，我们只要把需要执行的事件注册到 <code>reactor</code> 中，然后调用它的 <code>run</code> 方法，它就会帮我们执行注册好的事件，如果遇到网络IO等待，它会自动帮切换到可执行的事件上，非常高效。</p>
+<p>在这里我们不用深究 <code>reactor</code> 是如何工作的，你可以把它想象成一个线程池，只是采用注册回调的方式来执行事件。</p>
+<p>到这里，Scrapy 运行的入口就分析完了，之后爬虫的调度逻辑就交由引擎 <code>ExecuteEngine</code> 处理了，引擎会协调多个组件，相互配合完成整个任务的执行。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，Scrapy 在真正运行前，需要做的工作包括配置环境初始化、命令类的加载、爬虫模块的加载，以及命令类和参数解析，之后运行我们的爬虫类，最终，这个爬虫类的调度交给引擎处理。</p>
+<p>这里我把整个流程也总结成了思维导图，方便你理解：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1478618222.png" />
+
+<p>好了，Scrapy 是如何运行的代码剖析就先分析到这里，下篇文章我们会深入剖析各个核心组件，分析它们都是负责做什么工作的，以及它们之间又是如何协调完成抓取任务的，敬请期待。</p>
+<p>附：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a></li>
+<li>Scrapy源码分析（二）运行入口</li>
+<li><a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">Scrapy源码分析（三）核心组件初始化</a></li>
+<li><a href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">Scrapy源码分析（四）核心抓取流程</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/" title="Scrapy源码分析（二）运行入口">http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/scrapy/" rel="tag"><i class="fa fa-tag"></i> scrapy</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 源码分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/01/scrapy-code-analyze-architecture/" rel="prev" title="Scrapy源码分析（一）架构概览">
+      <i class="fa fa-chevron-left"></i> Scrapy源码分析（一）架构概览
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/21/scrapy-code-analyze-component-initialization/" rel="next" title="Scrapy源码分析（三）核心组件初始化">
+      Scrapy源码分析（三）核心组件初始化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#scrapy-命令从哪来？"><span class="nav-number">1.</span> <span class="nav-text">scrapy 命令从哪来？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行入口（execute-py）"><span class="nav-number">2.</span> <span class="nav-text">运行入口（execute.py）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化项目配置"><span class="nav-number">3.</span> <span class="nav-text">初始化项目配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#检查运行环境是否在项目中"><span class="nav-number">4.</span> <span class="nav-text">检查运行环境是否在项目中</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#组装命令实例集合"><span class="nav-number">5.</span> <span class="nav-text">组装命令实例集合</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解析命令"><span class="nav-number">6.</span> <span class="nav-text">解析命令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解析命令行参数"><span class="nav-number">7.</span> <span class="nav-text">解析命令行参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初始化CrawlerProcess"><span class="nav-number">8.</span> <span class="nav-text">初始化CrawlerProcess</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行爬虫"><span class="nav-number">9.</span> <span class="nav-text">运行爬虫</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

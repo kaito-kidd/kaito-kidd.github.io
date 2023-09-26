@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="你好，我是 Kaito。 用了这么久的 Redis，也翻了很多次源码，经常有人问我到底怎么读 Redis 源码。 一提到读源码，很多人都会比较畏惧，认为读源码是高手才会做的事情。他们可能遇到问题时，会更倾向于去找别人分享的答案。但往往很多时候，自己查到的资料并不能解决所有问题，尤其是比较细节的问题。 从我的实战经验来看，遇到这种情况，通常就需要去源码中寻找答案了，因为在源码面前，这些细节会变得「一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="读懂Redis源码，我总结了这7点心得">
+<meta property="og:url" content="http://kaito-kidd.com/2021/09/23/read-redis-source-code/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="你好，我是 Kaito。 用了这么久的 Redis，也翻了很多次源码，经常有人问我到底怎么读 Redis 源码。 一提到读源码，很多人都会比较畏惧，认为读源码是高手才会做的事情。他们可能遇到问题时，会更倾向于去找别人分享的答案。但往往很多时候，自己查到的资料并不能解决所有问题，尤其是比较细节的问题。 从我的实战经验来看，遇到这种情况，通常就需要去源码中寻找答案了，因为在源码面前，这些细节会变得「一">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323114248852.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140134.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140144.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140155.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140166.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140174.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140179.png">
+<meta property="article:published_time" content="2021-09-23T10:20:43.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="源码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323114248852.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2021/09/23/read-redis-source-code/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>读懂Redis源码，我总结了这7点心得 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2021/09/23/read-redis-source-code/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          读懂Redis源码，我总结了这7点心得
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-09-23 10:20:43" itemprop="dateCreated datePublished" datetime="2021-09-23T10:20:43+00:00">2021-09-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/09/23/read-redis-source-code/" class="post-meta-item leancloud_visitors" data-flag-title="读懂Redis源码，我总结了这7点心得" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/09/23/read-redis-source-code/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/09/23/read-redis-source-code/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.9k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>你好，我是 Kaito。</p>
+<p>用了这么久的 Redis，也翻了很多次源码，经常有人问我到底怎么读 Redis 源码。</p>
+<p>一提到读源码，很多人都会比较畏惧，认为读源码是高手才会做的事情。他们可能遇到问题时，会更倾向于去找别人分享的答案。但往往很多时候，自己查到的资料并不能解决所有问题，尤其是比较细节的问题。</p>
+<p>从我的实战经验来看，遇到这种情况，通常就需要去源码中寻找答案了，因为在源码面前，这些细节会变得「一览无余」。</p>
+<p>而且我认为，掌握读源码的能力，是从<strong>只懂得如何使用 Redis，到精通 Redis 实现原理</strong>的成长之路上，必须跨越的门槛。</p>
+<p>可是，面对庞大复杂的项目，我们怎样读源码才能更高效呢？</p>
+<p>这篇文章我就来和你聊一聊，我读 Redis 源码的经验，以及读源码的「通用思路」，希望这些心得可以帮助到你。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323114248852.png" alt=""></p>
+<a id="more"></a>
+
+<h1 id="01-找到地图"><a href="#01-找到地图" class="headerlink" title="01 找到地图"></a>01 找到地图</h1><p>很多开源项目的源码，代码量一般都比较庞大，如果在读代码之前，我们没有制定合理的方法，就一头扎进去读代码，势必会把自己搞晕。</p>
+<p>所以，我在拿到一个项目的代码之后，并不会马上着手去读，而是会先对整个项目结构进行梳理，划分出项目具体包含的模块。这样，我就对整个项目有了一个「宏观」的了解。</p>
+<p>读代码就好比去一个陌生城市旅行，这个旅途过程充满着未知。如果在出发之前，我们手里能有一张地图，那我们对自己的行程就可以有一个非常清晰的规划。</p>
+<p>我们就知道，如果想要到达目的地，需要从哪里出发、经过哪些地方、通过什么方式才能到达，<strong>有了地图就有了行进方向</strong>，否则很容易迷失。</p>
+<p>因此，提前花一些时间梳理整个项目的「结构和目录」，对于后面更好地阅读代码是非常有必要的。</p>
+<p>就拿 Redis 来举例，在读 Redis 源码之前，我们可以先梳理出整个项目的功能模块，以及每个模块对应的代码文件（src 下的代码结构）：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140134.png" alt=""></p>
+<p>这样，有了这张地图之后，我们再去看代码的时候，就可以有重点地阅读了。</p>
+<h1 id="02-前置知识准备"><a href="#02-前置知识准备" class="headerlink" title="02 前置知识准备"></a>02 前置知识准备</h1><p>在梳理完整个项目结构之后，我们就可以正式进入阅读环节当中了。不过，在阅读代码之前，我们其实还需要预先掌握一些「前置知识」。</p>
+<p>因为一个完整的项目，必然综合了各个领域的技术知识点，比如<strong>数据结构、操作系统、网络协议、编程语言</strong>等，如果我们提前做好一些功课，在读源码的过程中就会轻松很多。</p>
+<p>以下是根据我在阅读 Redis 书籍和实战过程中，提取的读源码必备前置知识点，你可以参考下：</p>
+<ul>
+<li><strong>常用数据结构</strong>：数组、链表、哈希表、跳表</li>
+<li><strong>网络协议</strong>：TCP 协议</li>
+<li><strong>网络 IO 模型</strong>：IO 多路复用、非阻塞 IO、Reactor 网络模型</li>
+<li><strong>操作系统</strong>：写时复制（Copy On Write）、常见系统调用、磁盘 IO 机制</li>
+<li><strong>C 语言基础</strong>：循环、分支、结构体、指针</li>
+</ul>
+<p>当然，在阅读源码的过程中，我们也可以根据实际问题再去查阅相关资料，但不管怎样，提前熟悉这些方面的知识，在真正读代码时就会省下不少时间。</p>
+<h1 id="03-从基础模块开始读"><a href="#03-从基础模块开始读" class="headerlink" title="03 从基础模块开始读"></a>03 从基础模块开始读</h1><p>好，有了地图并掌握了前置知识之后，接下来我们就要进入主题了：<strong>读代码</strong>。</p>
+<p>但具体要从哪个地方开始读起呢？我认为要先从「<strong>最基础</strong>」的模块开始读起。</p>
+<p>我在前面也分析了，一个完整的项目会划分很多的功能模块，但这些模块并不是孤立的，而很可能是有「依赖」关系的。</p>
+<p>比如说，Redis 中的 networking.c 文件，表示处理网络 IO 的具体实现。而如果我们能在理解事件驱动模块 ae.c 的基础上，再去阅读网络 IO 模块，效率就会更高。</p>
+<p>那在 Redis 源码中，哪些是最基础的模块呢？</p>
+<p>想一下，我们在使用 Redis 时，接触最频繁的是哪些功能？</p>
+<p>答案是<strong>各种数据类型</strong>。</p>
+<p>一切操作的基础，其实都是基于这些最常用的数据类型来做的，比如 String、List、Hash、Set、Sorted Set等。所以，我们就可以从这些基础模块开始读起，也就是从 t_string.c、t_list.c、t_hash.c、t_set.c、t_zset.c 代码入手。</p>
+<p>如果你对 Redis 的数据类型有所了解，就会看到这些数据类型在实现时，底层都对应了不同的数据结构。比如，String 的底层是 SDS，List 的底层是 ziplist + quicklist，Hash 底层可能是ziplist，也可能是哈希表，等等。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140144.png" alt=""></p>
+<p>由此一来，我们会发现，这些数据结构又是更为「底层」的模块，所以我们在阅读数据类型模块时，就需要重点聚焦在这些模块上，也就是 sds.c、ziplist.c、quicklist.c、dict.c、intset.c 文件，而且这些文件都是比较独立的，阅读起来就可以更加集中。</p>
+<p>这样，当我们真正掌握了这些「底层数据结构」的实现后，就能更好地理解基于它们实现的各种「数据类型」了。</p>
+<p><strong>这些基础模块就相当于一座大厦的地基，地基打好了，才能做到高楼耸立。</strong></p>
+<h1 id="04-找到核心主线"><a href="#04-找到核心主线" class="headerlink" title="04 找到核心主线"></a>04 找到核心主线</h1><p>接着，掌握了数据结构模块之后，这时我们的重点就需要放在「<strong>核心主线</strong>」上来了。</p>
+<p>在这个阶段，我们需要找到一个明确的目标，以这个目标为主线去读代码。因为读源码一个很常见的需求，就是为了了解这个项目最「核心功能」的实现细节，我们只有以此为目标，找到这条主线去读代码，才能达到最终目的。</p>
+<p>那么在读 Redis 源码时，什么才是它的核心主线呢？这里我分享一个非常好用的技巧，就是根据「<strong>Redis 究竟是怎么处理客户端发来的命令的？</strong>」为主线来梳理。</p>
+<p>举个例子，当我们在执行 SET testkey testval EX 60 这样一条命令时，就需要搞清楚 Redis 是怎么执行这条命令的。</p>
+<p>也就是要明确，<strong>Redis 从收到客户端请求，到把数据存到 Redis 中、设置过期时间，最后把响应结果返回给客户端</strong>，整个过程的每一个环节，到底是如何处理的。</p>
+<p>有了这条主线，我们就有了非常明确的目标，而且沿着这条主线去读代码，我们还可以很清晰地把多个模块「串联」起来。比如从前面的例子中，我们会看到一条命令的执行，主要包含了这样几个阶段。</p>
+<ul>
+<li><strong>Redis Server 初始化</strong>：加载配置、监听端口、注册连接建立事件、启动事件循环（server.c、anet.c）。</li>
+<li><strong>接收、解析客户端请求</strong>：初始化 client、注册读事件、读客户端 socket（networking.c）。</li>
+<li><strong>处理具体的命令</strong>：找到对应的命令函数、执行命令（server.c、t_string.c、t_list.c、t_hash.c、t_set.c、t_zset.c）。</li>
+<li><strong>返回响应给客户端</strong>：写客户端缓冲区、注册写事件、写客户端 socket（networking.c）。</li>
+</ul>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140155.jpg" alt=""></p>
+<p>沿着这条主线去读代码，我们就可以掌握一条命令的执行全过程。</p>
+<p>而且，由于这条主线的代码逻辑，已经覆盖了「所有命令」的执行流程，我们下次再去读其它命令时，比如 SADD，就只需要关注「处理命令」部分的逻辑即可，其它逻辑有 80% 都是相同的。</p>
+<h1 id="05-先整体后细节"><a href="#05-先整体后细节" class="headerlink" title="05 先整体后细节"></a>05 先整体后细节</h1><p>当然，在阅读主线代码的过程中，肯定也会遇到过于「<strong>复杂</strong>」的函数，第一次在读这种函数时，很容易就会「陷进去」，导致整个主线代码的阅读，无法继续推进下去。</p>
+<p>遇到这种情况其实是很正常的，可这时我们应该怎么办呢？</p>
+<p>这里我的做法是，前期读到这种逻辑时，不要马上陷入到细节中去，而是要先「抓整体」。</p>
+<p>具体来说，对于复杂的函数逻辑，我们刚开始并不需要知道它的每一个细节是如何实现的，而是只需知道这个函数「大致」做了几件事情即可。</p>
+<p>举个例子，在执行 HSET 命令时，有一段代码很复杂，其中包括了很多分支判断，一次很难读懂：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140166.png" alt=""></p>
+<p>那么，我在读这段代码时，就可以先简化逻辑，把握整体思路：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140174.png" alt=""></p>
+<p>之后，再了解每个分支大致做了哪些事情：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2021/09/16323108140179.png" alt=""></p>
+<p>这样做的好处，一是不会被复杂的细节逻辑搞晕，打击自己的自信心，二是可以有效避免阅读的连贯性被打断，从而能持续推进我们把整个主线逻辑读完。</p>
+<p>所以，这里的重点就是：<strong>先把复杂代码的主逻辑搞清楚，知道涉及的每个方法完成了什么事，心里要先搭建一个简单的「框架」，等有了框架之后，我们再去给框架填充「细节」</strong>。</p>
+<p>这样通过「先整体后细节」的方式，我们就可以不再畏惧代码中的复杂逻辑。</p>
+<h1 id="06-先主线后支线"><a href="#06-先主线后支线" class="headerlink" title="06 先主线后支线"></a>06 先主线后支线</h1><p>不过，在阅读主线代码的过程中，我们肯定还会遇到各种「支线」逻辑，比如<strong>数据过期、替换淘汰、持久化、主从复制</strong>等。</p>
+<p>其实，在阅读主线逻辑的时候，我们并不需要去重点关注这些支线，而当整个主线逻辑「清晰」起来之后，我们再去读这些支线模块，就会容易很多了。</p>
+<p>这时，我们就可以从这些支线中，选取下一个「目标」，带着这个目标去阅读，比如说：</p>
+<ul>
+<li>过期策略是怎么实现的？（expire.c、lazyfree.c）</li>
+<li>淘汰策略是如何实现的？（evict.c）</li>
+<li>持久化 RDB、AOF 是怎么做的？（rdb.c、aof.c）</li>
+<li>主从复制是怎么做的？（replication.c）</li>
+<li>哨兵如何完成故障自动切换？（sentinel.c）</li>
+<li>分片逻辑如何实现？（cluster.c）</li>
+<li>…</li>
+</ul>
+<p>有了新的支线目标后，我们依旧可以采用前面提到的「先整体后细节」的思路阅读相关模块，这样下来，整个项目的每个模块，就可以被「逐一击破」了。</p>
+<h1 id="07-查漏补缺"><a href="#07-查漏补缺" class="headerlink" title="07 查漏补缺"></a>07 查漏补缺</h1><p>最后，我们还需要「查漏补缺」。</p>
+<p>按照前面提到的方法，基本就可以把整个项目的主要模块读得七七八八了，这时我们基本已经对整个项目有了整体的「把控」。</p>
+<p>不过，当我们在工作中遇到问题时，很有可能会发现，在当时读代码的过程中，有很多并不在意的「细节」被忽略了。</p>
+<p>所以这时，我们就可以再带着「具体问题」出发，聚焦这个问题相关的模块，再一次去读源码。这样一来，我们就可以填补当时阅读源码的「空白区」。</p>
+<p>举个例子，当我们在阅读 String 底层数据结构 SDS（简单动态字符串）的实现时，我们会看到当 SDS 需要追加新内容时会进行扩容，而我们之前阅读这块代码时，<strong>很有可能只是了解到有这样的逻辑存在，但并没有在意扩容的相关细节（一次扩容多大）</strong>。</p>
+<p>所以，当我们在工作中遇到这个细节问题后，就可以把目光聚焦在 SDS 的扩容逻辑上（sds.c 的sdsMakeRoomFor函数），而此时我们会发现，当需要申请的新内存小于 1MB 时，Redis 就会翻倍申请内存，否则按 1MB 申请新内存。</p>
+<p>采用这个方法进行查漏补缺，我们就可以对整个项目了解得更深入、更全面，真正把项目「吃透」。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好了，以上就是我在阅读 Redis 源码时的经验心得，总结一下这 7 个步骤。</p>
+<p>1、<strong>找到地图</strong>：拿到项目代码后，提前梳理整个项目结构，知晓整个项目的模块划分，以及对应的代码文件。</p>
+<p>2、<strong>前置知识准备</strong>：提前掌握项目中用到的前置知识，比如数据结构、操作系统原理、网络协议、网络 IO 模型、编程语言语法等等。</p>
+<p>3、<strong>从基础模块开始读</strong>：从最底层的基础模块开始入手，先掌握了这些模块，之后基于它们构建的模块读起来会更加高效。</p>
+<p>4、<strong>找到核心主线</strong>：找到整个项目中最核心的主线逻辑，以此为目标，了解各模块为了完成这个功能，是如何协作和组织的。</p>
+<p>5、<strong>先整体后细节</strong>：对于复杂函数，不要上来就陷入细节，前期阅读只需了解这个函数大致做了什么事情，建立框架，等搭建起框架之后，再去填充细节。</p>
+<p>6、<strong>先主线后支线</strong>：整个主线逻辑清晰之后，再去延伸阅读支线逻辑，因为支线逻辑肯定是服务主线逻辑的，读完主线后再去读这些支线，也会变得更简单。</p>
+<p>7、<strong>查漏补缺</strong>：在工作中遇到具体问题，带着这些实际的问题出发再次去读源码，进行查漏补缺，填补之前读源码时没有注意到的地方。</p>
+<h1 id="后记"><a href="#后记" class="headerlink" title="后记"></a>后记</h1><p>你可以看到，这篇文章介绍的阅读源码的方法，其实并不局限于读 Redis 代码。</p>
+<p>这 7 个步骤，可以算是一个的「通用思路」，我也经常用这个思路来读其它项目的源码，非常有用，你也可以试试。</p>
+<p>​另外，我认为很多人读源码觉得难，<strong>一是因为心理上自认为自己读不懂，不敢迈步这一步，二是因为找不到合理的方法，在读源码时屡次受挫，最终知难而退</strong>。</p>
+<p>我在读源码时也经历过这些，这里再分享一下我的经验。</p>
+<p>1、<strong>永远不要给自己设限</strong>：想想看，曾经以为很多自己做不到的事，在有压力的情况下，是不是慢慢都做到了，而且发现做得还挺好？学习技术也是一样，技术是死的，东西就那么多，一遍不行来两遍，总有一次能搞懂，所以心态上一定不要先「否定」自己，凡事先迈一小步进去试试看，好的开始就是成功的一半。</p>
+<p>2、<strong>找到对的学习方法</strong>：正所谓「学会学习，再学习」，科学高效的方法，能帮你事半功倍，这篇文章分享的方法论，就是属于学习方法的范畴，你可以结合自己的实际情况试试看。</p>
+<p>希望我的这些经验和心得，对你有所启发。</p>
+<p>如果你也有自己的阅读源码的实践经验和方法，欢迎在留言区分享出来，我们一起交流，共同进步~</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2021/09/23/read-redis-source-code/" title="读懂Redis源码，我总结了这7点心得">http://kaito-kidd.com/2021/09/23/read-redis-source-code/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 源码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/09/15/2021-apple-conference/" rel="prev" title="iPhone 13发布，聊一聊这次苹果新品发布会">
+      <i class="fa fa-chevron-left"></i> iPhone 13发布，聊一聊这次苹果新品发布会
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/10/05/movie-a-great-dream-machine/" rel="next" title="电影，绝佳的造梦机器">
+      电影，绝佳的造梦机器 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#01-找到地图"><span class="nav-number">1.</span> <span class="nav-text">01 找到地图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#02-前置知识准备"><span class="nav-number">2.</span> <span class="nav-text">02 前置知识准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#03-从基础模块开始读"><span class="nav-number">3.</span> <span class="nav-text">03 从基础模块开始读</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#04-找到核心主线"><span class="nav-number">4.</span> <span class="nav-text">04 找到核心主线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#05-先整体后细节"><span class="nav-number">5.</span> <span class="nav-text">05 先整体后细节</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#06-先主线后支线"><span class="nav-number">6.</span> <span class="nav-text">06 先主线后支线</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#07-查漏补缺"><span class="nav-number">7.</span> <span class="nav-text">07 查漏补缺</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后记"><span class="nav-number">9.</span> <span class="nav-text">后记</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

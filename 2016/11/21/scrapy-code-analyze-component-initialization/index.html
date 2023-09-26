@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在上一篇文章：Scrapy源码分析（二）运行入口，我们主要剖析了 Scrapy 是如何运行起来的核心逻辑，也就是在真正执行抓取任务之前，Scrapy 都做了哪些工作。 这篇文章，我们就来进一步剖析一下，Scrapy 有哪些核心组件？以及它们主要负责了哪些工作？这些组件为了完成这些功能，内部又是如何实现的。 爬虫类我们接着上一篇结束的地方开始讲起。上次讲到 Scrapy 运行起来后，执行到最后到了">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy源码分析（三）核心组件初始化">
+<meta property="og:url" content="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在上一篇文章：Scrapy源码分析（二）运行入口，我们主要剖析了 Scrapy 是如何运行起来的核心逻辑，也就是在真正执行抓取任务之前，Scrapy 都做了哪些工作。 这篇文章，我们就来进一步剖析一下，Scrapy 有哪些核心组件？以及它们主要负责了哪些工作？这些组件为了完成这些功能，内部又是如何实现的。 爬虫类我们接着上一篇结束的地方开始讲起。上次讲到 Scrapy 运行起来后，执行到最后到了">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242067.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242206.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242425.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242611.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242739.png">
+<meta property="article:published_time" content="2016-11-21T23:30:16.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="scrapy">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242067.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Scrapy源码分析（三）核心组件初始化 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy源码分析（三）核心组件初始化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-21 23:30:16" itemprop="dateCreated datePublished" datetime="2016-11-21T23:30:16+00:00">2016-11-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/21/scrapy-code-analyze-component-initialization/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（三）核心组件初始化" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/21/scrapy-code-analyze-component-initialization/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/21/scrapy-code-analyze-component-initialization/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>24 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上一篇文章：<a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a>，我们主要剖析了 Scrapy 是如何运行起来的核心逻辑，也就是在真正执行抓取任务之前，Scrapy 都做了哪些工作。</p>
+<p>这篇文章，我们就来进一步剖析一下，Scrapy 有哪些核心组件？以及它们主要负责了哪些工作？这些组件为了完成这些功能，内部又是如何实现的。</p>
+<h1 id="爬虫类"><a href="#爬虫类" class="headerlink" title="爬虫类"></a>爬虫类</h1><p>我们接着上一篇结束的地方开始讲起。上次讲到 Scrapy 运行起来后，执行到最后到了 <code>Crawler</code> 的 <code>crawl</code> 方法，我们来看这个方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="keyword">not</span> self.crawling, <span class="string">"Crawling already taking place"</span></span><br><span class="line">    self.crawling = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 从spiderloader中找到爬虫类 并实例化爬虫实例</span></span><br><span class="line">        self.spider = self._create_spider(*args, **kwargs)</span><br><span class="line">        <span class="comment"># 创建引擎</span></span><br><span class="line">        self.engine = self._create_engine()</span><br><span class="line">        <span class="comment"># 调用爬虫类的start_requests方法 拿到种子URL列表</span></span><br><span class="line">        start_requests = iter(self.spider.start_requests())</span><br><span class="line">        <span class="comment"># 执行引擎的open_spider 并传入爬虫实例和初始请求</span></span><br><span class="line">        <span class="keyword">yield</span> self.engine.open_spider(self.spider, start_requests)</span><br><span class="line">        <span class="keyword">yield</span> defer.maybeDeferred(self.engine.start)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            exc_info = sys.exc_info()</span><br><span class="line">        self.crawling = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> self.engine <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">yield</span> self.engine.close()</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            six.reraise(*exc_info)</span><br><span class="line">        <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+
+<p>执行到这里，我们看到首先创建了爬虫实例，然后创建了引擎，最后把爬虫交给引擎来处理了。</p>
+<p>在上一篇文章我们也讲到，在 <code>Crawler</code> 实例化时，会创建 <code>SpiderLoader</code>，它会根据我们定义的配置文件 <code>settings.py</code> 找到存放爬虫的位置，我们写的爬虫代码都在这里。</p>
+<p>然后 <code>SpiderLoader</code> 会扫描这些代码文件，并找到父类是 <code>scrapy.Spider</code> 爬虫类，然后根据爬虫类中的 <code>name</code> 属性（在编写爬虫时，这个属性是必填的），生成一个 <code>{spider_name: spider_cls}</code> 的字典，最后根据 <code>scrapy crawl &lt;spider_name&gt;</code> 命令中的 <code>spider_name</code> 找到我们写的爬虫类，然后实例化它，在这里就是调用了<code>_create_spider</code>方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_spider</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="comment"># 调用类方法from_crawler实例化</span></span><br><span class="line">    <span class="keyword">return</span> self.spidercls.from_crawler(self, *args, **kwargs)</span><br></pre></td></tr></table></figure>
+
+<p>实例化爬虫比较有意思，它不是通过普通的构造方法进行初始化，而是调用了类方法 <code>from_crawler</code> 进行的初始化，找到 <code>scrapy.Spider</code> 类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@classmethod</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">from_crawler</span><span class="params">(cls, crawler, *args, **kwargs)</span>:</span></span><br><span class="line">    spider = cls(*args, **kwargs)</span><br><span class="line">    spider._set_crawler(crawler)</span><br><span class="line">    <span class="keyword">return</span> spider</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_set_crawler</span><span class="params">(self, crawler)</span>:</span></span><br><span class="line">    self.crawler = crawler</span><br><span class="line">    <span class="comment"># 把settings对象赋给spider实例</span></span><br><span class="line">    self.settings = crawler.settings</span><br><span class="line">    crawler.signals.connect(self.close, signals.spider_closed)</span><br></pre></td></tr></table></figure>
+
+<p>在这里我们可以看到，这个类方法其实也是调用了构造方法，进行实例化，同时也拿到了 <code>settings</code> 配置，来看构造方法干了些什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Spider</span><span class="params">(object_ref)</span>:</span></span><br><span class="line">    name = <span class="literal">None</span></span><br><span class="line">    custom_settings = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name=None, **kwargs)</span>:</span></span><br><span class="line">        <span class="comment"># name必填</span></span><br><span class="line">        <span class="keyword">if</span> name <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            self.name = name</span><br><span class="line">        <span class="keyword">elif</span> <span class="keyword">not</span> getattr(self, <span class="string">'name'</span>, <span class="literal">None</span>):</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"%s must have a name"</span> % type(self).__name__)</span><br><span class="line">        self.__dict__.update(kwargs)</span><br><span class="line">        <span class="comment"># 如果没有设置start_urls 默认是[]</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(self, <span class="string">'start_urls'</span>):</span><br><span class="line">            self.start_urls = []</span><br></pre></td></tr></table></figure>
+
+<p>看到这里是不是很熟悉？这里就是我们平时编写爬虫类时，最常用的几个属性：<code>name</code>、<code>start_urls</code>、<code>custom_settings</code>：</p>
+<ul>
+<li><code>name</code>：在运行爬虫时通过它找到我们编写的爬虫类；</li>
+<li><code>start_urls</code>：抓取入口，也可以叫做种子URL；</li>
+<li><code>custom_settings</code>：爬虫自定义配置，会覆盖配置文件中的配置项；</li>
+</ul>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242067.png" />
+
+<h1 id="引擎"><a href="#引擎" class="headerlink" title="引擎"></a>引擎</h1><p>分析完爬虫类的初始化后，还是回到 <code>Crawler</code> 的 <code>crawl</code> 方法，紧接着就是创建<strong>引擎</strong>对象，也就是 <code>_create_engine</code> 方法，看看初始化时都发生了什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExecutionEngine</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""引擎"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, crawler, spider_closed_callback)</span>:</span></span><br><span class="line">        self.crawler = crawler</span><br><span class="line">        <span class="comment"># 这里也把settings配置保存到引擎中</span></span><br><span class="line">        self.settings = crawler.settings</span><br><span class="line">        <span class="comment"># 信号</span></span><br><span class="line">        self.signals = crawler.signals</span><br><span class="line">        <span class="comment"># 日志格式</span></span><br><span class="line">        self.logformatter = crawler.logformatter</span><br><span class="line">        self.slot = <span class="literal">None</span></span><br><span class="line">        self.spider = <span class="literal">None</span></span><br><span class="line">        self.running = <span class="literal">False</span></span><br><span class="line">        self.paused = <span class="literal">False</span></span><br><span class="line">        <span class="comment"># 从settings中找到Scheduler调度器，找到Scheduler类</span></span><br><span class="line">        self.scheduler_cls = load_object(self.settings[<span class="string">'SCHEDULER'</span>])</span><br><span class="line">        <span class="comment"># 同样，找到Downloader下载器类</span></span><br><span class="line">        downloader_cls = load_object(self.settings[<span class="string">'DOWNLOADER'</span>])</span><br><span class="line">        <span class="comment"># 实例化Downloader</span></span><br><span class="line">        self.downloader = downloader_cls(crawler)</span><br><span class="line">        <span class="comment"># 实例化Scraper 它是引擎连接爬虫类的桥梁</span></span><br><span class="line">        self.scraper = Scraper(crawler)</span><br><span class="line">        self._spider_closed_callback = spider_closed_callback</span><br></pre></td></tr></table></figure>
+
+<p>在这里我们能看到，主要是对其他几个核心组件进行定义和初始化，主要包括包括：<code>Scheduler</code>、<code>Downloader</code>、<code>Scrapyer</code>，其中 <code>Scheduler</code> 只进行了类定义，没有实例化。</p>
+<p>也就是说，引擎是整个 Scrapy 的核心大脑，它负责管理和调度这些组件，让这些组件更好地协调工作。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242206.png" />
+
+<p>下面我们依次来看这几个核心组件都是如何初始化的？</p>
+<h1 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h1><p>调度器初始化发生在引擎的 <code>open_spider</code> 方法中，我们提前来看一下调度器的初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Scheduler</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="string">"""调度器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, dupefilter, jobdir=None, dqclass=None, mqclass=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 logunser=False, stats=None, pqclass=None)</span>:</span></span><br><span class="line">        <span class="comment"># 指纹过滤器</span></span><br><span class="line">        self.df = dupefilter</span><br><span class="line">        <span class="comment"># 任务队列文件夹</span></span><br><span class="line">        self.dqdir = self._dqdir(jobdir)</span><br><span class="line">        <span class="comment"># 优先级任务队列类</span></span><br><span class="line">        self.pqclass = pqclass</span><br><span class="line">        <span class="comment"># 磁盘任务队列类</span></span><br><span class="line">        self.dqclass = dqclass</span><br><span class="line">        <span class="comment"># 内存任务队列类</span></span><br><span class="line">        self.mqclass = mqclass</span><br><span class="line">        <span class="comment"># 日志是否序列化</span></span><br><span class="line">        self.logunser = logunser</span><br><span class="line">        self.stats = stats</span><br><span class="line">        </span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_crawler</span><span class="params">(cls, crawler)</span>:</span></span><br><span class="line">        settings = crawler.settings</span><br><span class="line">        <span class="comment"># 从配置文件中获取指纹过滤器类</span></span><br><span class="line">        dupefilter_cls = load_object(settings[<span class="string">'DUPEFILTER_CLASS'</span>])</span><br><span class="line">        <span class="comment"># 实例化指纹过滤器</span></span><br><span class="line">        dupefilter = dupefilter_cls.from_settings(settings)</span><br><span class="line">        <span class="comment"># 从配置文件中依次获取优先级任务队列类、磁盘队列类、内存队列类</span></span><br><span class="line">        pqclass = load_object(settings[<span class="string">'SCHEDULER_PRIORITY_QUEUE'</span>])</span><br><span class="line">        dqclass = load_object(settings[<span class="string">'SCHEDULER_DISK_QUEUE'</span>])</span><br><span class="line">        mqclass = load_object(settings[<span class="string">'SCHEDULER_MEMORY_QUEUE'</span>])</span><br><span class="line">        <span class="comment"># 请求日志序列化开关</span></span><br><span class="line">        logunser = settings.getbool(<span class="string">'LOG_UNSERIALIZABLE_REQUESTS'</span>, settings.getbool(<span class="string">'SCHEDULER_DEBUG'</span>))</span><br><span class="line">        <span class="keyword">return</span> cls(dupefilter, jobdir=job_dir(settings), logunser=logunser,</span><br><span class="line">                   stats=crawler.stats, pqclass=pqclass, dqclass=dqclass, mqclass=mqclass)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，调度器的初始化主要做了 2 件事：</p>
+<ul>
+<li>实例化请求指纹过滤器：主要用来过滤重复请求；</li>
+<li>定义不同类型的任务队列：优先级任务队列、基于磁盘的任务队列、基于内存的任务队列；</li>
+</ul>
+<p>请求指纹过滤器又是什么？</p>
+<p>在配置文件中，我们可以看到定义的默认指纹过滤器是 <code>RFPDupeFilter</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RFPDupeFilter</span><span class="params">(BaseDupeFilter)</span>:</span></span><br><span class="line">    <span class="string">"""请求指纹过滤器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, path=None, debug=False)</span>:</span></span><br><span class="line">        self.file = <span class="literal">None</span></span><br><span class="line">        <span class="comment"># 指纹集合 使用的是Set 基于内存</span></span><br><span class="line">        self.fingerprints = set()</span><br><span class="line">        self.logdupes = <span class="literal">True</span></span><br><span class="line">        self.debug = debug</span><br><span class="line">        self.logger = logging.getLogger(__name__)</span><br><span class="line">        <span class="comment"># 请求指纹可存入磁盘</span></span><br><span class="line">        <span class="keyword">if</span> path:</span><br><span class="line">            self.file = open(os.path.join(path, <span class="string">'requests.seen'</span>), <span class="string">'a+'</span>)</span><br><span class="line">            self.file.seek(<span class="number">0</span>)</span><br><span class="line">            self.fingerprints.update(x.rstrip() <span class="keyword">for</span> x <span class="keyword">in</span> self.file)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        debug = settings.getbool(<span class="string">'DUPEFILTER_DEBUG'</span>)</span><br><span class="line">        <span class="keyword">return</span> cls(job_dir(settings), debug)</span><br></pre></td></tr></table></figure>
+
+<p>请求指纹过滤器初始化时，定义了指纹集合，这个集合使用内存实现的 <code>Set</code>，而且可以控制这些指纹是否存入磁盘以供下次重复使用。</p>
+<p>也就是说，指纹过滤器的主要职责是：<strong>过滤重复请求，可自定义过滤规则。</strong></p>
+<p>在下篇文章中我们会介绍到，每个请求是根据什么规则生成指纹的，然后是又如何实现重复请求过滤逻辑的，这里我们先知道它的功能即可。</p>
+<p>下面来看调度器定义的任务队列都有什么作用？</p>
+<p>调度器默认定义了 2 种队列类型：</p>
+<ul>
+<li>基于磁盘的任务队列：在配置文件可配置存储路径，每次执行后会把队列任务保存到磁盘上；</li>
+<li>基于内存的任务队列：每次都在内存中执行，下次启动则消失；</li>
+</ul>
+<p>配置文件默认定义如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于磁盘的任务队列(后进先出)</span></span><br><span class="line">SCHEDULER_DISK_QUEUE = <span class="string">'scrapy.squeues.PickleLifoDiskQueue'</span></span><br><span class="line"><span class="comment"># 基于内存的任务队列(后进先出)</span></span><br><span class="line">SCHEDULER_MEMORY_QUEUE = <span class="string">'scrapy.squeues.LifoMemoryQueue'</span></span><br><span class="line"><span class="comment"># 优先级队列</span></span><br><span class="line">SCHEDULER_PRIORITY_QUEUE = <span class="string">'queuelib.PriorityQueue'</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们在配置文件中定义了 <code>JOBDIR</code> 配置项，那么每次执行爬虫时，都会把任务队列保存在磁盘中，下次启动爬虫时可以重新加载继续执行我们的任务。</p>
+<p>如果没有定义这个配置项，那么默认使用的是内存队列。</p>
+<p>细心的你可能会发现，默认定义的这些队列结构都是<strong>后进先出</strong>的，什么意思呢？</p>
+<p>也就是在运行我们的爬虫代码时，如果生成一个抓取任务，放入到任务队列中，那么下次抓取就会从任务队列中先获取到这个任务，优先执行。</p>
+<p>这么实现意味什么呢？其实意味着：<strong>Scrapy 默认的采集规则是深度优先！</strong></p>
+<p>如何改变这种机制，变为<strong>广度优先采集</strong>呢？这时候我们就要看一下 <code>scrapy.squeues</code> 模块了，在这里定义了很多种队列：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先进先出磁盘队列(pickle序列化)</span></span><br><span class="line">PickleFifoDiskQueue = _serializable_queue(queue.FifoDiskQueue, \</span><br><span class="line">    _pickle_serialize, pickle.loads)</span><br><span class="line"><span class="comment"># 后进先出磁盘队列(pickle序列化)</span></span><br><span class="line">PickleLifoDiskQueue = _serializable_queue(queue.LifoDiskQueue, \</span><br><span class="line">    _pickle_serialize, pickle.loads)</span><br><span class="line"><span class="comment"># 先进先出磁盘队列(marshal序列化)</span></span><br><span class="line">MarshalFifoDiskQueue = _serializable_queue(queue.FifoDiskQueue, \</span><br><span class="line">    marshal.dumps, marshal.loads)</span><br><span class="line"><span class="comment"># 后进先出磁盘队列(marshal序列化)</span></span><br><span class="line">MarshalLifoDiskQueue = _serializable_queue(queue.LifoDiskQueue, \</span><br><span class="line">    marshal.dumps, marshal.loads)</span><br><span class="line"><span class="comment"># 先进先出内存队列</span></span><br><span class="line">FifoMemoryQueue = queue.FifoMemoryQueue</span><br><span class="line"><span class="comment"># 后进先出内存队列</span></span><br><span class="line">LifoMemoryQueue = queue.LifoMemoryQueue</span><br></pre></td></tr></table></figure>
+
+<p>如果我们想把抓取任务改为广度优先，我们只需要在配置文件中把队列类修改为<strong>先进先出</strong>队列类就可以了！从这里我们也可以看出，Scrapy 各个组件之间的耦合性非常低，每个模块都是可自定义的。</p>
+<p>如果你想探究这些队列是如何实现的，可以参考 Scrapy 作者写的 <a href="https://github.com/scrapy/queuelib" target="_blank" rel="noopener">scrapy/queuelib</a> 项目，在 Github 上就可以找到，在这里有这些队列的具体实现。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242425.png" />
+
+<a id="more"></a>
+
+<h1 id="下载器"><a href="#下载器" class="headerlink" title="下载器"></a>下载器</h1><p>回到引擎的初始化的地方，接下来我们来看，下载器是如何初始化的。</p>
+<p>在默认的配置文件 <code>default_settings.py</code> 中，下载器配置如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOADER = <span class="string">'scrapy.core.downloader.Downloader'</span></span><br></pre></td></tr></table></figure>
+
+<p>我们来看 <code>Downloader</code> 类的初始化：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Downloader</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""下载器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, crawler)</span>:</span></span><br><span class="line">        <span class="comment"># 同样的 拿到settings对象</span></span><br><span class="line">        self.settings = crawler.settings</span><br><span class="line">        self.signals = crawler.signals</span><br><span class="line">        self.slots = &#123;&#125;</span><br><span class="line">        self.active = set()</span><br><span class="line">        <span class="comment"># 初始化DownloadHandlers</span></span><br><span class="line">        self.handlers = DownloadHandlers(crawler)</span><br><span class="line">        <span class="comment"># 从配置中获取设置的并发数</span></span><br><span class="line">        self.total_concurrency = self.settings.getint(<span class="string">'CONCURRENT_REQUESTS'</span>)</span><br><span class="line">        <span class="comment"># 同一域名并发数</span></span><br><span class="line">        self.domain_concurrency = self.settings.getint(<span class="string">'CONCURRENT_REQUESTS_PER_DOMAIN'</span>)</span><br><span class="line">        <span class="comment"># 同一IP并发数</span></span><br><span class="line">        self.ip_concurrency = self.settings.getint(<span class="string">'CONCURRENT_REQUESTS_PER_IP'</span>)</span><br><span class="line">        <span class="comment"># 随机延迟下载时间</span></span><br><span class="line">        self.randomize_delay = self.settings.getbool(<span class="string">'RANDOMIZE_DOWNLOAD_DELAY'</span>)</span><br><span class="line">        <span class="comment"># 初始化下载器中间件</span></span><br><span class="line">        self.middleware = DownloaderMiddlewareManager.from_crawler(crawler)</span><br><span class="line">        self._slot_gc_loop = task.LoopingCall(self._slot_gc)</span><br><span class="line">        self._slot_gc_loop.start(<span class="number">60</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这个过程中，主要是初始化了<strong>下载处理器</strong>、<strong>下载器中间件管理器</strong>以及从配置文件中拿到抓取请求控制的相关参数。</p>
+<p>那么下载处理器是做什么的？下载器中间件又负责哪些工作？</p>
+<p>先来看 <code>DownloadHandlers</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DownloadHandlers</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""下载器处理器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, crawler)</span>:</span></span><br><span class="line">        self._crawler = crawler</span><br><span class="line">        self._schemes = &#123;&#125;	<span class="comment"># 存储scheme对应的类路径 后面用于实例化</span></span><br><span class="line">        self._handlers = &#123;&#125;	<span class="comment"># 存储scheme对应的下载器</span></span><br><span class="line">        self._notconfigured = &#123;&#125;</span><br><span class="line">        <span class="comment"># 从配置中找到DOWNLOAD_HANDLERS_BASE 构造下载处理器</span></span><br><span class="line">        <span class="comment"># 注意：这里是调用getwithbase方法  取的是配置中的XXXX_BASE配置</span></span><br><span class="line">        handlers = without_none_values(</span><br><span class="line">            crawler.settings.getwithbase(<span class="string">'DOWNLOAD_HANDLERS'</span>))</span><br><span class="line">        <span class="comment"># 存储scheme对应的类路径 后面用于实例化</span></span><br><span class="line">        <span class="keyword">for</span> scheme, clspath <span class="keyword">in</span> six.iteritems(handlers):</span><br><span class="line">            self._schemes[scheme] = clspath</span><br><span class="line"></span><br><span class="line">        crawler.signals.connect(self._close, signals.engine_stopped)</span><br></pre></td></tr></table></figure>
+
+<p>下载处理器在默认的配置文件中是这样配置的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 用户可自定义的下载处理器</span></span><br><span class="line">DOWNLOAD_HANDLERS = &#123;&#125;</span><br><span class="line"><span class="comment"># 默认的下载处理器</span></span><br><span class="line">DOWNLOAD_HANDLERS_BASE = &#123;</span><br><span class="line">    <span class="string">'file'</span>: <span class="string">'scrapy.core.downloader.handlers.file.FileDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'http'</span>: <span class="string">'scrapy.core.downloader.handlers.http.HTTPDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'https'</span>: <span class="string">'scrapy.core.downloader.handlers.http.HTTPDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'s3'</span>: <span class="string">'scrapy.core.downloader.handlers.s3.S3DownloadHandler'</span>,</span><br><span class="line">    <span class="string">'ftp'</span>: <span class="string">'scrapy.core.downloader.handlers.ftp.FTPDownloadHandler'</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>看到这里你应该能明白了，下载处理器会根据下载资源的类型，选择对应的下载器去下载资源。其中我们最常用的就是 <code>http</code> 和 <code>https</code> 对应的处理器。</p>
+<p>但是请注意，在这里，这些下载器是没有被实例化的，只有在真正发起网络请求时，才会进行初始化，而且只会初始化一次，后面文章会讲到。</p>
+<p>下面我们来看下载器中间件 <code>DownloaderMiddlewareManager</code> 初始化过程，同样地，这里又调用了类方法 <code>from_crawler</code> 进行初始化，而且 <code>DownloaderMiddlewareManager</code> 继承了<code>MiddlewareManager</code> 类，来看它在初始化做了哪些工作：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MiddlewareManager</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""所有中间件的父类，提供中间件公共的方法"""</span></span><br><span class="line">    component_name = <span class="string">'foo middleware'</span></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_crawler</span><span class="params">(cls, crawler)</span>:</span></span><br><span class="line">        <span class="comment"># 调用from_settings</span></span><br><span class="line">        <span class="keyword">return</span> cls.from_settings(crawler.settings, crawler)</span><br><span class="line">    </span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_settings</span><span class="params">(cls, settings, crawler=None)</span>:</span></span><br><span class="line">        <span class="comment"># 调用子类_get_mwlist_from_settings得到所有中间件类的模块</span></span><br><span class="line">        mwlist = cls._get_mwlist_from_settings(settings)</span><br><span class="line">        middlewares = []</span><br><span class="line">        enabled = []</span><br><span class="line">        <span class="comment"># 依次实例化</span></span><br><span class="line">        <span class="keyword">for</span> clspath <span class="keyword">in</span> mwlist:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="comment"># 加载这些中间件模块</span></span><br><span class="line">                mwcls = load_object(clspath)</span><br><span class="line">                <span class="comment"># 如果此中间件类定义了from_crawler 则调用此方法实例化</span></span><br><span class="line">                <span class="keyword">if</span> crawler <span class="keyword">and</span> hasattr(mwcls, <span class="string">'from_crawler'</span>):</span><br><span class="line">                    mw = mwcls.from_crawler(crawler)</span><br><span class="line">                <span class="comment"># 如果此中间件类定义了from_settings 则调用此方法实例化</span></span><br><span class="line">                <span class="keyword">elif</span> hasattr(mwcls, <span class="string">'from_settings'</span>):</span><br><span class="line">                    mw = mwcls.from_settings(settings)</span><br><span class="line">                <span class="comment"># 上面2个方法都没有，则直接调用构造实例化</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    mw = mwcls()</span><br><span class="line">                middlewares.append(mw)</span><br><span class="line">                enabled.append(clspath)</span><br><span class="line">            <span class="keyword">except</span> NotConfigured <span class="keyword">as</span> e:</span><br><span class="line">                <span class="keyword">if</span> e.args:</span><br><span class="line">                    clsname = clspath.split(<span class="string">'.'</span>)[<span class="number">-1</span>]</span><br><span class="line">                    logger.warning(<span class="string">"Disabled %(clsname)s: %(eargs)s"</span>,</span><br><span class="line">                                   &#123;<span class="string">'clsname'</span>: clsname, <span class="string">'eargs'</span>: e.args[<span class="number">0</span>]&#125;,</span><br><span class="line">                                   extra=&#123;<span class="string">'crawler'</span>: crawler&#125;)</span><br><span class="line"></span><br><span class="line">        logger.info(<span class="string">"Enabled %(componentname)ss:\n%(enabledlist)s"</span>,</span><br><span class="line">                    &#123;<span class="string">'componentname'</span>: cls.component_name,</span><br><span class="line">                     <span class="string">'enabledlist'</span>: pprint.pformat(enabled)&#125;,</span><br><span class="line">                    extra=&#123;<span class="string">'crawler'</span>: crawler&#125;)</span><br><span class="line">        <span class="comment"># 调用构造方法</span></span><br><span class="line">        <span class="keyword">return</span> cls(*middlewares)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_mwlist_from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="comment"># 具体有哪些中间件类，子类定义</span></span><br><span class="line">        <span class="keyword">raise</span> NotImplementedError</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, *middlewares)</span>:</span></span><br><span class="line">        self.middlewares = middlewares</span><br><span class="line">        <span class="comment"># 定义中间件方法</span></span><br><span class="line">        self.methods = defaultdict(list)</span><br><span class="line">        <span class="keyword">for</span> mw <span class="keyword">in</span> middlewares:</span><br><span class="line">            self._add_middleware(mw)</span><br><span class="line">        </span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">_add_middleware</span><span class="params">(self, mw)</span>:</span></span><br><span class="line">        <span class="comment"># 默认定义的 子类可覆盖</span></span><br><span class="line">        <span class="comment"># 如果中间件类有定义open_spider 则加入到methods</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'open_spider'</span>):</span><br><span class="line">            self.methods[<span class="string">'open_spider'</span>].append(mw.open_spider)</span><br><span class="line">        <span class="comment"># 如果中间件类有定义close_spider 则加入到methods</span></span><br><span class="line">        <span class="comment"># methods就是一串中间件的方法链 后期会依次调用</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'close_spider'</span>):</span><br><span class="line">            self.methods[<span class="string">'close_spider'</span>].insert(<span class="number">0</span>, mw.close_spider)</span><br></pre></td></tr></table></figure>
+
+<p><code>DownloaderMiddlewareManager</code> 实例化过程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DownloaderMiddlewareManager</span><span class="params">(MiddlewareManager)</span>:</span></span><br><span class="line">	<span class="string">"""下载中间件管理器"""</span></span><br><span class="line">    component_name = <span class="string">'downloader middleware'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_mwlist_from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="comment"># 从配置文件DOWNLOADER_MIDDLEWARES_BASE和DOWNLOADER_MIDDLEWARES获得所有下载器中间件</span></span><br><span class="line">        <span class="keyword">return</span> build_component_list(</span><br><span class="line">            settings.getwithbase(<span class="string">'DOWNLOADER_MIDDLEWARES'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_add_middleware</span><span class="params">(self, mw)</span>:</span></span><br><span class="line">        <span class="comment"># 定义下载器中间件请求、响应、异常一串方法</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_request'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_request'</span>].append(mw.process_request)</span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_response'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_response'</span>].insert(<span class="number">0</span>, mw.process_response)</span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_exception'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_exception'</span>].insert(<span class="number">0</span>, mw.process_exception)</span><br></pre></td></tr></table></figure>
+
+<p><strong>下载器中间件管理器</strong>继承了 <code>MiddlewareManager</code> 类，然后重写了 <code>_add_middleware</code> 方法，为下载行为定义默认的<strong>下载前、下载后、异常时</strong>对应的处理方法。</p>
+<p>这里我们可以想一下，中间件这么做的好处是什么？</p>
+<p>从这里能大概看出，从某个组件流向另一个组件时，会经过一系列中间件，每个中间件都定义了自己的处理流程，相当于一个个管道，输入时可以针对数据进行处理，然后送达到另一个组件，另一个组件处理完逻辑后，又经过这一系列中间件，这些中间件可再针对这个响应结果进行处理，最终输出。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242611.png" />
+
+<h1 id="Scraper"><a href="#Scraper" class="headerlink" title="Scraper"></a>Scraper</h1><p>下载器实例化完了之后，回到引擎的初始化方法中，然后就是实例化 <code>Scraper</code>，在<a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a>这篇文章中我提到过，这个类没有在架构图中出现，但这个类其实是处于<code>Engine</code>、<code>Spiders</code>、<code>Pipeline</code> 之间，是连通这三个组件的桥梁。</p>
+<p>我们来看一下它的初始化过程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Scraper</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, crawler)</span>:</span></span><br><span class="line">        self.slot = <span class="literal">None</span></span><br><span class="line">        <span class="comment"># 实例化爬虫中间件管理器</span></span><br><span class="line">        self.spidermw = SpiderMiddlewareManager.from_crawler(crawler)</span><br><span class="line">        <span class="comment"># 从配置文件中加载Pipeline处理器类</span></span><br><span class="line">        itemproc_cls = load_object(crawler.settings[<span class="string">'ITEM_PROCESSOR'</span>])</span><br><span class="line">        <span class="comment"># 实例化Pipeline处理器</span></span><br><span class="line">        self.itemproc = itemproc_cls.from_crawler(crawler)</span><br><span class="line">        <span class="comment"># 从配置文件中获取同时处理输出的任务个数</span></span><br><span class="line">        self.concurrent_items = crawler.settings.getint(<span class="string">'CONCURRENT_ITEMS'</span>)</span><br><span class="line">        self.crawler = crawler</span><br><span class="line">        self.signals = crawler.signals</span><br><span class="line">        self.logformatter = crawler.logformatter</span><br></pre></td></tr></table></figure>
+
+<p><code>Scraper</code> 创建了 <code>SpiderMiddlewareManager</code>，它的初始化过程：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">SpiderMiddlewareManager</span><span class="params">(MiddlewareManager)</span>:</span></span><br><span class="line">	<span class="string">"""爬虫中间件管理器"""</span></span><br><span class="line">    component_name = <span class="string">'spider middleware'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_mwlist_from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="comment"># 从配置文件中SPIDER_MIDDLEWARES_BASE和SPIDER_MIDDLEWARES获取默认的爬虫中间件类</span></span><br><span class="line">        <span class="keyword">return</span> build_component_list(settings.getwithbase(<span class="string">'SPIDER_MIDDLEWARES'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_add_middleware</span><span class="params">(self, mw)</span>:</span></span><br><span class="line">        super(SpiderMiddlewareManager, self)._add_middleware(mw)</span><br><span class="line">        <span class="comment"># 定义爬虫中间件处理方法</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_spider_input'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_spider_input'</span>].append(mw.process_spider_input)</span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_spider_output'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_spider_output'</span>].insert(<span class="number">0</span>, mw.process_spider_output)</span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_spider_exception'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_spider_exception'</span>].insert(<span class="number">0</span>, mw.process_spider_exception)</span><br><span class="line">        <span class="keyword">if</span> hasattr(mw, <span class="string">'process_start_requests'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_start_requests'</span>].insert(<span class="number">0</span>, mw.process_start_requests)</span><br></pre></td></tr></table></figure>
+
+<p>爬虫中间件管理器初始化与之前的下载器中间件管理器类似，先是从配置文件中加载了默认的爬虫中间件类，然后依次注册爬虫中间件的一系列流程方法。配置文件中定义的默认的爬虫中间件类如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">SPIDER_MIDDLEWARES_BASE = &#123;</span><br><span class="line">	<span class="comment"># 默认的爬虫中间件类</span></span><br><span class="line">    <span class="string">'scrapy.spidermiddlewares.httperror.HttpErrorMiddleware'</span>: <span class="number">50</span>,</span><br><span class="line">    <span class="string">'scrapy.spidermiddlewares.offsite.OffsiteMiddleware'</span>: <span class="number">500</span>,</span><br><span class="line">    <span class="string">'scrapy.spidermiddlewares.referer.RefererMiddleware'</span>: <span class="number">700</span>,</span><br><span class="line">    <span class="string">'scrapy.spidermiddlewares.urllength.UrlLengthMiddleware'</span>: <span class="number">800</span>,</span><br><span class="line">    <span class="string">'scrapy.spidermiddlewares.depth.DepthMiddleware'</span>: <span class="number">900</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>这里解释一下，这些默认的爬虫中间件的职责：</p>
+<ul>
+<li>HttpErrorMiddleware：针对非 200 响应错误进行逻辑处理；</li>
+<li>OffsiteMiddleware：如果Spider中定义了 <code>allowed_domains</code>，会自动过滤除此之外的域名请求；</li>
+<li>RefererMiddleware：追加 <code>Referer</code> 头信息；</li>
+<li>UrlLengthMiddleware：过滤 URL 长度超过限制的请求；</li>
+<li>DepthMiddleware：过滤超过指定深度的抓取请求；</li>
+</ul>
+<p>当然，在这里你也可以定义自己的爬虫中间件，来处理自己所需的逻辑。</p>
+<p>爬虫中间件管理器初始化完之后，然后就是 <code>Pipeline</code> 组件的初始化，默认的 <code>Pipeline</code> 组件是 <code>ItemPipelineManager</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ItemPipelineManager</span><span class="params">(MiddlewareManager)</span>:</span></span><br><span class="line"></span><br><span class="line">    component_name = <span class="string">'item pipeline'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_mwlist_from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="comment"># 从配置文件加载ITEM_PIPELINES_BASE和ITEM_PIPELINES类</span></span><br><span class="line">        <span class="keyword">return</span> build_component_list(settings.getwithbase(<span class="string">'ITEM_PIPELINES'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_add_middleware</span><span class="params">(self, pipe)</span>:</span></span><br><span class="line">        super(ItemPipelineManager, self)._add_middleware(pipe)</span><br><span class="line">        <span class="comment"># 定义默认的pipeline处理逻辑</span></span><br><span class="line">        <span class="keyword">if</span> hasattr(pipe, <span class="string">'process_item'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_item'</span>].append(pipe.process_item)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_item</span><span class="params">(self, item, spider)</span>:</span></span><br><span class="line">        <span class="comment"># 依次调用所有子类的process_item方法</span></span><br><span class="line">        <span class="keyword">return</span> self._process_chain(<span class="string">'process_item'</span>, item, spider)</span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到 <code>ItemPipelineManager</code> 也是中间件管理器的一个子类，由于它的行为非常类似于中间件，但由于功能较为独立，所以属于核心组件之一。</p>
+<p>从 <code>Scraper</code> 的初始化过程我们可以看出，它管理着 <code>Spiders</code> 和 <code>Pipeline</code> 相关的数据交互。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242739.png" />
+
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好了，这篇文章我们主要剖析了 Scrapy 涉及到的核心的组件，主要包括：引擎、下载器、调度器、爬虫类、输出处理器，以及它们各自都是如何初始化的，在初始化过程中，它们又包含了哪些子模块来辅助完成这些模块的功能。</p>
+<p>这些组件各司其职，相互协调，共同完成爬虫的抓取任务，而且从代码中我们也能发现，每个组件类都是定义在配置文件中的，也就是说我们可以实现自己的逻辑，然后替代这些组件，这样的设计模式也非常值得我们学习。</p>
+<p>在下一篇文章中，我会带你剖析 Scrapy 最为核心的处理流程，分析这些组件具体是如何相互协作，完成我们的抓取任务的。</p>
+<p>附：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a></li>
+<li><a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a></li>
+<li>Scrapy源码分析（三）核心组件初始化</li>
+<li><a href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">Scrapy源码分析（四）核心抓取流程</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/" title="Scrapy源码分析（三）核心组件初始化">http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/scrapy/" rel="tag"><i class="fa fa-tag"></i> scrapy</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 源码分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/09/scrapy-code-analyze-entrance/" rel="prev" title="Scrapy源码分析（二）运行入口">
+      <i class="fa fa-chevron-left"></i> Scrapy源码分析（二）运行入口
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/12/07/scrapy-code-analyze-core-process/" rel="next" title="Scrapy源码分析（四）核心抓取流程">
+      Scrapy源码分析（四）核心抓取流程 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#爬虫类"><span class="nav-number">1.</span> <span class="nav-text">爬虫类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#引擎"><span class="nav-number">2.</span> <span class="nav-text">引擎</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调度器"><span class="nav-number">3.</span> <span class="nav-text">调度器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载器"><span class="nav-number">4.</span> <span class="nav-text">下载器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Scraper"><span class="nav-number">5.</span> <span class="nav-text">Scraper</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

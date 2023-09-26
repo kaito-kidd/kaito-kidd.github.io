@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="上一篇文章：Scrapy源码分析（三）核心组件初始化，我们已经分析了 Scrapy 核心组件的主要职责，以及它们在初始化时都完成了哪些工作。 这篇文章就让我们来看一下，也是 Scrapy 最核心的抓取流程是如何运行的，它是如何调度各个组件，完成整个抓取工作的。 运行入口还是回到最初的入口，在Scrapy源码分析（二）运行入口这篇文章中我们已经详细分析过了，在执行 Scrapy 命令时，主要经过以下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy源码分析（四）核心抓取流程">
+<meta property="og:url" content="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="上一篇文章：Scrapy源码分析（三）核心组件初始化，我们已经分析了 Scrapy 核心组件的主要职责，以及它们在初始化时都完成了哪些工作。 这篇文章就让我们来看一下，也是 Scrapy 最核心的抓取流程是如何运行的，它是如何调度各个组件，完成整个抓取工作的。 运行入口还是回到最初的入口，在Scrapy源码分析（二）运行入口这篇文章中我们已经详细分析过了，在执行 Scrapy 命令时，主要经过以下">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-arch.jpg">
+<meta property="article:published_time" content="2016-12-07T10:30:14.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="scrapy">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Scrapy源码分析（四）核心抓取流程 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy源码分析（四）核心抓取流程
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-12-07 10:30:14" itemprop="dateCreated datePublished" datetime="2016-12-07T10:30:14+00:00">2016-12-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/12/07/scrapy-code-analyze-core-process/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（四）核心抓取流程" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/12/07/scrapy-code-analyze-core-process/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/12/07/scrapy-code-analyze-core-process/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>26k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>43 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>上一篇文章：<a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">Scrapy源码分析（三）核心组件初始化</a>，我们已经分析了 Scrapy 核心组件的主要职责，以及它们在初始化时都完成了哪些工作。</p>
+<p>这篇文章就让我们来看一下，也是 Scrapy 最核心的抓取流程是如何运行的，它是如何调度各个组件，完成整个抓取工作的。</p>
+<h1 id="运行入口"><a href="#运行入口" class="headerlink" title="运行入口"></a>运行入口</h1><p>还是回到最初的入口，在<a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a>这篇文章中我们已经详细分析过了，在执行 Scrapy 命令时，主要经过以下几步：</p>
+<ul>
+<li>调用 <code>cmdline.py</code> 的 <code>execute</code> 方法</li>
+<li>找到对应的 <code>命令实例</code> 解析命令行</li>
+<li>构建 <code>CrawlerProcess</code> 实例，调用 <code>crawl</code> 和 <code>start</code> 方法开始抓取</li>
+</ul>
+<p>而 <code>crawl</code> 方法最终是调用了 <code>Cralwer</code> 实例的 <code>crawl</code>，这个方法最终把控制权交给了<code>Engine</code>，而 <code>start</code> 方法注册好协程池，就开始异步调度执行了。</p>
+<p>我们来看 <code>Cralwer</code> 的 <code>crawl</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="keyword">not</span> self.crawling, <span class="string">"Crawling already taking place"</span></span><br><span class="line">    self.crawling = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 创建爬虫实例</span></span><br><span class="line">        self.spider = self._create_spider(*args, **kwargs)</span><br><span class="line">        <span class="comment"># 创建引擎</span></span><br><span class="line">        self.engine = self._create_engine()</span><br><span class="line">        <span class="comment"># 调用spider的start_requests 获取种子URL</span></span><br><span class="line">        start_requests = iter(self.spider.start_requests())</span><br><span class="line">        <span class="comment"># 调用engine的open_spider 交由引擎调度</span></span><br><span class="line">        <span class="keyword">yield</span> self.engine.open_spider(self.spider, start_requests)</span><br><span class="line">        <span class="keyword">yield</span> defer.maybeDeferred(self.engine.start)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            exc_info = sys.exc_info()</span><br><span class="line">        self.crawling = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> self.engine <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">yield</span> self.engine.close()</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            six.reraise(*exc_info)</span><br><span class="line">        <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+
+<p>这里首先会创建出爬虫实例，然后创建引擎，之后调用了 <code>spider</code> 的 <code>start_requests</code> 方法，这个方法就是我们平时写的最多爬虫类的父类，它在 <code>spiders/__init__.py</code> 中定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_requests</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 根据定义好的start_urls属性 生成种子URL对象</span></span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> self.start_urls:</span><br><span class="line">        <span class="keyword">yield</span> self.make_requests_from_url(url)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_requests_from_url</span><span class="params">(self, url)</span>:</span></span><br><span class="line">    <span class="comment"># 构建Request对象</span></span><br><span class="line">    <span class="keyword">return</span> Request(url, dont_filter=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="构建请求"><a href="#构建请求" class="headerlink" title="构建请求"></a>构建请求</h1><p>通过上面这段代码，我们能看到，平时我们必须要定义的 <code>start_urls</code> 属性，原来就是在这里用来构建 <code>Request</code> 的，来看 <code>Request</code> 的定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Request</span><span class="params">(object_ref)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, url, callback=None, method=<span class="string">'GET'</span>, headers=None, body=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 cookies=None, meta=None, encoding=<span class="string">'utf-8'</span>, priority=<span class="number">0</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 dont_filter=False, errback=None)</span>:</span></span><br><span class="line">        <span class="comment"># 编码</span></span><br><span class="line">        self._encoding = encoding</span><br><span class="line">        <span class="comment"># 请求方法</span></span><br><span class="line">        self.method = str(method).upper()</span><br><span class="line">        <span class="comment"># 设置url</span></span><br><span class="line">        self._set_url(url)</span><br><span class="line">        <span class="comment"># 设置body</span></span><br><span class="line">        self._set_body(body)</span><br><span class="line">        <span class="keyword">assert</span> isinstance(priority, int), <span class="string">"Request priority not an integer: %r"</span> % priority</span><br><span class="line">        <span class="comment"># 优先级</span></span><br><span class="line">        self.priority = priority</span><br><span class="line">        <span class="keyword">assert</span> callback <span class="keyword">or</span> <span class="keyword">not</span> errback, <span class="string">"Cannot use errback without a callback"</span></span><br><span class="line">        <span class="comment"># 回调函数</span></span><br><span class="line">        self.callback = callback</span><br><span class="line">        <span class="comment"># 异常回调函数</span></span><br><span class="line">        self.errback = errback</span><br><span class="line">        <span class="comment"># cookies</span></span><br><span class="line">        self.cookies = cookies <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">        <span class="comment"># 构建Header</span></span><br><span class="line">        self.headers = Headers(headers <span class="keyword">or</span> &#123;&#125;, encoding=encoding)</span><br><span class="line">        <span class="comment"># 是否需要过滤</span></span><br><span class="line">        self.dont_filter = dont_filter</span><br><span class="line">		<span class="comment"># 附加信息</span></span><br><span class="line">        self._meta = dict(meta) <span class="keyword">if</span> meta <span class="keyword">else</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Request</code> 对象比较简单，就是封装了请求参数、请求方法、回调以及可附加的属性信息。</p>
+<p>当然，你也可以在子类中重写 <code>start_requests</code> 和 <code>make_requests_from_url</code> 这 2 个方法，用来自定义逻辑构建种子请求。</p>
+<h1 id="引擎调度"><a href="#引擎调度" class="headerlink" title="引擎调度"></a>引擎调度</h1><p>再回到 <code>crawl</code> 方法，构建好种子请求对象后，调用了 <code>engine</code> 的 <code>open_spider</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">open_spider</span><span class="params">(self, spider, start_requests=<span class="params">()</span>, close_if_idle=True)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> self.has_capacity(), <span class="string">"No free spider slot when opening %r"</span> % \</span><br><span class="line">        spider.name</span><br><span class="line">    logger.info(<span class="string">"Spider opened"</span>, extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">    <span class="comment"># 注册_next_request调度方法 循环调度</span></span><br><span class="line">    nextcall = CallLaterOnce(self._next_request, spider)</span><br><span class="line">    <span class="comment"># 初始化scheduler</span></span><br><span class="line">    scheduler = self.scheduler_cls.from_crawler(self.crawler)</span><br><span class="line">    <span class="comment"># 调用爬虫中间件 处理种子请求</span></span><br><span class="line">    start_requests = <span class="keyword">yield</span> self.scraper.spidermw.process_start_requests(start_requests, spider)</span><br><span class="line">    <span class="comment"># 封装Slot对象</span></span><br><span class="line">    slot = Slot(start_requests, close_if_idle, nextcall, scheduler)</span><br><span class="line">    self.slot = slot</span><br><span class="line">    self.spider = spider</span><br><span class="line">    <span class="comment"># 调用scheduler的open</span></span><br><span class="line">    <span class="keyword">yield</span> scheduler.open(spider)</span><br><span class="line">    <span class="comment"># 调用scrapyer的open</span></span><br><span class="line">    <span class="keyword">yield</span> self.scraper.open_spider(spider)</span><br><span class="line">    <span class="comment"># 调用stats的open</span></span><br><span class="line">    self.crawler.stats.open_spider(spider)</span><br><span class="line">    <span class="keyword">yield</span> self.signals.send_catch_log_deferred(signals.spider_opened, spider=spider)</span><br><span class="line">    <span class="comment"># 发起调度</span></span><br><span class="line">    slot.nextcall.schedule()</span><br><span class="line">    slot.heartbeat.start(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这里首先构建了一个 <code>CallLaterOnce</code>，之后把 <code>_next_request</code> 方法注册了进去，看此类的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CallLaterOnce</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 在twisted的reactor中循环调度一个方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func, *a, **kw)</span>:</span></span><br><span class="line">        self._func = func</span><br><span class="line">        self._a = a</span><br><span class="line">        self._kw = kw</span><br><span class="line">        self._call = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">schedule</span><span class="params">(self, delay=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="comment"># 上次发起调度 才可再次继续调度</span></span><br><span class="line">        <span class="keyword">if</span> self._call <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># 注册self到callLater中</span></span><br><span class="line">            self._call = reactor.callLater(delay, self)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cancel</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._call:</span><br><span class="line">            self._call.cancel()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 上面注册的是self 所以会执行__call__</span></span><br><span class="line">        self._call = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">return</span> self._func(*self._a, **self._kw)</span><br></pre></td></tr></table></figure>
+
+<p>这里封装了循环执行的方法类，并且注册的方法会在 <code>twisted</code> 的 <code>reactor</code> 中异步执行，以后执行只需调用 <code>schedule</code>，就会注册 <code>self</code> 到 <code>reactor</code> 的 <code>callLater</code> 中，然后它会执行 <code>__call__</code> 方法，最终执行的就是我们注册的方法。</p>
+<p>而这里我们注册的方法就是引擎的 <code>_next_request</code>，也就是说，此方法会循环调度，直到程序退出。</p>
+<p>之后调用了爬虫中间件的 <code>process_start_requests</code> 方法，你可以定义多个自己的爬虫中间件，每个类都重写此方法，爬虫在调度之前会分别调用你定义好的爬虫中间件，来处理初始化请求，你可以进行过滤、加工、筛选以及你想做的任何逻辑。</p>
+<p>这样做的好处就是，把想做的逻辑拆分成多个中间件，每个中间件功能独立，而且维护起来更加清晰。</p>
+<a id="more"></a>
+
+<h1 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h1><p>接下来就要开始调度任务了，这里首先调用了 <code>Scheduler</code> 的 <code>open</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">open</span><span class="params">(self, spider)</span>:</span></span><br><span class="line">    self.spider = spider</span><br><span class="line">    <span class="comment"># 实例化优先级队列</span></span><br><span class="line">    self.mqs = self.pqclass(self._newmq)</span><br><span class="line">    <span class="comment"># 如果定义了dqdir则实例化基于磁盘的队列</span></span><br><span class="line">    self.dqs = self._dq() <span class="keyword">if</span> self.dqdir <span class="keyword">else</span> <span class="literal">None</span></span><br><span class="line">    <span class="comment"># 调用请求指纹过滤器的open方法</span></span><br><span class="line">    <span class="keyword">return</span> self.df.open()</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_dq</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 实例化磁盘队列</span></span><br><span class="line">    activef = join(self.dqdir, <span class="string">'active.json'</span>)</span><br><span class="line">    <span class="keyword">if</span> exists(activef):</span><br><span class="line">        <span class="keyword">with</span> open(activef) <span class="keyword">as</span> f:</span><br><span class="line">            prios = json.load(f)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        prios = ()</span><br><span class="line">    q = self.pqclass(self._newdq, startprios=prios)</span><br><span class="line">    <span class="keyword">if</span> q:</span><br><span class="line">        logger.info(<span class="string">"Resuming crawl (%(queuesize)d requests scheduled)"</span>,</span><br><span class="line">                    &#123;<span class="string">'queuesize'</span>: len(q)&#125;, extra=&#123;<span class="string">'spider'</span>: self.spider&#125;)</span><br><span class="line">    <span class="keyword">return</span> q</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>open</code> 方法中，调度器会实例化出优先级队列，以及根据 <code>dqdir</code>是否配置，决定是否使用磁盘队列，最后调用了<strong>请求指纹过滤器</strong>的 <code>open</code> 方法，这个方法在父类 <code>BaseDupeFilter</code> 中定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BaseDupeFilter</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 过滤器基类,子类可重写以下方法</span></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> cls()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">request_seen</span><span class="params">(self, request)</span>:</span></span><br><span class="line">        <span class="comment"># 请求过滤</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">open</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 可重写 完成过滤器的初始化工作</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">close</span><span class="params">(self, reason)</span>:</span></span><br><span class="line">        <span class="comment"># 可重写 完成关闭过滤器工作</span></span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">log</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">        pas</span><br></pre></td></tr></table></figure>
+
+<p>请求过滤器提供了请求过滤的具体实现方式，Scrapy 默认提供了 <code>RFPDupeFilter</code> 过滤器实现过滤重复请求的逻辑，这里先对这个类有个了解，后面会讲具体是如何过滤重复请求的。</p>
+<h1 id="Scraper"><a href="#Scraper" class="headerlink" title="Scraper"></a>Scraper</h1><p>再之后就调用 <code>Scraper</code> 的 <code>open_spider</code> 方法，在之前的文章中我们提到过，<code>Scraper</code> 类是连接 <code>Engine</code>、<code>Spider</code>、<code>Item Pipeline</code> 这 3 个组件的桥梁：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">open_spider</span><span class="params">(self, spider)</span>:</span></span><br><span class="line">    self.slot = Slot()</span><br><span class="line">    <span class="comment"># 调用所有pipeline的open_spider</span></span><br><span class="line">    <span class="keyword">yield</span> self.itemproc.open_spider(spider)</span><br></pre></td></tr></table></figure>
+
+<p>这里的主要逻辑是 <code>Scraper</code> 调用所有 <code>Pipeline</code> 的 <code>open_spider</code> 方法，如果我们定义了多个 <code>Pipeline</code> 输出类，可以重写 <code>open_spider</code> 完成每个 <code>Pipeline</code> 在输出前的初始化工作。</p>
+<h1 id="循环调度"><a href="#循环调度" class="headerlink" title="循环调度"></a>循环调度</h1><p>调用了一系列组件的 <code>open</code> 方法后，最后调用了 <code>nextcall.schedule()</code> 开始调度，也就是循环执行在上面注册的 <code>_next_request</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_next_request</span><span class="params">(self, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 此方法会循环调度</span></span><br><span class="line">    slot = self.slot</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> slot:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># 暂停</span></span><br><span class="line">    <span class="keyword">if</span> self.paused:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># 是否等待</span></span><br><span class="line">    <span class="keyword">while</span> <span class="keyword">not</span> self._needs_backout(spider):</span><br><span class="line">        <span class="comment"># 从scheduler中获取request</span></span><br><span class="line">        <span class="comment"># 注意：第一次获取时，是没有的，也就是会break出来</span></span><br><span class="line">        <span class="comment"># 从而执行下面的逻辑</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self._next_request_from_scheduler(spider):</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    <span class="comment"># 如果start_requests有数据且不需要等待</span></span><br><span class="line">    <span class="keyword">if</span> slot.start_requests <span class="keyword">and</span> <span class="keyword">not</span> self._needs_backout(spider):</span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="comment"># 获取下一个种子请求</span></span><br><span class="line">            request = next(slot.start_requests)</span><br><span class="line">        <span class="keyword">except</span> StopIteration:</span><br><span class="line">            slot.start_requests = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">except</span> Exception:</span><br><span class="line">            slot.start_requests = <span class="literal">None</span></span><br><span class="line">            logger.error(<span class="string">'Error while obtaining start requests'</span>,</span><br><span class="line">                         exc_info=<span class="literal">True</span>, extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="comment"># 调用crawl,实际是把request放入scheduler的队列中</span></span><br><span class="line">            self.crawl(request, spider)</span><br><span class="line">    <span class="comment"># 空闲则关闭spider</span></span><br><span class="line">    <span class="keyword">if</span> self.spider_is_idle(spider) <span class="keyword">and</span> slot.close_if_idle:</span><br><span class="line">        self._spider_idle(spider)</span><br><span class="line">        </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_needs_backout</span><span class="params">(self, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 是否需要等待，取决4个条件</span></span><br><span class="line">    <span class="comment"># 1. Engine是否stop</span></span><br><span class="line">    <span class="comment"># 2. slot是否close</span></span><br><span class="line">    <span class="comment"># 3. downloader下载超过预设</span></span><br><span class="line">    <span class="comment"># 4. scraper处理response超过预设</span></span><br><span class="line">    slot = self.slot</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">not</span> self.running \</span><br><span class="line">        <span class="keyword">or</span> slot.closing \</span><br><span class="line">        <span class="keyword">or</span> self.downloader.needs_backout() \</span><br><span class="line">        <span class="keyword">or</span> self.scraper.slot.needs_backout()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_next_request_from_scheduler</span><span class="params">(self, spider)</span>:</span></span><br><span class="line">    slot = self.slot</span><br><span class="line">    <span class="comment"># 从scheduler拿出下个request</span></span><br><span class="line">    request = slot.scheduler.next_request()</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> request:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># 下载</span></span><br><span class="line">    d = self._download(request, spider)</span><br><span class="line">    <span class="comment"># 注册成功、失败、出口回调方法</span></span><br><span class="line">    d.addBoth(self._handle_downloader_output, request, spider)</span><br><span class="line">    d.addErrback(<span class="keyword">lambda</span> f: logger.info(<span class="string">'Error while handling downloader output'</span>,</span><br><span class="line">                                       exc_info=failure_to_exc_info(f),</span><br><span class="line">                                       extra=&#123;<span class="string">'spider'</span>: spider&#125;))</span><br><span class="line">    d.addBoth(<span class="keyword">lambda</span> _: slot.remove_request(request))</span><br><span class="line">    d.addErrback(<span class="keyword">lambda</span> f: logger.info(<span class="string">'Error while removing request from slot'</span>,</span><br><span class="line">                                       exc_info=failure_to_exc_info(f),</span><br><span class="line">                                       extra=&#123;<span class="string">'spider'</span>: spider&#125;))</span><br><span class="line">    d.addBoth(<span class="keyword">lambda</span> _: slot.nextcall.schedule())</span><br><span class="line">    d.addErrback(<span class="keyword">lambda</span> f: logger.info(<span class="string">'Error while scheduling new request'</span>,</span><br><span class="line">                                       exc_info=failure_to_exc_info(f),</span><br><span class="line">                                       extra=&#123;<span class="string">'spider'</span>: spider&#125;))</span><br><span class="line">    <span class="keyword">return</span> d</span><br><span class="line">    </span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> spider <span class="keyword">in</span> self.open_spiders, \</span><br><span class="line">        <span class="string">"Spider %r not opened when crawling: %s"</span> % (spider.name, request)</span><br><span class="line">    <span class="comment"># request放入scheduler队列，调用nextcall的schedule</span></span><br><span class="line">    self.schedule(request, spider)</span><br><span class="line">    self.slot.nextcall.schedule()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">schedule</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    self.signals.send_catch_log(signal=signals.request_scheduled,</span><br><span class="line">            request=request, spider=spider)</span><br><span class="line">    <span class="comment"># 调用scheduler的enqueue_request，把request放入scheduler队列</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.slot.scheduler.enqueue_request(request):</span><br><span class="line">        self.signals.send_catch_log(signal=signals.request_dropped,</span><br><span class="line">                                    request=request, spider=spider)</span><br></pre></td></tr></table></figure>
+
+<p><code>_next_request</code> 方法首先调用 <code>_needs_backout</code> 检查是否需要等待，等待的条件有以下几种情况：</p>
+<ul>
+<li>引擎是否主动关闭</li>
+<li>Slot是否关闭</li>
+<li>下载器在网络下载时是否超过预设参数</li>
+<li>Scraper处理输出是否超过预设参数</li>
+</ul>
+<p>如果不需要等待，则调用 <code>_next_request_from_scheduler</code>，此方法从名字上就能看出，主要是从 <code>Schduler</code> 中获取 <code>Request</code>。</p>
+<p>这里要注意，在第一次调用此方法时，<code>Scheduler</code> 中是没有放入任何 <code>Request</code> 的，这里会直接<code>break</code> 出来，执行下面的逻辑，而下面就会调用 <code>crawl</code> 方法，实际是把请求放到 <code>Scheduler</code> 的请求队列，放入队列的过程会经过请求过滤器校验是否重复。</p>
+<p>下次再调用 <code>_next_request_from_scheduler</code> 时，就能从 <code>Scheduler</code> 中获取到下载请求，然后执行下载动作。</p>
+<p>先来看第一次调度，执行 <code>crawl</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> spider <span class="keyword">in</span> self.open_spiders, \</span><br><span class="line">        <span class="string">"Spider %r not opened when crawling: %s"</span> % (spider.name, request)</span><br><span class="line">    <span class="comment"># 放入Scheduler队列</span></span><br><span class="line">    self.schedule(request, spider)</span><br><span class="line">    <span class="comment"># 进行下一次调度</span></span><br><span class="line">    self.slot.nextcall.schedule()</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">schedule</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    self.signals.send_catch_log(signal=signals.request_scheduled,</span><br><span class="line">            request=request, spider=spider)</span><br><span class="line">    <span class="comment"># 放入Scheduler队列</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> self.slot.scheduler.enqueue_request(request):</span><br><span class="line">        self.signals.send_catch_log(signal=signals.request_dropped,</span><br><span class="line">                                    request=request, spider=spider)</span><br></pre></td></tr></table></figure>
+
+<p>调用引擎的 <code>crawl</code> 实际就是把请求放入 <code>Scheduler</code> 的队列中，下面看请求是如何入队列的。</p>
+<h1 id="请求入队"><a href="#请求入队" class="headerlink" title="请求入队"></a>请求入队</h1><p><code>Scheduler</code> 请求入队方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">enqueue_request</span><span class="params">(self, request)</span>:</span></span><br><span class="line">    <span class="comment"># 请求入队 若请求过滤器验证重复 返回False</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> request.dont_filter <span class="keyword">and</span> self.df.request_seen(request):</span><br><span class="line">        self.df.log(request, self.spider)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">False</span></span><br><span class="line">    <span class="comment"># 磁盘队列是否入队成功</span></span><br><span class="line">    dqok = self._dqpush(request)</span><br><span class="line">    <span class="keyword">if</span> dqok:</span><br><span class="line">        self.stats.inc_value(<span class="string">'scheduler/enqueued/disk'</span>, spider=self.spider)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 没有定义磁盘队列 则使用内存队列</span></span><br><span class="line">        self._mqpush(request)</span><br><span class="line">        self.stats.inc_value(<span class="string">'scheduler/enqueued/memory'</span>, spider=self.spider)</span><br><span class="line">    self.stats.inc_value(<span class="string">'scheduler/enqueued'</span>, spider=self.spider)</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_dqpush</span><span class="params">(self, request)</span>:</span></span><br><span class="line">    <span class="comment"># 是否定义磁盘队列</span></span><br><span class="line">    <span class="keyword">if</span> self.dqs <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># Request对象转dict</span></span><br><span class="line">        reqd = request_to_dict(request, self.spider)</span><br><span class="line">        <span class="comment"># 放入磁盘队列</span></span><br><span class="line">        self.dqs.push(reqd, -request.priority)</span><br><span class="line">    <span class="keyword">except</span> ValueError <span class="keyword">as</span> e:  <span class="comment"># non serializable request</span></span><br><span class="line">        <span class="keyword">if</span> self.logunser:</span><br><span class="line">            msg = (<span class="string">"Unable to serialize request: %(request)s - reason:"</span></span><br><span class="line">                   <span class="string">" %(reason)s - no more unserializable requests will be"</span></span><br><span class="line">                   <span class="string">" logged (stats being collected)"</span>)</span><br><span class="line">            logger.warning(msg, &#123;<span class="string">'request'</span>: request, <span class="string">'reason'</span>: e&#125;,</span><br><span class="line">                           exc_info=<span class="literal">True</span>, extra=&#123;<span class="string">'spider'</span>: self.spider&#125;)</span><br><span class="line">            self.logunser = <span class="literal">False</span></span><br><span class="line">        self.stats.inc_value(<span class="string">'scheduler/unserializable'</span>,</span><br><span class="line">                             spider=self.spider)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_mqpush</span><span class="params">(self, request)</span>:</span></span><br><span class="line">    <span class="comment"># 入内存队列</span></span><br><span class="line">    self.mqs.push(request, -request.priority)</span><br></pre></td></tr></table></figure>
+
+<p>在上一篇文章时有说到，调度器主要定义了 2 种队列：基于磁盘队列、基于内存队列。</p>
+<p>如果在实例化 <code>Scheduler</code> 时候传入 <code>jobdir</code>，则使用磁盘队列，否则使用内存队列，默认使用内存队列。</p>
+<h1 id="指纹过滤"><a href="#指纹过滤" class="headerlink" title="指纹过滤"></a>指纹过滤</h1><p>上面说到，在请求入队之前，首先会通过请求指纹过滤器检查请求是否重复，也就是调用了过滤器的 <code>request_seen</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">request_seen</span><span class="params">(self, request)</span>:</span></span><br><span class="line">    <span class="comment"># 生成请求指纹</span></span><br><span class="line">    fp = self.request_fingerprint(request)</span><br><span class="line">    <span class="comment"># 请求指纹如果在指纹集合中 则认为重复</span></span><br><span class="line">    <span class="keyword">if</span> fp <span class="keyword">in</span> self.fingerprints:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">True</span></span><br><span class="line">    <span class="comment"># 不重复则记录此指纹</span></span><br><span class="line">    self.fingerprints.add(fp)</span><br><span class="line">    <span class="comment"># 实例化如果有path则把指纹写入文件</span></span><br><span class="line">    <span class="keyword">if</span> self.file:</span><br><span class="line">        self.file.write(fp + os.linesep)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">request_fingerprint</span><span class="params">(self, request)</span>:</span></span><br><span class="line">    <span class="comment"># 调用utils.request的request_fingerprint</span></span><br><span class="line">    <span class="keyword">return</span> request_fingerprint(request)</span><br></pre></td></tr></table></figure>
+
+<p><code>utils.request</code> 的 <code>request_fingerprint</code> 逻辑如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">request_fingerprint</span><span class="params">(request, include_headers=None)</span>:</span></span><br><span class="line">    <span class="string">"""生成请求指纹"""</span></span><br><span class="line">    <span class="comment"># 指纹生成是否包含headers</span></span><br><span class="line">    <span class="keyword">if</span> include_headers:</span><br><span class="line">        include_headers = tuple(to_bytes(h.lower())</span><br><span class="line">                                 <span class="keyword">for</span> h <span class="keyword">in</span> sorted(include_headers))</span><br><span class="line">    cache = _fingerprint_cache.setdefault(request, &#123;&#125;)</span><br><span class="line">    <span class="keyword">if</span> include_headers <span class="keyword">not</span> <span class="keyword">in</span> cache:</span><br><span class="line">        <span class="comment"># 使用sha1算法生成指纹</span></span><br><span class="line">        fp = hashlib.sha1()</span><br><span class="line">        fp.update(to_bytes(request.method))</span><br><span class="line">        fp.update(to_bytes(canonicalize_url(request.url)))</span><br><span class="line">        fp.update(request.body <span class="keyword">or</span> <span class="string">b''</span>)</span><br><span class="line">        <span class="keyword">if</span> include_headers:</span><br><span class="line">            <span class="keyword">for</span> hdr <span class="keyword">in</span> include_headers:</span><br><span class="line">                <span class="keyword">if</span> hdr <span class="keyword">in</span> request.headers:</span><br><span class="line">                    fp.update(hdr)</span><br><span class="line">                    <span class="keyword">for</span> v <span class="keyword">in</span> request.headers.getlist(hdr):</span><br><span class="line">                        fp.update(v)</span><br><span class="line">        cache[include_headers] = fp.hexdigest()</span><br><span class="line">    <span class="keyword">return</span> cache[include_headers]</span><br></pre></td></tr></table></figure>
+
+<p>这个过滤器先是通过 <code>Request</code> 对象生成一个请求指纹，在这里使用 <code>sha1</code> 算法，并记录到指纹集合，每次请求入队前先到这里验证一下指纹集合，如果已存在，则认为请求重复，则不会重复入队列。</p>
+<p>不过如果我想不校验重复，也想重复爬取怎么办？看 <code>enqueue_request</code> 的第一行判断，仅需将 <code>Request</code> 实例的 <code>dont_filter</code> 设置为 <code>True</code> 就可以重复抓取此请求，非常灵活。</p>
+<p>Scrapy 就是通过此逻辑实现重复请求的过滤，默认情况下，重复请求是不会进行重复抓取的。</p>
+<h1 id="下载请求"><a href="#下载请求" class="headerlink" title="下载请求"></a>下载请求</h1><p>请求第一次进来后，肯定是不重复的，那么则会正常进入调度器队列。之后下一次调度，再次调用 <code>_next_request_from_scheduler</code> 方法，此时调用调度器的 <code>next_request</code> 方法，就是从调度器队列中取出一个请求，这次就要开始进行网络下载了，也就是调用 <code>_download</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_download</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 下载请求</span></span><br><span class="line">    slot = self.slot</span><br><span class="line">    slot.add_request(request)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_on_success</span><span class="params">(response)</span>:</span></span><br><span class="line">        <span class="comment"># 成功回调 结果必须是Request或Response</span></span><br><span class="line">        <span class="keyword">assert</span> isinstance(response, (Response, Request))</span><br><span class="line">        <span class="keyword">if</span> isinstance(response, Response):</span><br><span class="line">            <span class="comment"># 如果下载后结果为Response 返回Response</span></span><br><span class="line">            response.request = request</span><br><span class="line">            logkws = self.logformatter.crawled(request, response, spider)</span><br><span class="line">            logger.log(*logformatter_adapter(logkws), extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">            self.signals.send_catch_log(signal=signals.response_received, \</span><br><span class="line">                response=response, request=request, spider=spider)</span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_on_complete</span><span class="params">(_)</span>:</span></span><br><span class="line">        <span class="comment"># 此次下载完成后 继续进行下一次调度</span></span><br><span class="line">        slot.nextcall.schedule()</span><br><span class="line">        <span class="keyword">return</span> _</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 调用Downloader进行下载</span></span><br><span class="line">    dwld = self.downloader.fetch(request, spider)</span><br><span class="line">    <span class="comment"># 注册成功回调</span></span><br><span class="line">    dwld.addCallbacks(_on_success)</span><br><span class="line">    <span class="comment"># 结束回调</span></span><br><span class="line">    dwld.addBoth(_on_complete)</span><br><span class="line">    <span class="keyword">return</span> dwld</span><br></pre></td></tr></table></figure>
+
+<p>在进行网络下载时，调用了 <code>Downloader</code> 的 <code>fetch</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">fetch</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_deactivate</span><span class="params">(response)</span>:</span></span><br><span class="line">        <span class="comment"># 下载结束后删除此记录</span></span><br><span class="line">        self.active.remove(request)</span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line">    <span class="comment"># 下载前记录处理中的请求</span></span><br><span class="line">    self.active.add(request)</span><br><span class="line">    <span class="comment"># 调用下载器中间件download 并注册下载成功的回调方法是self._enqueue_request</span></span><br><span class="line">    dfd = self.middleware.download(self._enqueue_request, request, spider)</span><br><span class="line">    <span class="comment"># 注册结束回调</span></span><br><span class="line">    <span class="keyword">return</span> dfd.addBoth(_deactivate)</span><br></pre></td></tr></table></figure>
+
+<p>这里调用下载器中间件的 <code>download</code>，并注册下载成功的回调方法是 <code>_enqueue_request</code>，来看下载方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">download</span><span class="params">(self, download_func, request, spider)</span>:</span></span><br><span class="line"><span class="meta">    @defer.inlineCallbacks</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_request</span><span class="params">(request)</span>:</span></span><br><span class="line">        <span class="comment"># 如果下载器中间件有定义process_request 则依次执行</span></span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_request'</span>]:</span><br><span class="line">            response = <span class="keyword">yield</span> method(request=request, spider=spider)</span><br><span class="line">            <span class="keyword">assert</span> response <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> isinstance(response, (Response, Request)), \</span><br><span class="line">                    <span class="string">'Middleware %s.process_request must return None, Response or Request, got %s'</span> % \</span><br><span class="line">                    (six.get_method_self(method).__class__.__name__, response.__class__.__name__)</span><br><span class="line">            <span class="comment"># 如果下载器中间件有返回值 直接返回此结果</span></span><br><span class="line">            <span class="keyword">if</span> response:</span><br><span class="line">                defer.returnValue(response)</span><br><span class="line">        <span class="comment"># 如果下载器中间件没有返回值，则执行注册进来的方法 也就是Downloader的_enqueue_request</span></span><br><span class="line">        defer.returnValue((<span class="keyword">yield</span> download_func(request=request,spider=spider)))</span><br><span class="line"></span><br><span class="line"><span class="meta">    @defer.inlineCallbacks</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_response</span><span class="params">(response)</span>:</span></span><br><span class="line">        <span class="keyword">assert</span> response <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>, <span class="string">'Received None in process_response'</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(response, Request):</span><br><span class="line">            defer.returnValue(response)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 如果下载器中间件有定义process_response 则依次执行</span></span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_response'</span>]:</span><br><span class="line">            response = <span class="keyword">yield</span> method(request=request, response=response,</span><br><span class="line">                                    spider=spider)</span><br><span class="line">            <span class="keyword">assert</span> isinstance(response, (Response, Request)), \</span><br><span class="line">                <span class="string">'Middleware %s.process_response must return Response or Request, got %s'</span> % \</span><br><span class="line">                (six.get_method_self(method).__class__.__name__, type(response))</span><br><span class="line">            <span class="keyword">if</span> isinstance(response, Request):</span><br><span class="line">                defer.returnValue(response)</span><br><span class="line">        defer.returnValue(response)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @defer.inlineCallbacks</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_exception</span><span class="params">(_failure)</span>:</span></span><br><span class="line">        exception = _failure.value</span><br><span class="line">        <span class="comment"># 如果下载器中间件有定义process_exception 则依次执行</span></span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_exception'</span>]:</span><br><span class="line">            response = <span class="keyword">yield</span> method(request=request, exception=exception,</span><br><span class="line">                                    spider=spider)</span><br><span class="line">            <span class="keyword">assert</span> response <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> isinstance(response, (Response, Request)), \</span><br><span class="line">                <span class="string">'Middleware %s.process_exception must return None, Response or Request, got %s'</span> % \</span><br><span class="line">                (six.get_method_self(method).__class__.__name__, type(response))</span><br><span class="line">            <span class="keyword">if</span> response:</span><br><span class="line">                defer.returnValue(response)</span><br><span class="line">        defer.returnValue(_failure)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 注册执行、错误、回调方法</span></span><br><span class="line">    deferred = mustbe_deferred(process_request, request)</span><br><span class="line">    deferred.addErrback(process_exception)</span><br><span class="line">    deferred.addCallback(process_response)</span><br><span class="line">    <span class="keyword">return</span> deferred</span><br></pre></td></tr></table></figure>
+
+<p>在下载过程中，首先找到所有定义好的下载器中间件，包括内置定义好的，也可以自己扩展下载器中间件，下载前先依次执行 <code>process_request</code>，可对 <code>Request</code> 进行加工、处理、校验等操作，然后发起真正的网络下载，也就是第一个参数 <code>download_func</code>，在这里是 <code>Downloader</code> 的 <code>_enqueue_request</code> 方法：</p>
+<p>下载成功后回调 <code>Downloader</code>的 <code>_enqueue_request</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_enqueue_request</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 加入下载请求队列</span></span><br><span class="line">    key, slot = self._get_slot(request, spider)</span><br><span class="line">    request.meta[<span class="string">'download_slot'</span>] = key</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_deactivate</span><span class="params">(response)</span>:</span></span><br><span class="line">        slot.active.remove(request)</span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line"></span><br><span class="line">    slot.active.add(request)</span><br><span class="line">    deferred = defer.Deferred().addBoth(_deactivate)</span><br><span class="line">    <span class="comment"># 下载队列</span></span><br><span class="line">    slot.queue.append((request, deferred))</span><br><span class="line">    <span class="comment"># 处理下载队列</span></span><br><span class="line">    self._process_queue(spider, slot)</span><br><span class="line">    <span class="keyword">return</span> deferred</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_process_queue</span><span class="params">(self, spider, slot)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> slot.latercall <span class="keyword">and</span> slot.latercall.active():</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 如果延迟下载参数有配置 则延迟处理队列</span></span><br><span class="line">    now = time()</span><br><span class="line">    delay = slot.download_delay()</span><br><span class="line">    <span class="keyword">if</span> delay:</span><br><span class="line">        penalty = delay - now + slot.lastseen</span><br><span class="line">        <span class="keyword">if</span> penalty &gt; <span class="number">0</span>:</span><br><span class="line">            slot.latercall = reactor.callLater(penalty, self._process_queue, spider, slot)</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 处理下载队列</span></span><br><span class="line">    <span class="keyword">while</span> slot.queue <span class="keyword">and</span> slot.free_transfer_slots() &gt; <span class="number">0</span>:</span><br><span class="line">        slot.lastseen = now</span><br><span class="line">        <span class="comment"># 从下载队列中取出下载请求</span></span><br><span class="line">        request, deferred = slot.queue.popleft()</span><br><span class="line">        <span class="comment"># 开始下载</span></span><br><span class="line">        dfd = self._download(slot, request, spider)</span><br><span class="line">        dfd.chainDeferred(deferred)</span><br><span class="line">        <span class="comment"># 延迟</span></span><br><span class="line">        <span class="keyword">if</span> delay:</span><br><span class="line">            self._process_queue(spider, slot)</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">            </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_download</span><span class="params">(self, slot, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 注册方法 调用handlers的download_request</span></span><br><span class="line">    dfd = mustbe_deferred(self.handlers.download_request, request, spider)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 注册下载完成回调方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_downloaded</span><span class="params">(response)</span>:</span></span><br><span class="line">        self.signals.send_catch_log(signal=signals.response_downloaded,</span><br><span class="line">                                    response=response,</span><br><span class="line">                                    request=request,</span><br><span class="line">                                    spider=spider)</span><br><span class="line">        <span class="keyword">return</span> response</span><br><span class="line">    dfd.addCallback(_downloaded)</span><br><span class="line"></span><br><span class="line">    slot.transferring.add(request)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">finish_transferring</span><span class="params">(_)</span>:</span></span><br><span class="line">        slot.transferring.remove(request)</span><br><span class="line">        <span class="comment"># 下载完成后调用_process_queue</span></span><br><span class="line">        self._process_queue(spider, slot)</span><br><span class="line">        <span class="keyword">return</span> _</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> dfd.addBoth(finish_transferring)</span><br></pre></td></tr></table></figure>
+
+<p>这里也维护了一个下载队列，可根据配置达到延迟下载的要求。真正发起下载请求是调用了 <code>self.handlers.download_request</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">download_request</span><span class="params">(self, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 获取请求的scheme</span></span><br><span class="line">    scheme = urlparse_cached(request).scheme</span><br><span class="line">    <span class="comment"># 根据scheeme获取下载处理器</span></span><br><span class="line">    handler = self._get_handler(scheme)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> handler:</span><br><span class="line">        <span class="keyword">raise</span> NotSupported(<span class="string">"Unsupported URL scheme '%s': %s"</span> %</span><br><span class="line">                           (scheme, self._notconfigured[scheme]))</span><br><span class="line">    <span class="comment"># 开始下载 并返回结果</span></span><br><span class="line">    <span class="keyword">return</span> handler.download_request(request, spider)</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_handler</span><span class="params">(self, scheme)</span>:</span></span><br><span class="line">    <span class="comment"># 根据scheme获取对应的下载处理器</span></span><br><span class="line">    <span class="comment"># 配置文件中定义好了http、https、ftp等资源的下载处理器</span></span><br><span class="line">    <span class="keyword">if</span> scheme <span class="keyword">in</span> self._handlers:</span><br><span class="line">        <span class="keyword">return</span> self._handlers[scheme]</span><br><span class="line">    <span class="keyword">if</span> scheme <span class="keyword">in</span> self._notconfigured:</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">if</span> scheme <span class="keyword">not</span> <span class="keyword">in</span> self._schemes:</span><br><span class="line">        self._notconfigured[scheme] = <span class="string">'no handler available for that scheme'</span></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    path = self._schemes[scheme]</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 实例化下载处理器</span></span><br><span class="line">        dhcls = load_object(path)</span><br><span class="line">        dh = dhcls(self._crawler.settings)</span><br><span class="line">    <span class="keyword">except</span> NotConfigured <span class="keyword">as</span> ex:</span><br><span class="line">        self._notconfigured[scheme] = str(ex)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> ex:</span><br><span class="line">        logger.error(<span class="string">'Loading "%(clspath)s" for scheme "%(scheme)s"'</span>,</span><br><span class="line">                     &#123;<span class="string">"clspath"</span>: path, <span class="string">"scheme"</span>: scheme&#125;,</span><br><span class="line">                     exc_info=<span class="literal">True</span>,  extra=&#123;<span class="string">'crawler'</span>: self._crawler&#125;)</span><br><span class="line">        self._notconfigured[scheme] = str(ex)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">None</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        self._handlers[scheme] = dh</span><br><span class="line">    <span class="keyword">return</span> self._handlers[scheme]</span><br></pre></td></tr></table></figure>
+
+<p>下载前，先通过解析 <code>request</code> 的 <code>scheme</code> 来获取对应的下载处理器，默认配置文件中定义的下载处理器如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">DOWNLOAD_HANDLERS_BASE = &#123;</span><br><span class="line">    <span class="string">'file'</span>: <span class="string">'scrapy.core.downloader.handlers.file.FileDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'http'</span>: <span class="string">'scrapy.core.downloader.handlers.http.HTTPDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'https'</span>: <span class="string">'scrapy.core.downloader.handlers.http.HTTPDownloadHandler'</span>,</span><br><span class="line">    <span class="string">'s3'</span>: <span class="string">'scrapy.core.downloader.handlers.s3.S3DownloadHandler'</span>,</span><br><span class="line">    <span class="string">'ftp'</span>: <span class="string">'scrapy.core.downloader.handlers.ftp.FTPDownloadHandler'</span>,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后调用 <code>download_request</code> 方法，完成网络下载，这里不再详细讲解每个处理器的实现，简单来说，你可以把它想象成封装好的网络下载库，输入URL，它会给你输出下载结果，这样方便理解。</p>
+<p>在下载过程中，如果发生异常情况，则会依次调用下载器中间件的 <code>process_exception</code> 方法，每个中间件只需定义自己的异常处理逻辑即可。</p>
+<p>如果下载成功，则会依次执行下载器中间件的 <code>process_response</code> 方法，每个中间件可以进一步处理下载后的结果，最终返回。</p>
+<p>这里值得提一下，<code>process_request</code> 方法是每个中间件顺序执行的，而 <code>process_response</code> 和 <code>process_exception</code> 方法是每个中间件倒序执行的，具体可看一下 <code>DownaloderMiddlewareManager</code> 的 <code>_add_middleware</code> 方法，就可以明白是如何注册这个方法链的。</p>
+<p>拿到最终的下载结果后，再回到 <code>ExecuteEngine</code> 的 <code>_next_request_from_scheduler</code> 中，会看到调用了 <code>_handle_downloader_output</code>，也就是处理下载结果的逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_handle_downloader_output</span><span class="params">(self, response, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 下载结果必须是Request、Response、Failure其一</span></span><br><span class="line">    <span class="keyword">assert</span> isinstance(response, (Request, Response, Failure)), response</span><br><span class="line">    <span class="comment"># 如果是Request 则再次调用crawl 执行Scheduler的入队逻辑</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(response, Request):</span><br><span class="line">        self.crawl(response, spider)</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    <span class="comment"># 如果是Response或Failure 则调用scraper的enqueue_scrape进一步处理</span></span><br><span class="line">    <span class="comment"># 主要是和Spiders和Pipeline交互</span></span><br><span class="line">    d = self.scraper.enqueue_scrape(response, request, spider)</span><br><span class="line">    d.addErrback(<span class="keyword">lambda</span> f: logger.error(<span class="string">'Error while enqueuing downloader output'</span>,</span><br><span class="line">                                        exc_info=failure_to_exc_info(f),</span><br><span class="line">                                        extra=&#123;<span class="string">'spider'</span>: spider&#125;))</span><br><span class="line">    <span class="keyword">return</span> d</span><br></pre></td></tr></table></figure>
+
+<p>拿到下载结果后，主要分 2 个逻辑：</p>
+<ul>
+<li>如果返回的是 <code>Request</code> 实例，则直接再次放入 <code>Scheduler</code> 请求队列</li>
+<li>如果返回的是是 <code>Response</code> 或 <code>Failure</code> 实例，则调用 <code>Scraper</code> 的 <code>enqueue_scrape</code> 方法，做进一步处理</li>
+</ul>
+<h1 id="处理下载结果"><a href="#处理下载结果" class="headerlink" title="处理下载结果"></a>处理下载结果</h1><p>请求入队逻辑不用再说，前面已经讲过。现在主要看 <code>Scraper</code> 的 <code>enqueue_scrape</code>，看<code>Scraper</code> 组件是如何处理后续逻辑的：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">enqueue_scrape</span><span class="params">(self, response, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 加入Scrape处理队列</span></span><br><span class="line">    slot = self.slot</span><br><span class="line">    dfd = slot.add_response_request(response, request)</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">finish_scraping</span><span class="params">(_)</span>:</span></span><br><span class="line">        slot.finish_response(response, request)</span><br><span class="line">        self._check_if_closing(spider, slot)</span><br><span class="line">        self._scrape_next(spider, slot)</span><br><span class="line">        <span class="keyword">return</span> _</span><br><span class="line">    dfd.addBoth(finish_scraping)</span><br><span class="line">    dfd.addErrback(</span><br><span class="line">        <span class="keyword">lambda</span> f: logger.error(<span class="string">'Scraper bug processing %(request)s'</span>,</span><br><span class="line">                               &#123;<span class="string">'request'</span>: request&#125;,</span><br><span class="line">                               exc_info=failure_to_exc_info(f),</span><br><span class="line">                               extra=&#123;<span class="string">'spider'</span>: spider&#125;))</span><br><span class="line">    self._scrape_next(spider, slot)</span><br><span class="line">    <span class="keyword">return</span> dfd</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_scrape_next</span><span class="params">(self, spider, slot)</span>:</span></span><br><span class="line">    <span class="keyword">while</span> slot.queue:</span><br><span class="line">        <span class="comment"># 从Scraper队列中获取一个待处理的任务</span></span><br><span class="line">        response, request, deferred = slot.next_response_request_deferred()</span><br><span class="line">        self._scrape(response, request, spider).chainDeferred(deferred)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_scrape</span><span class="params">(self, response, request, spider)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> isinstance(response, (Response, Failure))</span><br><span class="line">    <span class="comment"># 调用_scrape2继续处理</span></span><br><span class="line">    dfd = self._scrape2(response, request, spider)</span><br><span class="line">    <span class="comment"># 注册异常回调</span></span><br><span class="line">    dfd.addErrback(self.handle_spider_error, request, response, spider)</span><br><span class="line">    <span class="comment"># 出口回调</span></span><br><span class="line">    dfd.addCallback(self.handle_spider_output, request, response, spider)</span><br><span class="line">    <span class="keyword">return</span> dfd</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_scrape2</span><span class="params">(self, request_result, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 如果结果不是Failure实例 则调用爬虫中间件管理器的scrape_response</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> isinstance(request_result, Failure):</span><br><span class="line">        <span class="keyword">return</span> self.spidermw.scrape_response(</span><br><span class="line">            self.call_spider, request_result, request, spider)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 直接调用call_spider</span></span><br><span class="line">        dfd = self.call_spider(request_result, request, spider)</span><br><span class="line">        <span class="keyword">return</span> dfd.addErrback(</span><br><span class="line">            self._log_download_errors, request_result, request, spider)</span><br></pre></td></tr></table></figure>
+
+<p>首先把请求和响应加入到 <code>Scraper</code> 的处理队列中，然后从队列中获取到任务，如果不是异常结果，则调用<strong>爬虫中间件管理器</strong>的 <code>scrape_response</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">scrape_response</span><span class="params">(self, scrape_func, response, request, spider)</span>:</span></span><br><span class="line">    fname = <span class="keyword">lambda</span> f:<span class="string">'%s.%s'</span> % (</span><br><span class="line">            six.get_method_self(f).__class__.__name__,</span><br><span class="line">            six.get_method_function(f).__name__)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_spider_input</span><span class="params">(response)</span>:</span></span><br><span class="line">        <span class="comment"># 执行一系列爬虫中间件的process_spider_input</span></span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_spider_input'</span>]:</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                result = method(response=response, spider=spider)</span><br><span class="line">                <span class="keyword">assert</span> result <span class="keyword">is</span> <span class="literal">None</span>, \</span><br><span class="line">                        <span class="string">'Middleware %s must returns None or '</span> \</span><br><span class="line">                        <span class="string">'raise an exception, got %s '</span> \</span><br><span class="line">                        % (fname(method), type(result))</span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                <span class="keyword">return</span> scrape_func(Failure(), request, spider)</span><br><span class="line">        <span class="comment"># 执行完中间件的一系列process_spider_input方法后 执行call_spider</span></span><br><span class="line">        <span class="keyword">return</span> scrape_func(response, request, spider)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_spider_exception</span><span class="params">(_failure)</span>:</span></span><br><span class="line">        <span class="comment"># 执行一系列爬虫中间件的process_spider_exception</span></span><br><span class="line">        exception = _failure.value</span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_spider_exception'</span>]:</span><br><span class="line">            result = method(response=response, exception=exception, spider=spider)</span><br><span class="line">            <span class="keyword">assert</span> result <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">or</span> _isiterable(result), \</span><br><span class="line">                <span class="string">'Middleware %s must returns None, or an iterable object, got %s '</span> % \</span><br><span class="line">                (fname(method), type(result))</span><br><span class="line">            <span class="keyword">if</span> result <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">                <span class="keyword">return</span> result</span><br><span class="line">        <span class="keyword">return</span> _failure</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_spider_output</span><span class="params">(result)</span>:</span></span><br><span class="line">        <span class="comment"># 执行一系列爬虫中间件的process_spider_output</span></span><br><span class="line">        <span class="keyword">for</span> method <span class="keyword">in</span> self.methods[<span class="string">'process_spider_output'</span>]:</span><br><span class="line">            result = method(response=response, result=result, spider=spider)</span><br><span class="line">            <span class="keyword">assert</span> _isiterable(result), \</span><br><span class="line">                <span class="string">'Middleware %s must returns an iterable object, got %s '</span> % \</span><br><span class="line">                (fname(method), type(result))</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 执行process_spider_input</span></span><br><span class="line">    dfd = mustbe_deferred(process_spider_input, response)</span><br><span class="line">    <span class="comment"># 注册异常回调</span></span><br><span class="line">    dfd.addErrback(process_spider_exception)</span><br><span class="line">    <span class="comment"># 注册出口回调</span></span><br><span class="line">    dfd.addCallback(process_spider_output)</span><br><span class="line">    <span class="keyword">return</span> dfd</span><br></pre></td></tr></table></figure>
+
+<p>有没有感觉套路很熟悉？与上面下载器中间件调用方式非常相似，也调用一系列的前置方法，再执行真正的处理逻辑，最后执行一系列的后置方法。</p>
+<h1 id="回调爬虫"><a href="#回调爬虫" class="headerlink" title="回调爬虫"></a>回调爬虫</h1><p>接下来看一下，Scrapy 是如何执行我们写好的爬虫逻辑的，也就是 <code>call_spider</code> 方法，这里回调我们写好的爬虫类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">call_spider</span><span class="params">(self, result, request, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 回调爬虫模块</span></span><br><span class="line">    result.request = request</span><br><span class="line">    dfd = defer_result(result)</span><br><span class="line">    <span class="comment"># 注册回调方法 取得request.callback 如果未定义则调用爬虫模块的parse方法</span></span><br><span class="line">    dfd.addCallbacks(request.callback <span class="keyword">or</span> spider.parse, request.errback)</span><br><span class="line">    <span class="keyword">return</span> dfd.addCallback(iterate_spider_output)</span><br></pre></td></tr></table></figure>
+
+<p>看到这里，你应该更熟悉，平时我们写的最多的爬虫代码，<code>parse</code> 则是第一个回调方法。之后爬虫类拿到下载结果，就可以定义下载后的 <code>callback</code> 方法，也是在这里进行回调执行的。</p>
+<h1 id="处理输出"><a href="#处理输出" class="headerlink" title="处理输出"></a>处理输出</h1><p>在与爬虫类交互完成之后，<code>Scraper</code> 调用了 <code>handle_spider_output</code> 方法处理爬虫的输出结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">handle_spider_output</span><span class="params">(self, result, request, response, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 处理爬虫输出结果</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> result:</span><br><span class="line">        <span class="keyword">return</span> defer_succeed(<span class="literal">None</span>)</span><br><span class="line">    it = iter_errback(result, self.handle_spider_error, request, response, spider)</span><br><span class="line">    <span class="comment"># 注册_process_spidermw_output</span></span><br><span class="line">    dfd = parallel(it, self.concurrent_items,</span><br><span class="line">        self._process_spidermw_output, request, response, spider)</span><br><span class="line">    <span class="keyword">return</span> dfd</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_process_spidermw_output</span><span class="params">(self, output, request, response, spider)</span>:</span></span><br><span class="line">    <span class="comment"># 处理Spider模块返回的每一个Request/Item</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(output, Request):</span><br><span class="line">        <span class="comment"># 如果结果是Request 再次入Scheduler的请求队列</span></span><br><span class="line">        self.crawler.engine.crawl(request=output, spider=spider)</span><br><span class="line">    <span class="keyword">elif</span> isinstance(output, (BaseItem, dict)):</span><br><span class="line">        <span class="comment"># 如果结果是BaseItem/dict</span></span><br><span class="line">        self.slot.itemproc_size += <span class="number">1</span></span><br><span class="line">        <span class="comment"># 调用Pipeline的process_item</span></span><br><span class="line">        dfd = self.itemproc.process_item(output, spider)</span><br><span class="line">        dfd.addBoth(self._itemproc_finished, output, response, spider)</span><br><span class="line">        <span class="keyword">return</span> dfd</span><br><span class="line">    <span class="keyword">elif</span> output <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        <span class="keyword">pass</span></span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        typename = type(output).__name__</span><br><span class="line">        logger.error(<span class="string">'Spider must return Request, BaseItem, dict or None, '</span></span><br><span class="line">                     <span class="string">'got %(typename)r in %(request)s'</span>,</span><br><span class="line">                     &#123;<span class="string">'request'</span>: request, <span class="string">'typename'</span>: typename&#125;,</span><br><span class="line">                     extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>执行完我们自定义的解析逻辑后，解析方法可返回新的 <code>Request</code> 或 <code>BaseItem</code> 实例。</p>
+<p>如果是新的请求，则再次通过 <code>Scheduler</code> 进入请求队列，如果是 <code>BaseItem</code> 实例，则调用 <code>Pipeline</code> 管理器，依次执行 <code>process_item</code>。我们想输出结果时，只需要定义 <code>Pepeline</code> 类，然后重写这个方法就可以了。</p>
+<p><code>ItemPipeManager</code> 处理逻辑：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ItemPipelineManager</span><span class="params">(MiddlewareManager)</span>:</span></span><br><span class="line"></span><br><span class="line">    component_name = <span class="string">'item pipeline'</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_mwlist_from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> build_component_list(settings.getwithbase(<span class="string">'ITEM_PIPELINES'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_add_middleware</span><span class="params">(self, pipe)</span>:</span></span><br><span class="line">        super(ItemPipelineManager, self)._add_middleware(pipe)</span><br><span class="line">        <span class="keyword">if</span> hasattr(pipe, <span class="string">'process_item'</span>):</span><br><span class="line">            self.methods[<span class="string">'process_item'</span>].append(pipe.process_item)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">process_item</span><span class="params">(self, item, spider)</span>:</span></span><br><span class="line">        <span class="comment"># 依次调用Pipeline的process_item</span></span><br><span class="line">        <span class="keyword">return</span> self._process_chain(<span class="string">'process_item'</span>, item, spider)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到 <code>ItemPipeManager</code> 也是一个中间件，和之前下载器中间件管理器和爬虫中间件管理器类似，如果子类有定义 <code>process_item</code>，则依次执行它。</p>
+<p>执行完之后，调用 <code>_itemproc_finished</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_itemproc_finished</span><span class="params">(self, output, item, response, spider)</span>:</span></span><br><span class="line">    self.slot.itemproc_size -= <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> isinstance(output, Failure):</span><br><span class="line">        ex = output.value</span><br><span class="line">        <span class="comment"># 如果在Pipeline处理中抛DropItem异常 忽略处理结果</span></span><br><span class="line">        <span class="keyword">if</span> isinstance(ex, DropItem):</span><br><span class="line">            logkws = self.logformatter.dropped(item, ex, response, spider)</span><br><span class="line">            logger.log(*logformatter_adapter(logkws), extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">            <span class="keyword">return</span> self.signals.send_catch_log_deferred(</span><br><span class="line">                signal=signals.item_dropped, item=item, response=response,</span><br><span class="line">                spider=spider, exception=output.value)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            logger.error(<span class="string">'Error processing %(item)s'</span>, &#123;<span class="string">'item'</span>: item&#125;,</span><br><span class="line">                         exc_info=failure_to_exc_info(output),</span><br><span class="line">                         extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        logkws = self.logformatter.scraped(output, response, spider)</span><br><span class="line">        logger.log(*logformatter_adapter(logkws), extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">        <span class="keyword">return</span> self.signals.send_catch_log_deferred(</span><br><span class="line">            signal=signals.item_scraped, item=output, response=response,</span><br><span class="line">            spider=spider)</span><br></pre></td></tr></table></figure>
+
+<p>这里可以看到，如果想在 <code>Pipeline</code> 中丢弃某个结果，直接抛出 <code>DropItem</code> 异常即可，Scrapy 会进行对应的处理。</p>
+<p>到这里，抓取结果会根据自定义的输出类，然后输出到指定位置，而新的 <code>Request</code> 则会再次进入请求队列，等待引擎下一次调度，也就是再次调用 <code>ExecutionEngine</code> 的 <code>_next_request</code>，直至请求队列没有新的任务，整个程序退出。</p>
+<h1 id="CrawlerSpider"><a href="#CrawlerSpider" class="headerlink" title="CrawlerSpider"></a>CrawlerSpider</h1><p>以上，基本上整个核心抓取流程就讲完了。</p>
+<p>这里再简单说一下 <code>CrawlerSpider</code> 类，我们平时用的也比较多，它其实就是继承了 <code>Spider</code> 类，然后重写了 <code>parse</code> 方法（这也是继承此类不要重写此方法的原因），并结合 <code>Rule</code> 规则类，来完成 <code>Request</code> 的自动提取逻辑。</p>
+<p>Scrapy 提供了这个类方便我们更快速地编写爬虫代码，我们也可以基于此类进行再次封装，让我们的爬虫代码写得更简单。</p>
+<p>由此我们也可看出，Scrapy 的每个模块的实现都非常纯粹，每个组件都通过配置文件定义连接起来，如果想要扩展或替换，只需定义并实现自己的处理逻辑即可，其他模块均不受任何影响，所以我们也可以看到，业界有非常多的 Scrapy 插件，都是通过此机制来实现的。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这篇文章的代码量较多，也是 Scrapy 最为核心的抓取流程，如果你能把这块逻辑搞清楚了，那对 Scrapy 开发新的插件，或者在它的基础上进行二次开发也非常简单了。</p>
+<p>总结一下整个抓取流程，还是用这两张图表示再清楚不过：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png" alt="数据流转图"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-arch.jpg" alt="详细架构图"></p>
+<p>Scrapy 整体给我的感觉是，虽然它只是个单机版的爬虫框架，但我们可以非常方便地编写插件，或者自定义组件替换默认的功能，从而定制化我们自己的爬虫，最终可以实现一个功能强大的爬虫框架，例如分布式、代理调度、并发控制、可视化、监控等功能，它的灵活度非常高。</p>
+<p>附：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a></li>
+<li><a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a></li>
+<li><a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">Scrapy源码分析（三）核心组件初始化</a></li>
+<li>Scrapy源码分析（四）核心抓取流程</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/" title="Scrapy源码分析（四）核心抓取流程">http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/scrapy/" rel="tag"><i class="fa fa-tag"></i> scrapy</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 源码分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/11/21/scrapy-code-analyze-component-initialization/" rel="prev" title="Scrapy源码分析（三）核心组件初始化">
+      <i class="fa fa-chevron-left"></i> Scrapy源码分析（三）核心组件初始化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/12/26/delay-queue-based-on-redis/" rel="next" title="基于Redis实现延迟队列">
+      基于Redis实现延迟队列 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#运行入口"><span class="nav-number">1.</span> <span class="nav-text">运行入口</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构建请求"><span class="nav-number">2.</span> <span class="nav-text">构建请求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#引擎调度"><span class="nav-number">3.</span> <span class="nav-text">引擎调度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调度器"><span class="nav-number">4.</span> <span class="nav-text">调度器</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Scraper"><span class="nav-number">5.</span> <span class="nav-text">Scraper</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#循环调度"><span class="nav-number">6.</span> <span class="nav-text">循环调度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#请求入队"><span class="nav-number">7.</span> <span class="nav-text">请求入队</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#指纹过滤"><span class="nav-number">8.</span> <span class="nav-text">指纹过滤</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下载请求"><span class="nav-number">9.</span> <span class="nav-text">下载请求</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理下载结果"><span class="nav-number">10.</span> <span class="nav-text">处理下载结果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#回调爬虫"><span class="nav-number">11.</span> <span class="nav-text">回调爬虫</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理输出"><span class="nav-number">12.</span> <span class="nav-text">处理输出</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CrawlerSpider"><span class="nav-number">13.</span> <span class="nav-text">CrawlerSpider</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">14.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

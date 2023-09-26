@@ -1,0 +1,1800 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kaito&#39;s Blog">
+<meta property="og:url" content="http://kaito-kidd.com/page/6/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Kaito">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/page/6/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/02/23/python-magic-methods-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/02/23/python-magic-methods-2/" class="post-title-link" itemprop="url">Python进阶——如何正确使用魔法方法？（下）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-23 09:19:58" itemprop="dateCreated datePublished" datetime="2017-02-23T09:19:58+00:00">2017-02-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/02/23/python-magic-methods-2/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——如何正确使用魔法方法？（下）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/02/23/python-magic-methods-2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/02/23/python-magic-methods-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在上一篇文章<a href="http://kaito-kidd.com/2017/02/22/python-magic-methods/">Python进阶——如何正确使用魔法方法？（上）</a>中，我们主要介绍了关于构造与初始化、类的表示、访问控制这几类的魔法方法，以及它们的使用场景。</p>
+<p>这篇文章，我们继续介绍剩下的魔法方法，主要包括：比较操作、容器类操作、可调用对象、序列化。</p>
+<h1 id="比较操作"><a href="#比较操作" class="headerlink" title="比较操作"></a>比较操作</h1><p>比较操作的魔法方法主要包括以下几种：</p>
+<ul>
+<li><code>__cmp__</code></li>
+<li><code>__eq__</code></li>
+<li><code>__ne__</code></li>
+<li><code>__lt__</code></li>
+<li><code>__gt__</code></li>
+</ul>
+<h2 id="cmp"><a href="#cmp" class="headerlink" title="__cmp__"></a><code>__cmp__</code></h2><p>从名字我们就能看出来这个魔法方法的作用，当我们需要比较两个对象时，我们可以定义 <code>__cmp__</code> 来实现比较操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, uid)</span>:</span></span><br><span class="line">        self.uid = uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__cmp__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.uid == other.uid:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> self.uid &gt; other.uid:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span></span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="number">1</span>)</span><br><span class="line">p2 = Person(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> p1 &gt; p2	<span class="comment"># False</span></span><br><span class="line"><span class="keyword">print</span> p1 &lt; p2	<span class="comment"># True</span></span><br><span class="line"><span class="keyword">print</span> p1 == p2	<span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+
+<p>从例子中我们可以看到，比较两个对象的具体逻辑：</p>
+<ul>
+<li>如果 <code>__cmp__</code> 返回大于 0 的整数（一般为1），说明 self &gt; other</li>
+<li>如果 <code>__cmp__</code> 返回大于 0 的整数（一般为-1），说明 self &lt; other</li>
+<li>如果 <code>__cmp__</code> 返回 0，说明 self == other</li>
+</ul>
+<p>当然，这种比较方式有一定的局限性，如果我有 N 个属性，当比较谁大时，我们想用属性 A 来比较。当比较谁小时，我们想用属性 B 来比较，此时 <code>__cmp__</code> 就无法很好地实现这个逻辑了，所以它只适用于通用的比较逻辑。</p>
+<p>那如何实现复杂的比较逻辑？</p>
+<p>这就需要用到 <code>__eq__</code>、<code>__ne__</code>、<code>__lt__</code>、<code>__gt__</code> 这些魔法方法了，我们看下面这个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, uid, name, salary)</span>:</span></span><br><span class="line">        self.uid = uid</span><br><span class="line">        self.name = name</span><br><span class="line">        self.salary = salary</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__eq__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 == 判断"""</span></span><br><span class="line">        <span class="keyword">return</span> self.uid == other.uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__ne__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 != 判断"""</span></span><br><span class="line">        <span class="keyword">return</span> self.uid != other.uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__lt__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 &lt; 判断 根据len(name)"""</span></span><br><span class="line">        <span class="keyword">return</span> len(self.name) &lt; len(other.name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__gt__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 &gt; 判断 根据alary"""</span></span><br><span class="line">        <span class="keyword">return</span> self.salary &gt; other.salary</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="number">1</span>, <span class="string">'zhangsan'</span>, <span class="number">1000</span>)</span><br><span class="line">p2 = Person(<span class="number">1</span>, <span class="string">'lisi'</span>, <span class="number">2000</span>)</span><br><span class="line">p3 = Person(<span class="number">1</span>, <span class="string">'wangwu'</span>, <span class="number">3000</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p1 == p1	<span class="comment"># uid 是否相同</span></span><br><span class="line"><span class="keyword">print</span> p1 != p2	<span class="comment"># uid 是否不同</span></span><br><span class="line"><span class="keyword">print</span> p2 &lt; p3	<span class="comment"># name 长度比较</span></span><br><span class="line"><span class="keyword">print</span> p3 &gt; p2	<span class="comment"># salary 比较</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="eq"><a href="#eq" class="headerlink" title="__eq__"></a><code>__eq__</code></h2><p><code>__eq__</code> 我们在上一篇文章已经介绍过，它配合 <code>__hash__</code> 方法，可以判断两个对象是否相等。</p>
+<p>但在这个例子中，当判断两个对象是否相等时，实际上我们比较的是 <code>uid</code> 这个属性。</p>
+<h2 id="ne"><a href="#ne" class="headerlink" title="__ne__"></a><code>__ne__</code></h2><p>同样地，当需要判断两个对象不相等时，会调用 <code>__ne__</code> 方法，在这个例子中，我们也是根据 <code>uid</code> 来判断的。</p>
+<h2 id="lt"><a href="#lt" class="headerlink" title="__lt__"></a><code>__lt__</code></h2><p>当判断一个对象是否小于另一个对象时，会调用 <code>__lt__</code> 方法，在这个例子中，我们根据 <code>name</code> 的长度来做的比较。</p>
+<h2 id="gt"><a href="#gt" class="headerlink" title="__gt__"></a><code>__gt__</code></h2><p>同样地，在判断一个对象是否大于另一个对象时，会调用 <code>__gt__</code> 方法，在这个例子中，我们根据 <code>salary</code> 属性判断。</p>
+<blockquote>
+<p>在 Python3 中，<code>__cmp__</code>被取消了，因为它和其他魔法方法存在功能上的重复。</p>
+</blockquote>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/02/23/python-magic-methods-2/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/02/22/python-magic-methods/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/02/22/python-magic-methods/" class="post-title-link" itemprop="url">Python进阶——如何正确使用魔法方法？（上）</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-22 16:02:38" itemprop="dateCreated datePublished" datetime="2017-02-22T16:02:38+00:00">2017-02-22</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/02/22/python-magic-methods/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——如何正确使用魔法方法？（上）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/02/22/python-magic-methods/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/02/22/python-magic-methods/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在做 Python 开发时，我们经常会遇到以<strong>双下划线开头和结尾</strong>的方法，例如 <code>__init__</code>、<code>__new__</code>、<code>__getattr__</code>、<code>__setitem__</code> 等等，这些方法我们通常称之为「魔法方法」，而使用这些「魔法方法」，我们可以非常方便地给类添加特殊的功能。</p>
+<p>这篇文章，我们就来分析一下，Python 中的魔法方法都有哪些？使用这些魔法方法，我们可以实现哪些实用的功能？</p>
+<h1 id="魔法方法概览"><a href="#魔法方法概览" class="headerlink" title="魔法方法概览"></a>魔法方法概览</h1><p>首先，我们先对 Python 中的魔法方法进行归类，常见的魔法方法大致可分为以下几类：</p>
+<ul>
+<li>构造与初始化</li>
+<li>类的表示</li>
+<li>访问控制</li>
+<li>比较操作</li>
+<li>容器类操作</li>
+<li>可调用对象</li>
+<li>序列化</li>
+</ul>
+<p>由于魔法方法分类较多，这篇文章我们先来看前几个：构造与初始化、类的表示、访问控制。剩下的魔法方法，我们会在下一篇文章进行分析讲解。</p>
+<h1 id="构造与初始化"><a href="#构造与初始化" class="headerlink" title="构造与初始化"></a>构造与初始化</h1><p>首先，我们来看关于构造与初始化相关的魔法方法，主要包括以下几种：</p>
+<ul>
+<li><code>__init__</code></li>
+<li><code>__new__</code></li>
+<li><code>__del__</code></li>
+</ul>
+<h2 id="init"><a href="#init" class="headerlink" title="__init__"></a><code>__init__</code></h2><p>关于构造与初始化的魔法方法，我们使用最频繁的一个就是 <code>__init__</code> 了。</p>
+<p>我们在定义类的时候，通常都会去定义构造方法，它的作用就是在初始化一个对象时，定义这个对象的初始值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, age)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="string">'张三'</span>, <span class="number">25</span>)</span><br><span class="line">p2 = Person(<span class="string">'李四'</span>, <span class="number">30</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="new"><a href="#new" class="headerlink" title="__new__"></a><code>__new__</code></h2><p>在初始化一个类的属性时，除了使用 <code>__init__</code> 之外，还可以使用 <code>__new__</code> 这个方法。</p>
+<p>我们在平时开发中使用的虽然不多，但是经常能够在开源框架中看到它的身影。实际上，这才是「真正的构造方法」。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, *args, **kwargs)</span>:</span></span><br><span class="line">        <span class="keyword">print</span> <span class="string">"call __new__"</span></span><br><span class="line">        <span class="keyword">return</span> object.__new__(cls, *args, **kwargs)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, age)</span>:</span></span><br><span class="line">        <span class="keyword">print</span> <span class="string">"call __init__"</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line"></span><br><span class="line">p = Person(<span class="string">"张三"</span>, <span class="number">20</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># call __new__</span></span><br><span class="line"><span class="comment"># call __init__</span></span><br></pre></td></tr></table></figure>
+
+<p>从例子我们可以看到，<code>__new__</code> 会在对象实例化时第一个被调用，然后才会调用 <code>__init__</code>，它们的区别如下：</p>
+<ul>
+<li><code>__new__</code> 的第一个参数是 <code>cls</code>，而 <code>__init__</code> 的第一个参数是 <code>self</code></li>
+<li><code>__new__</code> 返回值是一个实例对象，而 <code>__init__</code> 没有任何返回值，只做初始化操作</li>
+<li><code>__new__</code> 由于返回的是一个实例对象，所以它可以给所有实例进行<strong>统一</strong>的初始化操作</li>
+</ul>
+<p>了解了它们之间的区别，我们来看 <code>__new__</code> 在什么场景下使用？</p>
+<p>由于 <code>__new__</code> 优先于 <code>__init__</code> 调用，而且它返回的是一个实例，所以我们可以利用这个特性，在 <code>__new__</code> 方法中，每次返回同一个实例来实现一个单例类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Singleton</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""单例"""</span></span><br><span class="line">    _instance = <span class="literal">None</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, *args, **kwargs)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> cls._instance:</span><br><span class="line">            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)</span><br><span class="line">        <span class="keyword">return</span> cls._instance</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MySingleton</span><span class="params">(Singleton)</span>:</span></span><br><span class="line">    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">a = MySingleton()</span><br><span class="line">b = MySingleton()</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> a <span class="keyword">is</span> b	<span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<p>另外一个使用场景是，当我们需要<strong>继承内置类</strong>时，例如想要继承 <code>int</code>、<code>str</code>、<code>tuple</code>，就无法使用 <code>__init__</code> 来初始化了，只能通过 <code>__new__</code> 来初始化数据：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">g</span><span class="params">(float)</span>:</span></span><br><span class="line">    <span class="string">"""千克转克"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__new__</span><span class="params">(cls, kg)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> float.__new__(cls, kg * <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">a = g(<span class="number">50</span>) <span class="comment"># 50千克转为克</span></span><br><span class="line"><span class="keyword">print</span> a 	<span class="comment"># 100</span></span><br><span class="line"><span class="keyword">print</span> a + <span class="number">100</span>	<span class="comment"># 200 由于继承了float，所以可以直接运算，非常方便！</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们实现了一个类，这个类继承了 <code>float</code>，之后，我们就可以对这个类的实例进行计算了，是不是很神奇？</p>
+<p>除此之外，<code>__new__</code> 比较多的应用场景是配合「元类」使用，关于「元类」的原理，我会在后面的文章中讲到。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/02/22/python-magic-methods/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/02/06/python-advance-decorator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/02/06/python-advance-decorator/" class="post-title-link" itemprop="url">Python进阶——如何实现一个装饰器？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-06 10:57:59" itemprop="dateCreated datePublished" datetime="2017-02-06T10:57:59+00:00">2017-02-06</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/02/06/python-advance-decorator/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——如何实现一个装饰器？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/02/06/python-advance-decorator/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/02/06/python-advance-decorator/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>8.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>14 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，我们经常会看到使用装饰器的场景，例如日志记录、权限校验、本地缓存等等。</p>
+<p>使用这些装饰器，给我们的开发带来了极大的便利，那么一个装饰器是如何实现的呢？</p>
+<p>这篇文章我们就来分析一下，Python 装饰器的使用及原理。</p>
+<h1 id="一切皆对象"><a href="#一切皆对象" class="headerlink" title="一切皆对象"></a>一切皆对象</h1><p>在介绍装饰器前，我们需要理解一个概念：在 Python 开发中，<strong>一切皆对象</strong>。</p>
+<p>什么意思呢？</p>
+<p>就是我们在开发中，无论是定义的变量（数字、字符串、元组、列表、字典）、还是方法、类、实例、模块，这些都可以称作<strong>对象</strong>。</p>
+<p>怎么理解呢？在 Python 中，所有的对象都会有属性和方法，也就是说可以通过「.」去获取它的属性或调用它的方法，例如像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line">i = <span class="number">10</span>	<span class="comment"># int对象</span></span><br><span class="line"><span class="keyword">print</span> id(i), type(i)</span><br><span class="line"><span class="comment"># 140703267064136, &lt;type 'int'&gt;</span></span><br><span class="line"></span><br><span class="line">s = <span class="string">'hello'</span>	<span class="comment"># str对象</span></span><br><span class="line"><span class="keyword">print</span> id(s), type(s), s.index(<span class="string">'o'</span>)</span><br><span class="line"><span class="comment"># 4308437920, &lt;type 'str'&gt;, 4</span></span><br><span class="line"></span><br><span class="line">d = &#123;<span class="string">'k'</span>: <span class="number">10</span>&#125;	<span class="comment"># dict对象</span></span><br><span class="line"><span class="keyword">print</span> id(d), type(d), d.get(<span class="string">'k'</span>)</span><br><span class="line"><span class="comment"># 4308446016, &lt;type 'dict'&gt;, 10</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span>	<span class="comment"># function对象</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'Hello World'</span></span><br><span class="line"><span class="keyword">print</span> id(hello), type(hello), hello.func_name, hello()</span><br><span class="line"><span class="comment"># 4308430192, &lt;type 'function'&gt;, hello, Hello World</span></span><br><span class="line"></span><br><span class="line">hello2 = hello	 <span class="comment"># 传递对象</span></span><br><span class="line"><span class="keyword">print</span> id(hello2), type(hello2), hello2.func_name, hello2()</span><br><span class="line"><span class="comment"># 4308430192, &lt;type 'function'&gt;, hello, Hello World</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 构建一个类</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">say</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'I am %s'</span> % self.name</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> id(Person), type(Person), Person.say</span><br><span class="line"><span class="comment"># 140703269140528, &lt;type 'type'&gt;, &lt;unbound method Person.say&gt;</span></span><br><span class="line"></span><br><span class="line">person = Person(<span class="string">'tom'</span>)		<span class="comment"># 实例化一个对象</span></span><br><span class="line"><span class="keyword">print</span> id(person), type(person),</span><br><span class="line"><span class="comment"># 4389020560, &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="keyword">print</span> person.name, person.say, person.say()</span><br><span class="line"><span class="comment"># tom, &lt;bound method Person.say of &lt;__main__.Person object at 0x1059b2390&gt;&gt;, I am tom</span></span><br></pre></td></tr></table></figure>
+
+<p>我们可以看到，常见的这些类型：<code>int</code>、<code>str</code>、<code>dict</code>、<code>function</code>，甚至 <code>class</code>、<code>instance</code> 都可以调用 <code>id</code> 和 <code>type</code> 获得对象的唯一标识和类型。</p>
+<p>例如方法的类型是 <code>function</code>，类的类型是 <code>type</code>，并且这些对象都是可传递的。</p>
+<p>对象可传递会带来什么好处呢？</p>
+<p>这么做的好处就是，我们可以实现一个「闭包」，而「闭包」就是实现一个装饰器的基础。</p>
+<h1 id="闭包"><a href="#闭包" class="headerlink" title="闭包"></a>闭包</h1><p>假设我们现在想统计一个方法的执行时间，通常实现的逻辑如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    start = time.time() <span class="comment"># 开始时间</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)       <span class="comment"># 模拟执行耗时</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'hello'</span></span><br><span class="line">    end = time.time()   <span class="comment"># 结束时间</span></span><br><span class="line">    <span class="keyword">print</span> <span class="string">'duration time: %ds'</span> % int(end - start) <span class="comment"># 计算耗时</span></span><br><span class="line"></span><br><span class="line">hello()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># hello</span></span><br><span class="line"><span class="comment"># duration time: 1s</span></span><br></pre></td></tr></table></figure>
+
+<p>统计一个方法执行时间的逻辑很简单，只需要在调用这个方法的前后，增加时间的记录就可以了。</p>
+<p>但是，统计这一个方法的执行时间这么写一次还好，如果我们想统计任意一个方法的执行时间，每个方法都这么写，就会有大量的重复代码，而且不宜维护。</p>
+<p>如何解决？这时我们通常会想到，可以把这个逻辑抽离出来：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">timeit</span><span class="params">(func)</span>:</span>   <span class="comment"># 计算方法耗时的通用方法</span></span><br><span class="line">    start = time.time()</span><br><span class="line">    func()          <span class="comment"># 执行方法</span></span><br><span class="line">    end = time.time()</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'duration time: %ds'</span> % int(end - start)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'hello'</span></span><br><span class="line"></span><br><span class="line">timeit(hello)   <span class="comment"># 调用执行</span></span><br></pre></td></tr></table></figure>
+
+<p>这里我们定义了一个 <code>timeit</code> 方法，而参数传入一个方法对象，在执行完真正的方法逻辑后，计算其运行时间。</p>
+<p>这样，如果我们想计算哪个方法的执行时间，都按照此方式调用即可。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">timeit(func1)   <span class="comment"># 计算func1执行时间</span></span><br><span class="line">timeit(func2)   <span class="comment"># 计算func2执行时间</span></span><br></pre></td></tr></table></figure>
+
+<p>虽然此方式可以满足我们的需求，但有没有觉得，本来我们想要执行的是 <code>hello</code> 方法，现在执行都需要使用 <code>timeit</code> 然后传入 <code>hello</code> 才能达到要求，有没有一种方式，既可以给原来的方法加上计算时间的逻辑，还能像调用原方法一样使用呢？</p>
+<p>答案当然是可以的，我们对 <code>timeit</code> 进行改造：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">timeit</span><span class="params">(func)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">inner</span><span class="params">()</span>:</span></span><br><span class="line">        start = time.time()</span><br><span class="line">        func()</span><br><span class="line">        end = time.time()</span><br><span class="line">        <span class="keyword">print</span> <span class="string">'duration time: %ds'</span> % int(end - start)</span><br><span class="line">    <span class="keyword">return</span> inner</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'hello'</span></span><br><span class="line"></span><br><span class="line">hello = timeit(hello)	  <span class="comment"># 重新定义hello</span></span><br><span class="line">hello()					  <span class="comment"># 像调用原始方法一样使用</span></span><br></pre></td></tr></table></figure>
+
+<p>请注意观察 <code>timeit</code> 的变动，它在内部定义了一个 <code>inner</code> 方法，此方法内部的实现与之前类似，但是，<code>timeit</code> 最终返回的不是一个值，而是 <code>inner</code> 对象。</p>
+<p>所以当我们调用 <code>hello = timeit(hello)</code> 时，会得到一个方法对象，那么变量 <code>hello</code> 其实是 <code>inner</code>，在执行 <code>hello()</code> 时，真正执行的是 <code>inner</code> 方法。</p>
+<p>我们对 <code>hello</code> 方法进行了重新定义，这么一来，<code>hello</code> 不仅保留了其原有的逻辑，而且还增加了计算方法执行耗时的新功能。</p>
+<p>回过头来，我们分析一下 <code>timeit</code> 这个方法是如何运行的？</p>
+<p>在 Python 中允许在一个方法中嵌套另一个方法，这种特殊的机制就叫做<strong>「闭包」</strong>，这个内部方法可以保留外部方法的作用域，尽管外部方法不是全局的，内部方法也可以访问到外部方法的参数和变量。</p>
+<h1 id="装饰器"><a href="#装饰器" class="headerlink" title="装饰器"></a>装饰器</h1><p>明白了闭包的工作机制后，那么实现一个装饰器就变得非常简单了。</p>
+<p>Python 支持一种装饰器语法糖「@」，使用这个语法糖，我们也可以实现与上面完全相同的功能：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="meta">@timeit			# 相当于 hello = timeit(hello)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">hello</span><span class="params">()</span>:</span></span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'hello'</span></span><br><span class="line"></span><br><span class="line">hello()		<span class="comment"># 直接调用原方法即可</span></span><br></pre></td></tr></table></figure>
+
+<p>看到这里，是不是觉得很简单？</p>
+<p>这里的 <code>@timeit</code> 其实就等价于 <code>hello = timeit(hello)</code>。</p>
+<p>装饰器本质上就是实现一个闭包，把一个方法对象当做参数，传入到另一个方法中，然后这个方法返回了一个增强功能的方法对象。</p>
+<p>这就是装饰器的核心，平时我们开发中常见的装饰器，无非就是这种形式的变形而已。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/02/06/python-advance-decorator/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/01/11/vps-shadowsocks-proxy/" class="post-title-link" itemprop="url">VPS搭建Shadowsocks代理服务</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-11 11:12:22" itemprop="dateCreated datePublished" datetime="2017-01-11T11:12:22+00:00">2017-01-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/01/11/vps-shadowsocks-proxy/" class="post-meta-item leancloud_visitors" data-flag-title="VPS搭建Shadowsocks代理服务" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/01/11/vps-shadowsocks-proxy/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/01/11/vps-shadowsocks-proxy/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>之前买的科学上网服务从不稳定到不可用，也没有通知一声，貌似跑路了，太没有职业道德，这年头只想稳定的上网真的这么难么？</p>
+<p>还好，之前买过一台VPS，本想业余时间开发一些小东西，目前只部署了个爬虫在上面跑，这次先用它搭个梯子代理，至少自己动手，比别人的要稳定吧！</p>
+</blockquote>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>首先说一下<code>shadowsocks</code>的工作原理，正常情况下，如果你想访问外面的世界，由于有GFW的存在，直连是访问不了的，但如果你有一台外面世界的VPS，而你可以直连到这台VPS上，那么就可以通过这台VPS搭一条通道，也就是所谓的梯子，来让我们间接的连通外面的世界。</p>
+<p>说白了就是在这台VPS上自己搭建一个服务，可以使我们的请求数据包经过这个服务转发出去，然后将响应数据包再通过这个服务正常返回给我们，但是由于我们上网都会经过GFW，它会验证我们的数据包，如果是被屏蔽的域名或IP，则会拒绝访问。怎样才能跨越屏障呢？</p>
+<p>那就是在发送请求数据给代理服务时，先进行加密，这样就能跨越GFW到达代理服务，代理服务再通过同样的算法解密数据包，然后转发到我们请求的网站，之后得到响应后再通过先加密后解密的方式返回到我们本机，这样就能实现与外部连通。所以我们需要<strong>客户端</strong>和<strong>服务端</strong>配合来完成，大致流程如下：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484119054.png" />
+
+<p>明白了原理之后，我们怎样搭建这样一个服务呢？</p>
+<p><code>shadowsocks</code>就已经实现了这些东西，我们只需要经过配置就可以轻松完成这个服务。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/01/11/vps-shadowsocks-proxy/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/12/26/delay-queue-based-on-redis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/12/26/delay-queue-based-on-redis/" class="post-title-link" itemprop="url">基于Redis实现延迟队列</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-12-26 15:45:10" itemprop="dateCreated datePublished" datetime="2016-12-26T15:45:10+00:00">2016-12-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/12/26/delay-queue-based-on-redis/" class="post-meta-item leancloud_visitors" data-flag-title="基于Redis实现延迟队列" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/12/26/delay-queue-based-on-redis/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/12/26/delay-queue-based-on-redis/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>在后端服务中，经常有这样一种场景，写数据库操作在异步队列中执行，且这个异步队列是多进程运行的，这时如果对同一资源进行写库操作，很有可能产生数据被覆盖等问题，于是就需要业务层在更新数据库之前进行加锁，这样保证在更改同一资源时，没有其他更新操作干涉，保证数据一致性。</p>
+<p>但如果在更新前对数据库更新加锁，那此时又来了新的更新数据库的请求，但这个更新操作不能丢弃掉，需要延迟执行，那这就需要添加到延迟队列中，延迟执行。</p>
+<p>那么如何实现一个延迟队列？利用<code>Redis</code>的<code>SortedSet</code>和<code>String</code>这两种结构，就可以轻松实现。</p>
+<h1 id="具体实现"><a href="#具体实现" class="headerlink" title="具体实现"></a>具体实现</h1><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="string">"""Delay Queue"""</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> json</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> uuid</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> redis</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DelayQueue</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="string">"""延迟队列"""</span></span><br><span class="line"></span><br><span class="line">    QUEUE_KEY = <span class="string">'delay_queue'</span></span><br><span class="line">    DATA_PREFIX = <span class="string">'queue_data'</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, conf)</span>:</span></span><br><span class="line">        host, port, db = conf[<span class="string">'host'</span>], conf[<span class="string">'port'</span>], conf[<span class="string">'db'</span>]</span><br><span class="line">        self.client = redis.Redis(host=host, port=port, db=db)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">push</span><span class="params">(self, data)</span>:</span></span><br><span class="line">        <span class="string">"""push</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param data: data</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># 唯一ID</span></span><br><span class="line">        task_id = str(uuid.uuid4())</span><br><span class="line">        data_key = <span class="string">'&#123;&#125;_&#123;&#125;'</span>.format(self.DATA_PREFIX, task_id)</span><br><span class="line">        <span class="comment"># save string</span></span><br><span class="line">        self.client.set(data_key, json.dumps(data))</span><br><span class="line">        <span class="comment"># add zset(queue_key=&gt;data_key,ts)</span></span><br><span class="line">        self.client.zadd(self.QUEUE_KEY, data_key, int(time.time()))</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">pop</span><span class="params">(self, num=<span class="number">5</span>, previous=<span class="number">3</span>)</span>:</span></span><br><span class="line">        <span class="string">"""pop多条数据</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param num: pop多少个</span></span><br><span class="line"><span class="string">        :param previous: 获取多少秒前push的数据</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># 取出previous秒之前push的数据</span></span><br><span class="line">        until_ts = int(time.time()) - previous</span><br><span class="line">        task_ids = self.client.zrangebyscore(</span><br><span class="line">            self.QUEUE_KEY, <span class="number">0</span>, until_ts, start=<span class="number">0</span>, num=num)</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> task_ids:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 利用删除的原子性,防止并发获取重复数据</span></span><br><span class="line">        pipe = self.client.pipeline()</span><br><span class="line">        <span class="keyword">for</span> task_id <span class="keyword">in</span> task_ids:</span><br><span class="line">            pipe.zrem(self.QUEUE_KEY, task_id)</span><br><span class="line">        data_keys = [</span><br><span class="line">            data_key</span><br><span class="line">            <span class="keyword">for</span> data_key, flag <span class="keyword">in</span> zip(task_ids, pipe.execute())</span><br><span class="line">            <span class="keyword">if</span> flag</span><br><span class="line">        ]</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> data_keys:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">        <span class="comment"># load data</span></span><br><span class="line">        data = [</span><br><span class="line">            json.loads(item)</span><br><span class="line">            <span class="keyword">for</span> item <span class="keyword">in</span> self.client.mget(data_keys)</span><br><span class="line">        ]</span><br><span class="line">        <span class="comment"># delete string key</span></span><br><span class="line">        self.client.delete(*data_keys)</span><br><span class="line">        <span class="keyword">return</span> data</span><br></pre></td></tr></table></figure>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/12/26/delay-queue-based-on-redis/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/12/07/scrapy-code-analyze-core-process/" class="post-title-link" itemprop="url">Scrapy源码分析（四）核心抓取流程</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-12-07 10:30:14" itemprop="dateCreated datePublished" datetime="2016-12-07T10:30:14+00:00">2016-12-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/12/07/scrapy-code-analyze-core-process/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（四）核心抓取流程" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/12/07/scrapy-code-analyze-core-process/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/12/07/scrapy-code-analyze-core-process/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>26k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>43 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>上一篇文章：<a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">Scrapy源码分析（三）核心组件初始化</a>，我们已经分析了 Scrapy 核心组件的主要职责，以及它们在初始化时都完成了哪些工作。</p>
+<p>这篇文章就让我们来看一下，也是 Scrapy 最核心的抓取流程是如何运行的，它是如何调度各个组件，完成整个抓取工作的。</p>
+<h1 id="运行入口"><a href="#运行入口" class="headerlink" title="运行入口"></a>运行入口</h1><p>还是回到最初的入口，在<a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a>这篇文章中我们已经详细分析过了，在执行 Scrapy 命令时，主要经过以下几步：</p>
+<ul>
+<li>调用 <code>cmdline.py</code> 的 <code>execute</code> 方法</li>
+<li>找到对应的 <code>命令实例</code> 解析命令行</li>
+<li>构建 <code>CrawlerProcess</code> 实例，调用 <code>crawl</code> 和 <code>start</code> 方法开始抓取</li>
+</ul>
+<p>而 <code>crawl</code> 方法最终是调用了 <code>Cralwer</code> 实例的 <code>crawl</code>，这个方法最终把控制权交给了<code>Engine</code>，而 <code>start</code> 方法注册好协程池，就开始异步调度执行了。</p>
+<p>我们来看 <code>Cralwer</code> 的 <code>crawl</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="keyword">not</span> self.crawling, <span class="string">"Crawling already taking place"</span></span><br><span class="line">    self.crawling = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 创建爬虫实例</span></span><br><span class="line">        self.spider = self._create_spider(*args, **kwargs)</span><br><span class="line">        <span class="comment"># 创建引擎</span></span><br><span class="line">        self.engine = self._create_engine()</span><br><span class="line">        <span class="comment"># 调用spider的start_requests 获取种子URL</span></span><br><span class="line">        start_requests = iter(self.spider.start_requests())</span><br><span class="line">        <span class="comment"># 调用engine的open_spider 交由引擎调度</span></span><br><span class="line">        <span class="keyword">yield</span> self.engine.open_spider(self.spider, start_requests)</span><br><span class="line">        <span class="keyword">yield</span> defer.maybeDeferred(self.engine.start)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            exc_info = sys.exc_info()</span><br><span class="line">        self.crawling = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> self.engine <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">yield</span> self.engine.close()</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            six.reraise(*exc_info)</span><br><span class="line">        <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+
+<p>这里首先会创建出爬虫实例，然后创建引擎，之后调用了 <code>spider</code> 的 <code>start_requests</code> 方法，这个方法就是我们平时写的最多爬虫类的父类，它在 <code>spiders/__init__.py</code> 中定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">start_requests</span><span class="params">(self)</span>:</span></span><br><span class="line">    <span class="comment"># 根据定义好的start_urls属性 生成种子URL对象</span></span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> self.start_urls:</span><br><span class="line">        <span class="keyword">yield</span> self.make_requests_from_url(url)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_requests_from_url</span><span class="params">(self, url)</span>:</span></span><br><span class="line">    <span class="comment"># 构建Request对象</span></span><br><span class="line">    <span class="keyword">return</span> Request(url, dont_filter=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h1 id="构建请求"><a href="#构建请求" class="headerlink" title="构建请求"></a>构建请求</h1><p>通过上面这段代码，我们能看到，平时我们必须要定义的 <code>start_urls</code> 属性，原来就是在这里用来构建 <code>Request</code> 的，来看 <code>Request</code> 的定义：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Request</span><span class="params">(object_ref)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, url, callback=None, method=<span class="string">'GET'</span>, headers=None, body=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 cookies=None, meta=None, encoding=<span class="string">'utf-8'</span>, priority=<span class="number">0</span>,</span></span></span><br><span class="line"><span class="function"><span class="params">                 dont_filter=False, errback=None)</span>:</span></span><br><span class="line">        <span class="comment"># 编码</span></span><br><span class="line">        self._encoding = encoding</span><br><span class="line">        <span class="comment"># 请求方法</span></span><br><span class="line">        self.method = str(method).upper()</span><br><span class="line">        <span class="comment"># 设置url</span></span><br><span class="line">        self._set_url(url)</span><br><span class="line">        <span class="comment"># 设置body</span></span><br><span class="line">        self._set_body(body)</span><br><span class="line">        <span class="keyword">assert</span> isinstance(priority, int), <span class="string">"Request priority not an integer: %r"</span> % priority</span><br><span class="line">        <span class="comment"># 优先级</span></span><br><span class="line">        self.priority = priority</span><br><span class="line">        <span class="keyword">assert</span> callback <span class="keyword">or</span> <span class="keyword">not</span> errback, <span class="string">"Cannot use errback without a callback"</span></span><br><span class="line">        <span class="comment"># 回调函数</span></span><br><span class="line">        self.callback = callback</span><br><span class="line">        <span class="comment"># 异常回调函数</span></span><br><span class="line">        self.errback = errback</span><br><span class="line">        <span class="comment"># cookies</span></span><br><span class="line">        self.cookies = cookies <span class="keyword">or</span> &#123;&#125;</span><br><span class="line">        <span class="comment"># 构建Header</span></span><br><span class="line">        self.headers = Headers(headers <span class="keyword">or</span> &#123;&#125;, encoding=encoding)</span><br><span class="line">        <span class="comment"># 是否需要过滤</span></span><br><span class="line">        self.dont_filter = dont_filter</span><br><span class="line">		<span class="comment"># 附加信息</span></span><br><span class="line">        self._meta = dict(meta) <span class="keyword">if</span> meta <span class="keyword">else</span> <span class="literal">None</span></span><br></pre></td></tr></table></figure>
+
+<p><code>Request</code> 对象比较简单，就是封装了请求参数、请求方法、回调以及可附加的属性信息。</p>
+<p>当然，你也可以在子类中重写 <code>start_requests</code> 和 <code>make_requests_from_url</code> 这 2 个方法，用来自定义逻辑构建种子请求。</p>
+<h1 id="引擎调度"><a href="#引擎调度" class="headerlink" title="引擎调度"></a>引擎调度</h1><p>再回到 <code>crawl</code> 方法，构建好种子请求对象后，调用了 <code>engine</code> 的 <code>open_spider</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">open_spider</span><span class="params">(self, spider, start_requests=<span class="params">()</span>, close_if_idle=True)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> self.has_capacity(), <span class="string">"No free spider slot when opening %r"</span> % \</span><br><span class="line">        spider.name</span><br><span class="line">    logger.info(<span class="string">"Spider opened"</span>, extra=&#123;<span class="string">'spider'</span>: spider&#125;)</span><br><span class="line">    <span class="comment"># 注册_next_request调度方法 循环调度</span></span><br><span class="line">    nextcall = CallLaterOnce(self._next_request, spider)</span><br><span class="line">    <span class="comment"># 初始化scheduler</span></span><br><span class="line">    scheduler = self.scheduler_cls.from_crawler(self.crawler)</span><br><span class="line">    <span class="comment"># 调用爬虫中间件 处理种子请求</span></span><br><span class="line">    start_requests = <span class="keyword">yield</span> self.scraper.spidermw.process_start_requests(start_requests, spider)</span><br><span class="line">    <span class="comment"># 封装Slot对象</span></span><br><span class="line">    slot = Slot(start_requests, close_if_idle, nextcall, scheduler)</span><br><span class="line">    self.slot = slot</span><br><span class="line">    self.spider = spider</span><br><span class="line">    <span class="comment"># 调用scheduler的open</span></span><br><span class="line">    <span class="keyword">yield</span> scheduler.open(spider)</span><br><span class="line">    <span class="comment"># 调用scrapyer的open</span></span><br><span class="line">    <span class="keyword">yield</span> self.scraper.open_spider(spider)</span><br><span class="line">    <span class="comment"># 调用stats的open</span></span><br><span class="line">    self.crawler.stats.open_spider(spider)</span><br><span class="line">    <span class="keyword">yield</span> self.signals.send_catch_log_deferred(signals.spider_opened, spider=spider)</span><br><span class="line">    <span class="comment"># 发起调度</span></span><br><span class="line">    slot.nextcall.schedule()</span><br><span class="line">    slot.heartbeat.start(<span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+
+<p>在这里首先构建了一个 <code>CallLaterOnce</code>，之后把 <code>_next_request</code> 方法注册了进去，看此类的实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">CallLaterOnce</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="comment"># 在twisted的reactor中循环调度一个方法</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func, *a, **kw)</span>:</span></span><br><span class="line">        self._func = func</span><br><span class="line">        self._a = a</span><br><span class="line">        self._kw = kw</span><br><span class="line">        self._call = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">schedule</span><span class="params">(self, delay=<span class="number">0</span>)</span>:</span></span><br><span class="line">        <span class="comment"># 上次发起调度 才可再次继续调度</span></span><br><span class="line">        <span class="keyword">if</span> self._call <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="comment"># 注册self到callLater中</span></span><br><span class="line">            self._call = reactor.callLater(delay, self)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cancel</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._call:</span><br><span class="line">            self._call.cancel()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 上面注册的是self 所以会执行__call__</span></span><br><span class="line">        self._call = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">return</span> self._func(*self._a, **self._kw)</span><br></pre></td></tr></table></figure>
+
+<p>这里封装了循环执行的方法类，并且注册的方法会在 <code>twisted</code> 的 <code>reactor</code> 中异步执行，以后执行只需调用 <code>schedule</code>，就会注册 <code>self</code> 到 <code>reactor</code> 的 <code>callLater</code> 中，然后它会执行 <code>__call__</code> 方法，最终执行的就是我们注册的方法。</p>
+<p>而这里我们注册的方法就是引擎的 <code>_next_request</code>，也就是说，此方法会循环调度，直到程序退出。</p>
+<p>之后调用了爬虫中间件的 <code>process_start_requests</code> 方法，你可以定义多个自己的爬虫中间件，每个类都重写此方法，爬虫在调度之前会分别调用你定义好的爬虫中间件，来处理初始化请求，你可以进行过滤、加工、筛选以及你想做的任何逻辑。</p>
+<p>这样做的好处就是，把想做的逻辑拆分成多个中间件，每个中间件功能独立，而且维护起来更加清晰。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/12/07/scrapy-code-analyze-core-process/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/11/21/scrapy-code-analyze-component-initialization/" class="post-title-link" itemprop="url">Scrapy源码分析（三）核心组件初始化</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-21 23:30:16" itemprop="dateCreated datePublished" datetime="2016-11-21T23:30:16+00:00">2016-11-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/21/scrapy-code-analyze-component-initialization/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（三）核心组件初始化" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/21/scrapy-code-analyze-component-initialization/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/21/scrapy-code-analyze-component-initialization/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>24 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在上一篇文章：<a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a>，我们主要剖析了 Scrapy 是如何运行起来的核心逻辑，也就是在真正执行抓取任务之前，Scrapy 都做了哪些工作。</p>
+<p>这篇文章，我们就来进一步剖析一下，Scrapy 有哪些核心组件？以及它们主要负责了哪些工作？这些组件为了完成这些功能，内部又是如何实现的。</p>
+<h1 id="爬虫类"><a href="#爬虫类" class="headerlink" title="爬虫类"></a>爬虫类</h1><p>我们接着上一篇结束的地方开始讲起。上次讲到 Scrapy 运行起来后，执行到最后到了 <code>Crawler</code> 的 <code>crawl</code> 方法，我们来看这个方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@defer.inlineCallbacks</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">crawl</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">assert</span> <span class="keyword">not</span> self.crawling, <span class="string">"Crawling already taking place"</span></span><br><span class="line">    self.crawling = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="comment"># 从spiderloader中找到爬虫类 并实例化爬虫实例</span></span><br><span class="line">        self.spider = self._create_spider(*args, **kwargs)</span><br><span class="line">        <span class="comment"># 创建引擎</span></span><br><span class="line">        self.engine = self._create_engine()</span><br><span class="line">        <span class="comment"># 调用爬虫类的start_requests方法 拿到种子URL列表</span></span><br><span class="line">        start_requests = iter(self.spider.start_requests())</span><br><span class="line">        <span class="comment"># 执行引擎的open_spider 并传入爬虫实例和初始请求</span></span><br><span class="line">        <span class="keyword">yield</span> self.engine.open_spider(self.spider, start_requests)</span><br><span class="line">        <span class="keyword">yield</span> defer.maybeDeferred(self.engine.start)</span><br><span class="line">    <span class="keyword">except</span> Exception:</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            exc_info = sys.exc_info()</span><br><span class="line">        self.crawling = <span class="literal">False</span></span><br><span class="line">        <span class="keyword">if</span> self.engine <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">yield</span> self.engine.close()</span><br><span class="line">        <span class="keyword">if</span> six.PY2:</span><br><span class="line">            six.reraise(*exc_info)</span><br><span class="line">        <span class="keyword">raise</span></span><br></pre></td></tr></table></figure>
+
+<p>执行到这里，我们看到首先创建了爬虫实例，然后创建了引擎，最后把爬虫交给引擎来处理了。</p>
+<p>在上一篇文章我们也讲到，在 <code>Crawler</code> 实例化时，会创建 <code>SpiderLoader</code>，它会根据我们定义的配置文件 <code>settings.py</code> 找到存放爬虫的位置，我们写的爬虫代码都在这里。</p>
+<p>然后 <code>SpiderLoader</code> 会扫描这些代码文件，并找到父类是 <code>scrapy.Spider</code> 爬虫类，然后根据爬虫类中的 <code>name</code> 属性（在编写爬虫时，这个属性是必填的），生成一个 <code>{spider_name: spider_cls}</code> 的字典，最后根据 <code>scrapy crawl &lt;spider_name&gt;</code> 命令中的 <code>spider_name</code> 找到我们写的爬虫类，然后实例化它，在这里就是调用了<code>_create_spider</code>方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_create_spider</span><span class="params">(self, *args, **kwargs)</span>:</span></span><br><span class="line">    <span class="comment"># 调用类方法from_crawler实例化</span></span><br><span class="line">    <span class="keyword">return</span> self.spidercls.from_crawler(self, *args, **kwargs)</span><br></pre></td></tr></table></figure>
+
+<p>实例化爬虫比较有意思，它不是通过普通的构造方法进行初始化，而是调用了类方法 <code>from_crawler</code> 进行的初始化，找到 <code>scrapy.Spider</code> 类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@classmethod</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">from_crawler</span><span class="params">(cls, crawler, *args, **kwargs)</span>:</span></span><br><span class="line">    spider = cls(*args, **kwargs)</span><br><span class="line">    spider._set_crawler(crawler)</span><br><span class="line">    <span class="keyword">return</span> spider</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_set_crawler</span><span class="params">(self, crawler)</span>:</span></span><br><span class="line">    self.crawler = crawler</span><br><span class="line">    <span class="comment"># 把settings对象赋给spider实例</span></span><br><span class="line">    self.settings = crawler.settings</span><br><span class="line">    crawler.signals.connect(self.close, signals.spider_closed)</span><br></pre></td></tr></table></figure>
+
+<p>在这里我们可以看到，这个类方法其实也是调用了构造方法，进行实例化，同时也拿到了 <code>settings</code> 配置，来看构造方法干了些什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Spider</span><span class="params">(object_ref)</span>:</span></span><br><span class="line">    name = <span class="literal">None</span></span><br><span class="line">    custom_settings = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name=None, **kwargs)</span>:</span></span><br><span class="line">        <span class="comment"># name必填</span></span><br><span class="line">        <span class="keyword">if</span> name <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            self.name = name</span><br><span class="line">        <span class="keyword">elif</span> <span class="keyword">not</span> getattr(self, <span class="string">'name'</span>, <span class="literal">None</span>):</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"%s must have a name"</span> % type(self).__name__)</span><br><span class="line">        self.__dict__.update(kwargs)</span><br><span class="line">        <span class="comment"># 如果没有设置start_urls 默认是[]</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(self, <span class="string">'start_urls'</span>):</span><br><span class="line">            self.start_urls = []</span><br></pre></td></tr></table></figure>
+
+<p>看到这里是不是很熟悉？这里就是我们平时编写爬虫类时，最常用的几个属性：<code>name</code>、<code>start_urls</code>、<code>custom_settings</code>：</p>
+<ul>
+<li><code>name</code>：在运行爬虫时通过它找到我们编写的爬虫类；</li>
+<li><code>start_urls</code>：抓取入口，也可以叫做种子URL；</li>
+<li><code>custom_settings</code>：爬虫自定义配置，会覆盖配置文件中的配置项；</li>
+</ul>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242067.png" />
+
+<h1 id="引擎"><a href="#引擎" class="headerlink" title="引擎"></a>引擎</h1><p>分析完爬虫类的初始化后，还是回到 <code>Crawler</code> 的 <code>crawl</code> 方法，紧接着就是创建<strong>引擎</strong>对象，也就是 <code>_create_engine</code> 方法，看看初始化时都发生了什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ExecutionEngine</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""引擎"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, crawler, spider_closed_callback)</span>:</span></span><br><span class="line">        self.crawler = crawler</span><br><span class="line">        <span class="comment"># 这里也把settings配置保存到引擎中</span></span><br><span class="line">        self.settings = crawler.settings</span><br><span class="line">        <span class="comment"># 信号</span></span><br><span class="line">        self.signals = crawler.signals</span><br><span class="line">        <span class="comment"># 日志格式</span></span><br><span class="line">        self.logformatter = crawler.logformatter</span><br><span class="line">        self.slot = <span class="literal">None</span></span><br><span class="line">        self.spider = <span class="literal">None</span></span><br><span class="line">        self.running = <span class="literal">False</span></span><br><span class="line">        self.paused = <span class="literal">False</span></span><br><span class="line">        <span class="comment"># 从settings中找到Scheduler调度器，找到Scheduler类</span></span><br><span class="line">        self.scheduler_cls = load_object(self.settings[<span class="string">'SCHEDULER'</span>])</span><br><span class="line">        <span class="comment"># 同样，找到Downloader下载器类</span></span><br><span class="line">        downloader_cls = load_object(self.settings[<span class="string">'DOWNLOADER'</span>])</span><br><span class="line">        <span class="comment"># 实例化Downloader</span></span><br><span class="line">        self.downloader = downloader_cls(crawler)</span><br><span class="line">        <span class="comment"># 实例化Scraper 它是引擎连接爬虫类的桥梁</span></span><br><span class="line">        self.scraper = Scraper(crawler)</span><br><span class="line">        self._spider_closed_callback = spider_closed_callback</span><br></pre></td></tr></table></figure>
+
+<p>在这里我们能看到，主要是对其他几个核心组件进行定义和初始化，主要包括包括：<code>Scheduler</code>、<code>Downloader</code>、<code>Scrapyer</code>，其中 <code>Scheduler</code> 只进行了类定义，没有实例化。</p>
+<p>也就是说，引擎是整个 Scrapy 的核心大脑，它负责管理和调度这些组件，让这些组件更好地协调工作。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242206.png" />
+
+<p>下面我们依次来看这几个核心组件都是如何初始化的？</p>
+<h1 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h1><p>调度器初始化发生在引擎的 <code>open_spider</code> 方法中，我们提前来看一下调度器的初始化。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Scheduler</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="string">"""调度器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, dupefilter, jobdir=None, dqclass=None, mqclass=None,</span></span></span><br><span class="line"><span class="function"><span class="params">                 logunser=False, stats=None, pqclass=None)</span>:</span></span><br><span class="line">        <span class="comment"># 指纹过滤器</span></span><br><span class="line">        self.df = dupefilter</span><br><span class="line">        <span class="comment"># 任务队列文件夹</span></span><br><span class="line">        self.dqdir = self._dqdir(jobdir)</span><br><span class="line">        <span class="comment"># 优先级任务队列类</span></span><br><span class="line">        self.pqclass = pqclass</span><br><span class="line">        <span class="comment"># 磁盘任务队列类</span></span><br><span class="line">        self.dqclass = dqclass</span><br><span class="line">        <span class="comment"># 内存任务队列类</span></span><br><span class="line">        self.mqclass = mqclass</span><br><span class="line">        <span class="comment"># 日志是否序列化</span></span><br><span class="line">        self.logunser = logunser</span><br><span class="line">        self.stats = stats</span><br><span class="line">        </span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_crawler</span><span class="params">(cls, crawler)</span>:</span></span><br><span class="line">        settings = crawler.settings</span><br><span class="line">        <span class="comment"># 从配置文件中获取指纹过滤器类</span></span><br><span class="line">        dupefilter_cls = load_object(settings[<span class="string">'DUPEFILTER_CLASS'</span>])</span><br><span class="line">        <span class="comment"># 实例化指纹过滤器</span></span><br><span class="line">        dupefilter = dupefilter_cls.from_settings(settings)</span><br><span class="line">        <span class="comment"># 从配置文件中依次获取优先级任务队列类、磁盘队列类、内存队列类</span></span><br><span class="line">        pqclass = load_object(settings[<span class="string">'SCHEDULER_PRIORITY_QUEUE'</span>])</span><br><span class="line">        dqclass = load_object(settings[<span class="string">'SCHEDULER_DISK_QUEUE'</span>])</span><br><span class="line">        mqclass = load_object(settings[<span class="string">'SCHEDULER_MEMORY_QUEUE'</span>])</span><br><span class="line">        <span class="comment"># 请求日志序列化开关</span></span><br><span class="line">        logunser = settings.getbool(<span class="string">'LOG_UNSERIALIZABLE_REQUESTS'</span>, settings.getbool(<span class="string">'SCHEDULER_DEBUG'</span>))</span><br><span class="line">        <span class="keyword">return</span> cls(dupefilter, jobdir=job_dir(settings), logunser=logunser,</span><br><span class="line">                   stats=crawler.stats, pqclass=pqclass, dqclass=dqclass, mqclass=mqclass)</span><br></pre></td></tr></table></figure>
+
+<p>可以看到，调度器的初始化主要做了 2 件事：</p>
+<ul>
+<li>实例化请求指纹过滤器：主要用来过滤重复请求；</li>
+<li>定义不同类型的任务队列：优先级任务队列、基于磁盘的任务队列、基于内存的任务队列；</li>
+</ul>
+<p>请求指纹过滤器又是什么？</p>
+<p>在配置文件中，我们可以看到定义的默认指纹过滤器是 <code>RFPDupeFilter</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RFPDupeFilter</span><span class="params">(BaseDupeFilter)</span>:</span></span><br><span class="line">    <span class="string">"""请求指纹过滤器"""</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, path=None, debug=False)</span>:</span></span><br><span class="line">        self.file = <span class="literal">None</span></span><br><span class="line">        <span class="comment"># 指纹集合 使用的是Set 基于内存</span></span><br><span class="line">        self.fingerprints = set()</span><br><span class="line">        self.logdupes = <span class="literal">True</span></span><br><span class="line">        self.debug = debug</span><br><span class="line">        self.logger = logging.getLogger(__name__)</span><br><span class="line">        <span class="comment"># 请求指纹可存入磁盘</span></span><br><span class="line">        <span class="keyword">if</span> path:</span><br><span class="line">            self.file = open(os.path.join(path, <span class="string">'requests.seen'</span>), <span class="string">'a+'</span>)</span><br><span class="line">            self.file.seek(<span class="number">0</span>)</span><br><span class="line">            self.fingerprints.update(x.rstrip() <span class="keyword">for</span> x <span class="keyword">in</span> self.file)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @classmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">from_settings</span><span class="params">(cls, settings)</span>:</span></span><br><span class="line">        debug = settings.getbool(<span class="string">'DUPEFILTER_DEBUG'</span>)</span><br><span class="line">        <span class="keyword">return</span> cls(job_dir(settings), debug)</span><br></pre></td></tr></table></figure>
+
+<p>请求指纹过滤器初始化时，定义了指纹集合，这个集合使用内存实现的 <code>Set</code>，而且可以控制这些指纹是否存入磁盘以供下次重复使用。</p>
+<p>也就是说，指纹过滤器的主要职责是：<strong>过滤重复请求，可自定义过滤规则。</strong></p>
+<p>在下篇文章中我们会介绍到，每个请求是根据什么规则生成指纹的，然后是又如何实现重复请求过滤逻辑的，这里我们先知道它的功能即可。</p>
+<p>下面来看调度器定义的任务队列都有什么作用？</p>
+<p>调度器默认定义了 2 种队列类型：</p>
+<ul>
+<li>基于磁盘的任务队列：在配置文件可配置存储路径，每次执行后会把队列任务保存到磁盘上；</li>
+<li>基于内存的任务队列：每次都在内存中执行，下次启动则消失；</li>
+</ul>
+<p>配置文件默认定义如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 基于磁盘的任务队列(后进先出)</span></span><br><span class="line">SCHEDULER_DISK_QUEUE = <span class="string">'scrapy.squeues.PickleLifoDiskQueue'</span></span><br><span class="line"><span class="comment"># 基于内存的任务队列(后进先出)</span></span><br><span class="line">SCHEDULER_MEMORY_QUEUE = <span class="string">'scrapy.squeues.LifoMemoryQueue'</span></span><br><span class="line"><span class="comment"># 优先级队列</span></span><br><span class="line">SCHEDULER_PRIORITY_QUEUE = <span class="string">'queuelib.PriorityQueue'</span></span><br></pre></td></tr></table></figure>
+
+<p>如果我们在配置文件中定义了 <code>JOBDIR</code> 配置项，那么每次执行爬虫时，都会把任务队列保存在磁盘中，下次启动爬虫时可以重新加载继续执行我们的任务。</p>
+<p>如果没有定义这个配置项，那么默认使用的是内存队列。</p>
+<p>细心的你可能会发现，默认定义的这些队列结构都是<strong>后进先出</strong>的，什么意思呢？</p>
+<p>也就是在运行我们的爬虫代码时，如果生成一个抓取任务，放入到任务队列中，那么下次抓取就会从任务队列中先获取到这个任务，优先执行。</p>
+<p>这么实现意味什么呢？其实意味着：<strong>Scrapy 默认的采集规则是深度优先！</strong></p>
+<p>如何改变这种机制，变为<strong>广度优先采集</strong>呢？这时候我们就要看一下 <code>scrapy.squeues</code> 模块了，在这里定义了很多种队列：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 先进先出磁盘队列(pickle序列化)</span></span><br><span class="line">PickleFifoDiskQueue = _serializable_queue(queue.FifoDiskQueue, \</span><br><span class="line">    _pickle_serialize, pickle.loads)</span><br><span class="line"><span class="comment"># 后进先出磁盘队列(pickle序列化)</span></span><br><span class="line">PickleLifoDiskQueue = _serializable_queue(queue.LifoDiskQueue, \</span><br><span class="line">    _pickle_serialize, pickle.loads)</span><br><span class="line"><span class="comment"># 先进先出磁盘队列(marshal序列化)</span></span><br><span class="line">MarshalFifoDiskQueue = _serializable_queue(queue.FifoDiskQueue, \</span><br><span class="line">    marshal.dumps, marshal.loads)</span><br><span class="line"><span class="comment"># 后进先出磁盘队列(marshal序列化)</span></span><br><span class="line">MarshalLifoDiskQueue = _serializable_queue(queue.LifoDiskQueue, \</span><br><span class="line">    marshal.dumps, marshal.loads)</span><br><span class="line"><span class="comment"># 先进先出内存队列</span></span><br><span class="line">FifoMemoryQueue = queue.FifoMemoryQueue</span><br><span class="line"><span class="comment"># 后进先出内存队列</span></span><br><span class="line">LifoMemoryQueue = queue.LifoMemoryQueue</span><br></pre></td></tr></table></figure>
+
+<p>如果我们想把抓取任务改为广度优先，我们只需要在配置文件中把队列类修改为<strong>先进先出</strong>队列类就可以了！从这里我们也可以看出，Scrapy 各个组件之间的耦合性非常低，每个模块都是可自定义的。</p>
+<p>如果你想探究这些队列是如何实现的，可以参考 Scrapy 作者写的 <a href="https://github.com/scrapy/queuelib" target="_blank" rel="noopener">scrapy/queuelib</a> 项目，在 Github 上就可以找到，在这里有这些队列的具体实现。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1482242425.png" />
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/11/21/scrapy-code-analyze-component-initialization/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/11/09/scrapy-code-analyze-entrance/" class="post-title-link" itemprop="url">Scrapy源码分析（二）运行入口</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-09 20:35:31" itemprop="dateCreated datePublished" datetime="2016-11-09T20:35:31+00:00">2016-11-09</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/09/scrapy-code-analyze-entrance/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（二）运行入口" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/09/scrapy-code-analyze-entrance/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/09/scrapy-code-analyze-entrance/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>14k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>23 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在上篇文章：<a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">Scrapy源码分析（一）架构概览</a>，我们主要从整体上了解了 Scrapy 的架构和数据流转，并没有深入分析每个模块。从这篇文章开始，我将带你详细剖析 Scrapy 的运行原理。</p>
+<p>这篇文章，我们先从最基础的运行入口来讲，来看一下 Scrapy 究竟是如何运行起来的。</p>
+<h1 id="scrapy-命令从哪来？"><a href="#scrapy-命令从哪来？" class="headerlink" title="scrapy 命令从哪来？"></a>scrapy 命令从哪来？</h1><p>当我们基于 Scrapy 写好一个爬虫后，想要把我们的爬虫运行起来，怎么做？非常简单，只需要执行以下命令就可以了。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">scrapy crawl &lt;spider_name&gt;</span><br></pre></td></tr></table></figure>
+
+<p>通过这个命令，我们的爬虫就真正开始工作了。那么从命令行到执行爬虫逻辑，这个过程中到底发生了什么？</p>
+<p>在开始之前，不知道你有没有和我一样的疑惑，我们执行的 <code>scrapy</code> 命令从何而来？</p>
+<p>实际上，当你成功安装好 Scrapy 后，使用如下命令，就能找到这个命令文件，这个文件就是 Scrapy 的运行入口：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ which scrapy</span><br><span class="line">&#x2F;usr&#x2F;local&#x2F;bin&#x2F;scrapy</span><br></pre></td></tr></table></figure>
+
+<p>使用编辑打开这个文件，你会发现，它其实它就是一个 Python 脚本，而且代码非常少。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> re</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> scrapy.cmdline <span class="keyword">import</span> execute</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    sys.argv[<span class="number">0</span>] = re.sub(<span class="string">r'(-script\.pyw|\.exe)?$'</span>, <span class="string">''</span>, sys.argv[<span class="number">0</span>])</span><br><span class="line">    sys.exit(execute())</span><br></pre></td></tr></table></figure>
+
+<p>安装好 Scrapy 后，为什么入口点是这里呢？</p>
+<p>答案就在于 Scrapy 的安装文件 <code>setup.py</code> 中，我们找到这个文件，就会发现在这个文件里，已经声明好了程序的运行入口处：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> os.path <span class="keyword">import</span> dirname, join</span><br><span class="line"><span class="keyword">from</span> setuptools <span class="keyword">import</span> setup, find_packages</span><br><span class="line"></span><br><span class="line">setup(</span><br><span class="line">    name=<span class="string">'Scrapy'</span>,</span><br><span class="line">    version=version,</span><br><span class="line">    url=<span class="string">'http://scrapy.org'</span>,</span><br><span class="line">    ...</span><br><span class="line">    entry_points=&#123;      <span class="comment"># 运行入口在这里：scrapy.cmdline:execute</span></span><br><span class="line">        <span class="string">'console_scripts'</span>: [<span class="string">'scrapy = scrapy.cmdline:execute'</span>]</span><br><span class="line">    &#125;,</span><br><span class="line">    classifiers=[</span><br><span class="line">        ...</span><br><span class="line">    ],</span><br><span class="line">    install_requires=[</span><br><span class="line">        ...</span><br><span class="line">    ],</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>我们需要关注的是 <code>entry_points</code> 配置，它就是调用 Scrapy 开始的地方，也就是<code>cmdline.py</code> 的 <code>execute</code> 方法。</p>
+<p>也就是说，我们在安装 Scrapy 的过程中，<code>setuptools</code> 这个包管理工具，就会把上述代码生成好并放在可执行路径下，这样当我们调用 <code>scrapy</code> 命令时，就会调用 Scrapy 模块下的 <code>cmdline.py</code> 的 <code>execute</code> 方法。</p>
+<p>而且在这这里，我们可以学到一个小技巧——如何用 Python 编写一个可执行文件？其实非常简单，模仿上面的思路，只需要以下几步即可完成：</p>
+<ol>
+<li>编写一个带有 <code>main</code> 方法的 Python 模块（首行必须注明 Python 执行路径）</li>
+<li>去掉<code>.py</code>后缀名</li>
+<li>修改权限为可执行（<code>chmod +x</code> 文件名）</li>
+<li>直接用文件名就可以执行这个 Python 文件</li>
+</ol>
+<p>例如，我们创建一个文件 <code>mycmd</code>，在这个文件中编写一个 <code>main</code> 方法，这个方法编写我们想要的执行的逻辑，之后执行 <code>chmod +x mycmd</code> 把这个文件权限变成可执行，最后通过 <code>./mycmd</code> 就可以执行这段代码了，而不再需要通过 <code>python &lt;file.py&gt;</code> 方式就可以执行了，是不是很简单？</p>
+<h1 id="运行入口（execute-py）"><a href="#运行入口（execute-py）" class="headerlink" title="运行入口（execute.py）"></a>运行入口（execute.py）</h1><p>现在，我们已经知道了 Scrapy 的运行入口是 <code>scrapy/cmdline.py</code> 的 <code>execute</code> 方法，那我们就看一下这个方法。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">execute</span><span class="params">(argv=None, settings=None)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> argv <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        argv = sys.argv</span><br><span class="line"></span><br><span class="line">    <span class="comment"># --- 兼容低版本scrapy.conf.settings的配置 ---</span></span><br><span class="line">    <span class="keyword">if</span> settings <span class="keyword">is</span> <span class="literal">None</span> <span class="keyword">and</span> <span class="string">'scrapy.conf'</span> <span class="keyword">in</span> sys.modules:</span><br><span class="line">        <span class="keyword">from</span> scrapy <span class="keyword">import</span> conf</span><br><span class="line">        <span class="keyword">if</span> hasattr(conf, <span class="string">'settings'</span>):</span><br><span class="line">            settings = conf.settings</span><br><span class="line">    <span class="comment"># -----------------------------------------</span></span><br><span class="line"></span><br><span class="line">	<span class="comment"># 初始化环境、获取项目配置参数 返回settings对象</span></span><br><span class="line">    <span class="keyword">if</span> settings <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">        settings = get_project_settings()</span><br><span class="line">    <span class="comment"># 校验弃用的配置项</span></span><br><span class="line">    check_deprecated_settings(settings)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># --- 兼容低版本scrapy.conf.settings的配置 ---</span></span><br><span class="line">    <span class="keyword">import</span> warnings</span><br><span class="line">    <span class="keyword">from</span> scrapy.exceptions <span class="keyword">import</span> ScrapyDeprecationWarning</span><br><span class="line">    <span class="keyword">with</span> warnings.catch_warnings():</span><br><span class="line">        warnings.simplefilter(<span class="string">"ignore"</span>, ScrapyDeprecationWarning)</span><br><span class="line">        <span class="keyword">from</span> scrapy <span class="keyword">import</span> conf</span><br><span class="line">        conf.settings = settings</span><br><span class="line">    <span class="comment"># ---------------------------------------</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 执行环境是否在项目中 主要检查scrapy.cfg配置文件是否存在</span></span><br><span class="line">    inproject = inside_project()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 读取commands文件夹 把所有的命令类转换为&#123;cmd_name: cmd_instance&#125;的字典</span></span><br><span class="line">    cmds = _get_commands_dict(settings, inproject)</span><br><span class="line">    <span class="comment"># 从命令行解析出执行的是哪个命令</span></span><br><span class="line">    cmdname = _pop_command_name(argv)</span><br><span class="line">    parser = optparse.OptionParser(formatter=optparse.TitledHelpFormatter(), \</span><br><span class="line">        conflict_handler=<span class="string">'resolve'</span>)</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> cmdname:</span><br><span class="line">        _print_commands(settings, inproject)</span><br><span class="line">        sys.exit(<span class="number">0</span>)</span><br><span class="line">    <span class="keyword">elif</span> cmdname <span class="keyword">not</span> <span class="keyword">in</span> cmds:</span><br><span class="line">        _print_unknown_command(settings, cmdname, inproject)</span><br><span class="line">        sys.exit(<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 根据命令名称找到对应的命令实例</span></span><br><span class="line">    cmd = cmds[cmdname]</span><br><span class="line">    parser.usage = <span class="string">"scrapy %s %s"</span> % (cmdname, cmd.syntax())</span><br><span class="line">    parser.description = cmd.long_desc()</span><br><span class="line">    <span class="comment"># 设置项目配置和级别为command</span></span><br><span class="line">    settings.setdict(cmd.default_settings, priority=<span class="string">'command'</span>)</span><br><span class="line">    cmd.settings = settings</span><br><span class="line">    <span class="comment"># 添加解析规则</span></span><br><span class="line">    cmd.add_options(parser)</span><br><span class="line">    <span class="comment"># 解析命令参数，并交由Scrapy命令实例处理</span></span><br><span class="line">    opts, args = parser.parse_args(args=argv[<span class="number">1</span>:])</span><br><span class="line">    _run_print_help(parser, cmd.process_options, args, opts)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 初始化CrawlerProcess实例 并给命令实例添加crawler_process属性</span></span><br><span class="line">    cmd.crawler_process = CrawlerProcess(settings)</span><br><span class="line">    <span class="comment"># 执行命令实例的run方法</span></span><br><span class="line">    _run_print_help(parser, _run_command, cmd, args, opts)</span><br><span class="line">    sys.exit(cmd.exitcode)</span><br></pre></td></tr></table></figure>
+
+<p>这块代码就是 Scrapy 执行的运行入口了，我们根据注释就能看到，这里的主要工作包括配置初始化、命令解析、爬虫类加载、运行爬虫这几步。</p>
+<p>了解了整个入口的流程，下面我会对每个步骤进行详细的分析。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/11/09/scrapy-code-analyze-entrance/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/11/01/scrapy-code-analyze-architecture/" class="post-title-link" itemprop="url">Scrapy源码分析（一）架构概览</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-01 20:45:56" itemprop="dateCreated datePublished" datetime="2016-11-01T20:45:56+00:00">2016-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/01/scrapy-code-analyze-architecture/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（一）架构概览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/01/scrapy-code-analyze-architecture/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/01/scrapy-code-analyze-architecture/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在爬虫开发领域，使用最多的主流语言主要是 Java 和 Python 这两种，如果你经常使用 Python 开发爬虫，那么肯定听说过 Scrapy 这个开源框架，它正是由Python编写的。</p>
+<p>Scrapy 在开源爬虫框架中名声非常大，几乎用 Python 写爬虫的人，都用过这个框架。而且业界很多开源的爬虫框架都是模仿和参考 Scrapy 的思想和架构实现的，如果想深入学习爬虫，研读 Scrapy 的源码还是很有必要的。</p>
+<p>从这篇文章开始，我就和你分享一下当时我在做爬虫时，阅读 Scrapy 源码的思路和经验总结。</p>
+<p>这篇文章我们先来介绍一下 Scrapy 的整体架构，从宏观层面上学习一下 Scrapy 运行的流程。之后的几篇文章，我会带你深入到每个模块，剖析这个框架的实现细节。</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>首先，我们先来看一下 Scrapy 的官方是如何介绍它的。从官方网站，我们可以看到 Scrapy 如下定义。</p>
+<p><strong>Scrapy 是一个基于 Python 语言编写的开源爬虫框架，它可以帮你快速、简单的方式构建爬虫，并从网站上提取你所需要的数据。</strong></p>
+<p>也就是说，使用 Scrapy 能帮你快速简单的编写一个爬虫，用来抓取网站数据。</p>
+<p>本篇文章不再介绍 Scrapy 的安装和使用，这个系列主要通过阅读源码讲解 Scrapy 的实现思路，关于如何安装和使用的问题，请参考<a href="https://scrapy.org/" target="_blank" rel="noopener">官方网站</a>和<a href="https://doc.scrapy.org/en/1.2/" target="_blank" rel="noopener">官方文档</a>学习。（注：写本篇文章时，Scrapy 版本为1.2，虽然版本有些低，但与最新版的实现思路基本没有很大出入。）</p>
+<p>使用 Scrapy 开发一个爬虫非常简单，这里使用 Scrapy 官网上的例子来说明如何编写一个简单爬虫：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477833723.png" />
+
+<p>简单来讲，编写和运行一个爬虫只需以下几步：</p>
+<ol>
+<li>使用 <code>scrapy startproject</code> 命令创建一个爬虫模板，或自己按模板编写爬虫代码</li>
+<li>定义一个爬虫类，并继承 <code>scrapy.Spider</code>，然后重写 <code>parse</code> 方法</li>
+<li><code>parse</code> 方法里编写网页解析逻辑，以及抓取路径</li>
+<li>使用 <code>scrapy runspider &lt;spider_file.py&gt;</code> 运行这个爬虫</li>
+</ol>
+<p>可见，使用 Scrapy 编写简单的几行代码，就能采集到一个网站页面的数据，非常方便。</p>
+<p>但是在这背后到底发生了什么？Scrapy 到底是如何帮助我们工作的呢？</p>
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p>要想知道 Scrapy 是如何工作的，首先我们来看一下 Scrapy 的架构图，从宏观角度来了解一下它是如何运行的：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png" />
+
+<h1 id="核心模块"><a href="#核心模块" class="headerlink" title="核心模块"></a>核心模块</h1><p>从架构图可以看到，Scrapy 主要包含以下五大模块：</p>
+<ul>
+<li><code>Scrapy Engine</code>：核心引擎，负责控制和调度各个组件，保证数据流转；</li>
+<li><code>Scheduler</code>：负责管理任务、过滤任务、输出任务的调度器，存储、去重任务都在此控制；</li>
+<li><code>Downloader</code>：下载器，负责在网络上下载数据，输入待下载的 URL，输出下载结果；</li>
+<li><code>Spiders</code>：我们自己编写的爬虫逻辑，定义抓取意图；</li>
+<li><code>Item Pipeline</code>：负责输出结构化数据，可自定义格式和输出的位置；</li>
+</ul>
+<p>如果你观察地比较仔细的话，可以看到还有两个模块：</p>
+<ul>
+<li><code>Downloader middlewares</code>：介于引擎和下载器之间，可以在网页在下载前、后进行逻辑处理；</li>
+<li><code>Spider middlewares</code>：介于引擎和爬虫之间，在向爬虫输入下载结果前，和爬虫输出请求 / 数据后进行逻辑处理；</li>
+</ul>
+<p>了解了这些核心模块，我们再来看使用 Scrapy 时，它内部的采集流程是如何流转的，也就是说各个模块是如何交互协作，来完成整个抓取任务的。</p>
+<h1 id="运行流程"><a href="#运行流程" class="headerlink" title="运行流程"></a>运行流程</h1><p>按照上面架构图标识出的序号，我们可以看到，Scrapy 运行时的数据流转大概是这样的：</p>
+<ol>
+<li><strong>引擎</strong>从<strong>自定义爬虫</strong>中获取初始化请求（也叫种子 URL）；</li>
+<li>引擎把该请求放入<strong>调度器</strong>中，同时调度器向引擎获取待下载的请求；</li>
+<li>调度器把<strong>待下载</strong>的请求发给引擎；</li>
+<li>引擎发送请求给<strong>下载器</strong>，中间会经过一系列<strong>下载器中间件</strong>；</li>
+<li>这个请求通过下载器下载完成后，生成一个<strong>响应对象</strong>，返回给引擎，这中间会再次经过一系列<strong>下载器中间件</strong>；</li>
+<li>引擎接收到下载器返回的响应后，发送给爬虫，中间会经过一系列<strong>爬虫中间件</strong>，最后执行爬虫<strong>自定义的解析逻辑</strong>；</li>
+<li>爬虫执行完自定义的解析逻辑后，生成<strong>结果对象</strong>或<strong>新的请求对象</strong>给引擎，再次经过一系列<strong>爬虫中间件</strong>；</li>
+<li>引擎把爬虫返回的结果对象交由<strong>结果处理器</strong>处理，把<strong>新的请求</strong>通过引擎再交给<strong>调度器</strong>；</li>
+<li>重复执行1-8，直到<strong>调度器</strong>中没有新的请求处理，任务结束；</li>
+</ol>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/11/01/scrapy-code-analyze-architecture/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/10/19/markdown-image-alfred/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2016/10/19/markdown-image-alfred/" class="post-title-link" itemprop="url">Markdown快速插入图片工具</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-10-19 21:53:31" itemprop="dateCreated datePublished" datetime="2016-10-19T21:53:31+00:00">2016-10-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/10/19/markdown-image-alfred/" class="post-meta-item leancloud_visitors" data-flag-title="Markdown快速插入图片工具" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/10/19/markdown-image-alfred/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/10/19/markdown-image-alfred/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>733</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>1 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <h1 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h1><p>不知道大家在用Markdown语法写博客时有没有遇到这样的问题？想使用Markdown语法插入一张图，大概要经过以下几个步骤：</p>
+<ul>
+<li>截图保存图片到本地</li>
+<li>打开并登陆注册好的图床网站</li>
+<li>上传图片至图床</li>
+<li>复制生成好的图片地址</li>
+<li>用Markdown语法插入图片</li>
+</ul>
+<p>如果插入图片过多，这样来回操作多次，简直要崩溃！经过网上搜索，貌似有2种解决方案：</p>
+<ul>
+<li>付费购买此类软件</li>
+<li>自己写一个小工具，简化工作</li>
+</ul>
+<p>我当然是属于第二种，想一想这个功能也不复杂，参考了有人已经实现出来的代码和思路，但是不忍其代码写的太渣太low，便自己造了这个轮子。</p>
+<h1 id="功能"><a href="#功能" class="headerlink" title="功能"></a>功能</h1><p>先来看效果图：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/fast-upload-img-animation.gif" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/screenshot-upload-image-animation.gif" />
+
+<p><strong>主要功能就是：复制本地图片或截图，快速上传图片至七牛云空间，并获取Markdown格式的图片地址。</strong></p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2016/10/19/markdown-image-alfred/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/5/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/7/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

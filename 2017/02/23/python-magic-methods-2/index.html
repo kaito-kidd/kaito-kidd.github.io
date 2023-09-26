@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在上一篇文章Python进阶——如何正确使用魔法方法？（上）中，我们主要介绍了关于构造与初始化、类的表示、访问控制这几类的魔法方法，以及它们的使用场景。 这篇文章，我们继续介绍剩下的魔法方法，主要包括：比较操作、容器类操作、可调用对象、序列化。 比较操作比较操作的魔法方法主要包括以下几种：  __cmp__ __eq__ __ne__ __lt__ __gt__  __cmp__从名字我们就能看出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶——如何正确使用魔法方法？（下）">
+<meta property="og:url" content="http://kaito-kidd.com/2017/02/23/python-magic-methods-2/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在上一篇文章Python进阶——如何正确使用魔法方法？（上）中，我们主要介绍了关于构造与初始化、类的表示、访问控制这几类的魔法方法，以及它们的使用场景。 这篇文章，我们继续介绍剩下的魔法方法，主要包括：比较操作、容器类操作、可调用对象、序列化。 比较操作比较操作的魔法方法主要包括以下几种：  __cmp__ __eq__ __ne__ __lt__ __gt__  __cmp__从名字我们就能看出">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2017-02-23T09:19:58.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2017/02/23/python-magic-methods-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python进阶——如何正确使用魔法方法？（下） | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/02/23/python-magic-methods-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python进阶——如何正确使用魔法方法？（下）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-02-23 09:19:58" itemprop="dateCreated datePublished" datetime="2017-02-23T09:19:58+00:00">2017-02-23</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/02/23/python-magic-methods-2/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——如何正确使用魔法方法？（下）" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/02/23/python-magic-methods-2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/02/23/python-magic-methods-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上一篇文章<a href="http://kaito-kidd.com/2017/02/22/python-magic-methods/">Python进阶——如何正确使用魔法方法？（上）</a>中，我们主要介绍了关于构造与初始化、类的表示、访问控制这几类的魔法方法，以及它们的使用场景。</p>
+<p>这篇文章，我们继续介绍剩下的魔法方法，主要包括：比较操作、容器类操作、可调用对象、序列化。</p>
+<h1 id="比较操作"><a href="#比较操作" class="headerlink" title="比较操作"></a>比较操作</h1><p>比较操作的魔法方法主要包括以下几种：</p>
+<ul>
+<li><code>__cmp__</code></li>
+<li><code>__eq__</code></li>
+<li><code>__ne__</code></li>
+<li><code>__lt__</code></li>
+<li><code>__gt__</code></li>
+</ul>
+<h2 id="cmp"><a href="#cmp" class="headerlink" title="__cmp__"></a><code>__cmp__</code></h2><p>从名字我们就能看出来这个魔法方法的作用，当我们需要比较两个对象时，我们可以定义 <code>__cmp__</code> 来实现比较操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line">	<span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, uid)</span>:</span></span><br><span class="line">        self.uid = uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__cmp__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.uid == other.uid:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">        <span class="keyword">if</span> self.uid &gt; other.uid:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span></span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="number">1</span>)</span><br><span class="line">p2 = Person(<span class="number">2</span>)</span><br><span class="line"><span class="keyword">print</span> p1 &gt; p2	<span class="comment"># False</span></span><br><span class="line"><span class="keyword">print</span> p1 &lt; p2	<span class="comment"># True</span></span><br><span class="line"><span class="keyword">print</span> p1 == p2	<span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+
+<p>从例子中我们可以看到，比较两个对象的具体逻辑：</p>
+<ul>
+<li>如果 <code>__cmp__</code> 返回大于 0 的整数（一般为1），说明 self &gt; other</li>
+<li>如果 <code>__cmp__</code> 返回大于 0 的整数（一般为-1），说明 self &lt; other</li>
+<li>如果 <code>__cmp__</code> 返回 0，说明 self == other</li>
+</ul>
+<p>当然，这种比较方式有一定的局限性，如果我有 N 个属性，当比较谁大时，我们想用属性 A 来比较。当比较谁小时，我们想用属性 B 来比较，此时 <code>__cmp__</code> 就无法很好地实现这个逻辑了，所以它只适用于通用的比较逻辑。</p>
+<p>那如何实现复杂的比较逻辑？</p>
+<p>这就需要用到 <code>__eq__</code>、<code>__ne__</code>、<code>__lt__</code>、<code>__gt__</code> 这些魔法方法了，我们看下面这个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, uid, name, salary)</span>:</span></span><br><span class="line">        self.uid = uid</span><br><span class="line">        self.name = name</span><br><span class="line">        self.salary = salary</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__eq__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 == 判断"""</span></span><br><span class="line">        <span class="keyword">return</span> self.uid == other.uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__ne__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 != 判断"""</span></span><br><span class="line">        <span class="keyword">return</span> self.uid != other.uid</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__lt__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 &lt; 判断 根据len(name)"""</span></span><br><span class="line">        <span class="keyword">return</span> len(self.name) &lt; len(other.name)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__gt__</span><span class="params">(self, other)</span>:</span></span><br><span class="line">        <span class="string">"""对象 &gt; 判断 根据alary"""</span></span><br><span class="line">        <span class="keyword">return</span> self.salary &gt; other.salary</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="number">1</span>, <span class="string">'zhangsan'</span>, <span class="number">1000</span>)</span><br><span class="line">p2 = Person(<span class="number">1</span>, <span class="string">'lisi'</span>, <span class="number">2000</span>)</span><br><span class="line">p3 = Person(<span class="number">1</span>, <span class="string">'wangwu'</span>, <span class="number">3000</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p1 == p1	<span class="comment"># uid 是否相同</span></span><br><span class="line"><span class="keyword">print</span> p1 != p2	<span class="comment"># uid 是否不同</span></span><br><span class="line"><span class="keyword">print</span> p2 &lt; p3	<span class="comment"># name 长度比较</span></span><br><span class="line"><span class="keyword">print</span> p3 &gt; p2	<span class="comment"># salary 比较</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="eq"><a href="#eq" class="headerlink" title="__eq__"></a><code>__eq__</code></h2><p><code>__eq__</code> 我们在上一篇文章已经介绍过，它配合 <code>__hash__</code> 方法，可以判断两个对象是否相等。</p>
+<p>但在这个例子中，当判断两个对象是否相等时，实际上我们比较的是 <code>uid</code> 这个属性。</p>
+<h2 id="ne"><a href="#ne" class="headerlink" title="__ne__"></a><code>__ne__</code></h2><p>同样地，当需要判断两个对象不相等时，会调用 <code>__ne__</code> 方法，在这个例子中，我们也是根据 <code>uid</code> 来判断的。</p>
+<h2 id="lt"><a href="#lt" class="headerlink" title="__lt__"></a><code>__lt__</code></h2><p>当判断一个对象是否小于另一个对象时，会调用 <code>__lt__</code> 方法，在这个例子中，我们根据 <code>name</code> 的长度来做的比较。</p>
+<h2 id="gt"><a href="#gt" class="headerlink" title="__gt__"></a><code>__gt__</code></h2><p>同样地，在判断一个对象是否大于另一个对象时，会调用 <code>__gt__</code> 方法，在这个例子中，我们根据 <code>salary</code> 属性判断。</p>
+<blockquote>
+<p>在 Python3 中，<code>__cmp__</code>被取消了，因为它和其他魔法方法存在功能上的重复。</p>
+</blockquote>
+<a id="more"></a>
+
+<h1 id="容器类操作"><a href="#容器类操作" class="headerlink" title="容器类操作"></a>容器类操作</h1><p>接下来我们来看容器类的魔法方法，主要包括：</p>
+<ul>
+<li><code>__setitem__</code></li>
+<li><code>__getitem__</code></li>
+<li><code>__delitem__</code></li>
+<li><code>__len__</code></li>
+<li><code>__iter__</code></li>
+<li><code>__contains__</code></li>
+<li><code>__reversed__</code></li>
+</ul>
+<p>是不是很熟悉？我们在开发中多少都使用到过这些方法。</p>
+<p>在介绍容器的魔法方法之前，我们首先想一下，Python 中的容器类型都有哪些？</p>
+<p>是的，Python 中常见的容器类型有：</p>
+<ul>
+<li>字典</li>
+<li>元组</li>
+<li>列表</li>
+<li>字符串</li>
+</ul>
+<p>这些都是容器类型。为什么这么说？</p>
+<p>因为它们都是「可迭代」的。可迭代是因为，它们都实现了容器协议，也就是我们下面要介绍到的魔法方法。</p>
+<p>我们看下面这个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">MyList</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""自己实现一个list"""</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, values=None)</span>:</span></span><br><span class="line">        <span class="comment"># 初始化自定义list</span></span><br><span class="line">        self.values = values <span class="keyword">or</span> []</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setitem__</span><span class="params">(self, key, value)</span>:</span></span><br><span class="line">        <span class="comment"># 添加元素</span></span><br><span class="line">        self.values[key] = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, key)</span>:</span></span><br><span class="line">        <span class="comment"># 获取元素</span></span><br><span class="line">        <span class="keyword">return</span> self.values[key]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delitem__</span><span class="params">(self, key)</span>:</span></span><br><span class="line">        <span class="comment"># 删除元素</span></span><br><span class="line">        <span class="keyword">del</span> self.values[key]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__len__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 自定义list的元素个数</span></span><br><span class="line">        <span class="keyword">return</span> len(self.values)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 可迭代</span></span><br><span class="line">        <span class="keyword">return</span> self</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">next</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 迭代的具体细节</span></span><br><span class="line">        <span class="comment"># 如果__iter__返回self 则必须实现此方法</span></span><br><span class="line">        <span class="keyword">if</span> self._index &gt;= len(self.values):</span><br><span class="line">            <span class="keyword">raise</span> StopIteration()</span><br><span class="line">        value = self.values[self._index]</span><br><span class="line">        self._index += <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__contains__</span><span class="params">(self, key)</span>:</span></span><br><span class="line">        <span class="comment"># 元素是否在自定义list中</span></span><br><span class="line">        <span class="keyword">return</span> key <span class="keyword">in</span> self.values</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__reversed__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 反转</span></span><br><span class="line">        <span class="keyword">return</span> list(reversed(self.values))</span><br><span class="line"></span><br><span class="line"><span class="comment"># 初始化自定义list</span></span><br><span class="line">my_list = MyList([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> my_list[<span class="number">0</span>]	     <span class="comment"># __getitem__</span></span><br><span class="line">my_list[<span class="number">1</span>] = <span class="number">20</span>		     <span class="comment"># __setitem__</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> <span class="number">1</span> <span class="keyword">in</span> my_list	     <span class="comment"># __contains__</span></span><br><span class="line"><span class="keyword">print</span> len(my_list)	     <span class="comment"># __len__</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> [i <span class="keyword">for</span> i <span class="keyword">in</span> my_list]  <span class="comment"># __iter__</span></span><br><span class="line"><span class="keyword">del</span> my_list[<span class="number">0</span>]	             <span class="comment"># __del__</span></span><br><span class="line"></span><br><span class="line">reversed_list = reversed(my_list) <span class="comment"># __reversed__</span></span><br><span class="line"><span class="keyword">print</span> [i <span class="keyword">for</span> i <span class="keyword">in</span> reversed_list]  <span class="comment"># __iter__</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们自己实现了一个 MyList 类，在这个类中，定义了很多容器类的魔法方法。这样一来，我们这个 MyList 类就可以像操作普通 <code>list</code> 一样，通过切片的方式添加、获取、删除、迭代元素了。</p>
+<h2 id="setitem"><a href="#setitem" class="headerlink" title="__setitem__"></a><code>__setitem__</code></h2><p>当我们执行 <code>my_list[1] = 20</code> 时，就会调用 <code>__setitem__</code> 方法，这个方法主要用于向容器内添加元素。</p>
+<h2 id="getitem"><a href="#getitem" class="headerlink" title="__getitem__"></a><code>__getitem__</code></h2><p>当我们执行 <code>my_list[0]</code> 时，就会调用 <code>__getitem__</code> 方法，这个方法主要用于从容器中读取元素。</p>
+<h2 id="delitem"><a href="#delitem" class="headerlink" title="__delitem__"></a><code>__delitem__</code></h2><p>当我们执行 <code>del my_list[0]</code> 时，就会调用 <code>__delitem__</code> 方法，这个方法主要用于从容器中删除元素。</p>
+<h2 id="len"><a href="#len" class="headerlink" title="__len__"></a><code>__len__</code></h2><p>当我们执行 <code>len(my_list)</code> 时，就会调用 <code>__len__</code> 方法，这个方法主要用于读取容器内元素的数量。</p>
+<h2 id="iter"><a href="#iter" class="headerlink" title="__iter__"></a><code>__iter__</code></h2><p>这个方法我们需要重点关注，为什么我们可以执行 <code>[i for i in my_list]</code>？就是因为我们定义了 <code>__iter__</code>。</p>
+<p>这个方法的返回值可以有两种：</p>
+<ul>
+<li>返回 <code>iter(obj)</code>：代表使用 <code>obj</code> 对象的迭代协议，一般 <code>obj</code> 是内置的容器对象</li>
+<li>返回 <code>self</code>：代表迭代的逻辑由本类来实现，此时需要重写 <code>next</code> 方法，实现自定义的迭代逻辑</li>
+</ul>
+<p>在这个例子中，<code>__iter__</code> 返回的是 <code>self</code>，所以我们需要定义 <code>next</code> 方法，实现自己的迭代细节。</p>
+<p><code>next</code> 方法使用一个索引变量，用于记录当前迭代的位置，这个方法每次被调用时，都会返回一个元素，当所有元素都迭代完成后，这个方法会返回 <code>StopIteration</code> 异常，此时 <code>for</code> 会停止迭代。</p>
+<blockquote>
+<p>在 Python3 中，已不再使用 next 方法，取而代之的是 <code>__next__</code>。</p>
+</blockquote>
+<h2 id="contains"><a href="#contains" class="headerlink" title="__contains__"></a><code>__contains__</code></h2><p>从名字也能看出来，这个方法是在执行 <code>1 in my_list</code> 时触发，用于判断某个元素是否存在于容器中。</p>
+<h2 id="reversed"><a href="#reversed" class="headerlink" title="__reversed__"></a><code>__reversed__</code></h2><p>这个方法在执行 <code>reversed(my_list)</code> 时触发，用于反转容器的元素，具体的反转逻辑我们也可以自己实现。</p>
+<h1 id="可调用对象"><a href="#可调用对象" class="headerlink" title="可调用对象"></a>可调用对象</h1><p>了解了容器类魔法方法，我们接着来看可调用对象的魔法方法，这个魔法方法只有一个：<code>__call__</code>。</p>
+<p>我们看下面这个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Circle</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, x, y)</span>:</span></span><br><span class="line">        self.x = x</span><br><span class="line">        self.y = y</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, x, y)</span>:</span></span><br><span class="line">        self.x = x</span><br><span class="line">        self.y = y</span><br><span class="line"></span><br><span class="line">c = Circle(<span class="number">10</span>, <span class="number">20</span>)	 <span class="comment"># __init__</span></span><br><span class="line"><span class="keyword">print</span> c.x, c.y	    <span class="comment"># 10 20</span></span><br><span class="line"></span><br><span class="line">c(<span class="number">100</span>, <span class="number">200</span>)	        <span class="comment"># 调用instance() 触发__call__</span></span><br><span class="line"><span class="keyword">print</span> c.x, c.y	     <span class="comment"># 100 200</span></span><br></pre></td></tr></table></figure>
+
+<p>仔细看这个例子，我们首先初始化一个 <code>Circle</code> 实例 <code>c</code>，此时会调用 <code>__init__</code> 方法，这个很好理解。</p>
+<p>但是，我们对于实例 <code>c</code> 又做了调用 <code>c(100, 200)</code>，注意，此时的 <code>c</code> 是一个实例对象，当我们这样执行时，其实它调用的就是 <code>__call__</code>。这样一来，我们就可以把实例当做一个方法来执行。</p>
+<p>如果不好理解，你可以多看几遍这个例子，理解一下。</p>
+<p>也就是说，Python 中的实例，也是可以被调用的，通过定义 <code>__call__</code> 方法，就可以传入自定义参数实现自己的逻辑。</p>
+<p>这个魔法方法通常会用在类实现一个装饰器、元类等场景中，当你遇到这个魔法方法时，你能理解其中的原理就可以了。</p>
+<h1 id="序列化"><a href="#序列化" class="headerlink" title="序列化"></a>序列化</h1><p>我们知道 Python 提供了序列号模块 <code>pickle</code>，当我们使用这个模块序列化一个实例时，也可以通过魔法方法来实现自己的逻辑，这些魔法方法包括：</p>
+<ul>
+<li><code>__getstate__</code></li>
+<li><code>__setstate__</code></li>
+</ul>
+<p>我们来看下面的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, age, birthday)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line">        self.birthday = birthday</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__getstate__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 执行 pick.dumps 时 忽略 age 属性</span></span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">            <span class="string">'name'</span>: self.name,</span><br><span class="line">            <span class="string">'birthday'</span>: self.birthday</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__setstate__</span><span class="params">(self, state)</span>:</span></span><br><span class="line">        <span class="comment"># 执行 pick.loads 时 忽略 age 属性</span></span><br><span class="line">        self.name = state[<span class="string">'name'</span>]</span><br><span class="line">        self.birthday = state[<span class="string">'birthday'</span>]</span><br><span class="line"></span><br><span class="line">person = Person(<span class="string">'zhangsan'</span>, <span class="number">20</span>, date(<span class="number">2017</span>, <span class="number">2</span>, <span class="number">23</span>))</span><br><span class="line">pickled_person = pickle.dumps(person) <span class="comment"># __getstate__</span></span><br><span class="line"></span><br><span class="line">p = pickle.loads(pickled_person) <span class="comment"># __setstate__</span></span><br><span class="line"><span class="keyword">print</span> p.name, p.birthday</span><br><span class="line"></span><br><span class="line"><span class="keyword">print</span> p.age	<span class="comment"># AttributeError: 'Person' object has no attribute 'age'</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="getstate"><a href="#getstate" class="headerlink" title="__getstate__"></a><code>__getstate__</code></h2><p>在这个例子中，我们首先初始了 <code>Person</code> 对象，其中包括 3 个属性：<code>name</code>、<code>age</code>、<code>birthday</code>。</p>
+<p>当我们调用 <code>pickle.dumps(person)</code> 时，<code>__getstate__</code> 方法就会被调用，在这里我们忽略了 <code>Person</code> 对象的 <code>age</code> 属性，那么 <code>person</code> 在序列化时，就只会对其他两个属性进行保存。</p>
+<h2 id="setstate"><a href="#setstate" class="headerlink" title="__setstate__"></a><code>__setstate__</code></h2><p>同样地，当我们调用 <code>pickle.loads(pickled_person)</code> 时，<code>__setstate__</code> 会被调用，其中入参就是 <code>__getstate__</code> 返回的结果。</p>
+<p>在 <code>__setstate__</code> 方法，我们从入参中取得了被序列化的 <code>dict</code>，然后从 <code>dict</code> 中取出对应的属性，就达到了反序列的效果。</p>
+<h1 id="其他魔法方法"><a href="#其他魔法方法" class="headerlink" title="其他魔法方法"></a>其他魔法方法</h1><p>好了，以上介绍的这些，就是我们平时遇到比较多的魔法方法。</p>
+<p>剩下的魔法方法还有很多，主要包括数值处理、算术操作、反射算术操作、增量赋值、类型转换、反射这几类，由于我们在开发中很少会见到，这里就不再过多介绍了，当遇到时，我们直接查阅文档了解即可。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这篇文章，我们主要介绍了关于比较操作、容器类、可调用对象、序列化等魔法方法。</p>
+<p>其中，比较操作的魔法方法，可以用于自定义实例的比较逻辑。容器类魔法方法，可以帮我们实现一个自定义的容器类，然后我们就可以像操作 <code>list</code>、<code>dict</code> 那样，方便地去获取容器里的元素、迭代数据等等。可调用对象魔法方法，可以把一个实例当做方法来调用。序列化的魔法方法，可以修改一个实例的序列化和反序列化逻辑。</p>
+<p>Python 的魔法方法正如它的名字一样，如果使用得当，我们的类就像被添加了魔法一样，变得更易用。我们可以使用这些魔法方法，帮我们实现一些复杂的功能，例如装饰器、元类等等。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2017/02/23/python-magic-methods-2/" title="Python进阶——如何正确使用魔法方法？（下）">http://kaito-kidd.com/2017/02/23/python-magic-methods-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/02/22/python-magic-methods/" rel="prev" title="Python进阶——如何正确使用魔法方法？（上）">
+      <i class="fa fa-chevron-left"></i> Python进阶——如何正确使用魔法方法？（上）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/08/31/spider-platform-build/" rel="next" title="如何构建一个通用的垂直爬虫平台？">
+      如何构建一个通用的垂直爬虫平台？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#比较操作"><span class="nav-number">1.</span> <span class="nav-text">比较操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#cmp"><span class="nav-number">1.1.</span> <span class="nav-text">__cmp__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#eq"><span class="nav-number">1.2.</span> <span class="nav-text">__eq__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ne"><span class="nav-number">1.3.</span> <span class="nav-text">__ne__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lt"><span class="nav-number">1.4.</span> <span class="nav-text">__lt__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#gt"><span class="nav-number">1.5.</span> <span class="nav-text">__gt__</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#容器类操作"><span class="nav-number">2.</span> <span class="nav-text">容器类操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#setitem"><span class="nav-number">2.1.</span> <span class="nav-text">__setitem__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#getitem"><span class="nav-number">2.2.</span> <span class="nav-text">__getitem__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#delitem"><span class="nav-number">2.3.</span> <span class="nav-text">__delitem__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#len"><span class="nav-number">2.4.</span> <span class="nav-text">__len__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#iter"><span class="nav-number">2.5.</span> <span class="nav-text">__iter__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#contains"><span class="nav-number">2.6.</span> <span class="nav-text">__contains__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#reversed"><span class="nav-number">2.7.</span> <span class="nav-text">__reversed__</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#可调用对象"><span class="nav-number">3.</span> <span class="nav-text">可调用对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#序列化"><span class="nav-number">4.</span> <span class="nav-text">序列化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#getstate"><span class="nav-number">4.1.</span> <span class="nav-text">__getstate__</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#setstate"><span class="nav-number">4.2.</span> <span class="nav-text">__setstate__</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#其他魔法方法"><span class="nav-number">5.</span> <span class="nav-text">其他魔法方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

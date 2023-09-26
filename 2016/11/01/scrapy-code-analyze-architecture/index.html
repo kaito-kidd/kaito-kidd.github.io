@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在爬虫开发领域，使用最多的主流语言主要是 Java 和 Python 这两种，如果你经常使用 Python 开发爬虫，那么肯定听说过 Scrapy 这个开源框架，它正是由Python编写的。 Scrapy 在开源爬虫框架中名声非常大，几乎用 Python 写爬虫的人，都用过这个框架。而且业界很多开源的爬虫框架都是模仿和参考 Scrapy 的思想和架构实现的，如果想深入学习爬虫，研读 Scrapy">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Scrapy源码分析（一）架构概览">
+<meta property="og:url" content="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在爬虫开发领域，使用最多的主流语言主要是 Java 和 Python 这两种，如果你经常使用 Python 开发爬虫，那么肯定听说过 Scrapy 这个开源框架，它正是由Python编写的。 Scrapy 在开源爬虫框架中名声非常大，几乎用 Python 写爬虫的人，都用过这个框架。而且业界很多开源的爬虫框架都是模仿和参考 Scrapy 的思想和架构实现的，如果想深入学习爬虫，研读 Scrapy">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477833723.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-arch.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-class.jpg">
+<meta property="article:published_time" content="2016-11-01T20:45:56.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="scrapy">
+<meta property="article:tag" content="源码分析">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477833723.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Scrapy源码分析（一）架构概览 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Scrapy源码分析（一）架构概览
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-11-01 20:45:56" itemprop="dateCreated datePublished" datetime="2016-11-01T20:45:56+00:00">2016-11-01</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/11/01/scrapy-code-analyze-architecture/" class="post-meta-item leancloud_visitors" data-flag-title="Scrapy源码分析（一）架构概览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/11/01/scrapy-code-analyze-architecture/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/11/01/scrapy-code-analyze-architecture/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在爬虫开发领域，使用最多的主流语言主要是 Java 和 Python 这两种，如果你经常使用 Python 开发爬虫，那么肯定听说过 Scrapy 这个开源框架，它正是由Python编写的。</p>
+<p>Scrapy 在开源爬虫框架中名声非常大，几乎用 Python 写爬虫的人，都用过这个框架。而且业界很多开源的爬虫框架都是模仿和参考 Scrapy 的思想和架构实现的，如果想深入学习爬虫，研读 Scrapy 的源码还是很有必要的。</p>
+<p>从这篇文章开始，我就和你分享一下当时我在做爬虫时，阅读 Scrapy 源码的思路和经验总结。</p>
+<p>这篇文章我们先来介绍一下 Scrapy 的整体架构，从宏观层面上学习一下 Scrapy 运行的流程。之后的几篇文章，我会带你深入到每个模块，剖析这个框架的实现细节。</p>
+<h1 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h1><p>首先，我们先来看一下 Scrapy 的官方是如何介绍它的。从官方网站，我们可以看到 Scrapy 如下定义。</p>
+<p><strong>Scrapy 是一个基于 Python 语言编写的开源爬虫框架，它可以帮你快速、简单的方式构建爬虫，并从网站上提取你所需要的数据。</strong></p>
+<p>也就是说，使用 Scrapy 能帮你快速简单的编写一个爬虫，用来抓取网站数据。</p>
+<p>本篇文章不再介绍 Scrapy 的安装和使用，这个系列主要通过阅读源码讲解 Scrapy 的实现思路，关于如何安装和使用的问题，请参考<a href="https://scrapy.org/" target="_blank" rel="noopener">官方网站</a>和<a href="https://doc.scrapy.org/en/1.2/" target="_blank" rel="noopener">官方文档</a>学习。（注：写本篇文章时，Scrapy 版本为1.2，虽然版本有些低，但与最新版的实现思路基本没有很大出入。）</p>
+<p>使用 Scrapy 开发一个爬虫非常简单，这里使用 Scrapy 官网上的例子来说明如何编写一个简单爬虫：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477833723.png" />
+
+<p>简单来讲，编写和运行一个爬虫只需以下几步：</p>
+<ol>
+<li>使用 <code>scrapy startproject</code> 命令创建一个爬虫模板，或自己按模板编写爬虫代码</li>
+<li>定义一个爬虫类，并继承 <code>scrapy.Spider</code>，然后重写 <code>parse</code> 方法</li>
+<li><code>parse</code> 方法里编写网页解析逻辑，以及抓取路径</li>
+<li>使用 <code>scrapy runspider &lt;spider_file.py&gt;</code> 运行这个爬虫</li>
+</ol>
+<p>可见，使用 Scrapy 编写简单的几行代码，就能采集到一个网站页面的数据，非常方便。</p>
+<p>但是在这背后到底发生了什么？Scrapy 到底是如何帮助我们工作的呢？</p>
+<h1 id="架构"><a href="#架构" class="headerlink" title="架构"></a>架构</h1><p>要想知道 Scrapy 是如何工作的，首先我们来看一下 Scrapy 的架构图，从宏观角度来了解一下它是如何运行的：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1477839561.png" />
+
+<h1 id="核心模块"><a href="#核心模块" class="headerlink" title="核心模块"></a>核心模块</h1><p>从架构图可以看到，Scrapy 主要包含以下五大模块：</p>
+<ul>
+<li><code>Scrapy Engine</code>：核心引擎，负责控制和调度各个组件，保证数据流转；</li>
+<li><code>Scheduler</code>：负责管理任务、过滤任务、输出任务的调度器，存储、去重任务都在此控制；</li>
+<li><code>Downloader</code>：下载器，负责在网络上下载数据，输入待下载的 URL，输出下载结果；</li>
+<li><code>Spiders</code>：我们自己编写的爬虫逻辑，定义抓取意图；</li>
+<li><code>Item Pipeline</code>：负责输出结构化数据，可自定义格式和输出的位置；</li>
+</ul>
+<p>如果你观察地比较仔细的话，可以看到还有两个模块：</p>
+<ul>
+<li><code>Downloader middlewares</code>：介于引擎和下载器之间，可以在网页在下载前、后进行逻辑处理；</li>
+<li><code>Spider middlewares</code>：介于引擎和爬虫之间，在向爬虫输入下载结果前，和爬虫输出请求 / 数据后进行逻辑处理；</li>
+</ul>
+<p>了解了这些核心模块，我们再来看使用 Scrapy 时，它内部的采集流程是如何流转的，也就是说各个模块是如何交互协作，来完成整个抓取任务的。</p>
+<h1 id="运行流程"><a href="#运行流程" class="headerlink" title="运行流程"></a>运行流程</h1><p>按照上面架构图标识出的序号，我们可以看到，Scrapy 运行时的数据流转大概是这样的：</p>
+<ol>
+<li><strong>引擎</strong>从<strong>自定义爬虫</strong>中获取初始化请求（也叫种子 URL）；</li>
+<li>引擎把该请求放入<strong>调度器</strong>中，同时调度器向引擎获取待下载的请求；</li>
+<li>调度器把<strong>待下载</strong>的请求发给引擎；</li>
+<li>引擎发送请求给<strong>下载器</strong>，中间会经过一系列<strong>下载器中间件</strong>；</li>
+<li>这个请求通过下载器下载完成后，生成一个<strong>响应对象</strong>，返回给引擎，这中间会再次经过一系列<strong>下载器中间件</strong>；</li>
+<li>引擎接收到下载器返回的响应后，发送给爬虫，中间会经过一系列<strong>爬虫中间件</strong>，最后执行爬虫<strong>自定义的解析逻辑</strong>；</li>
+<li>爬虫执行完自定义的解析逻辑后，生成<strong>结果对象</strong>或<strong>新的请求对象</strong>给引擎，再次经过一系列<strong>爬虫中间件</strong>；</li>
+<li>引擎把爬虫返回的结果对象交由<strong>结果处理器</strong>处理，把<strong>新的请求</strong>通过引擎再交给<strong>调度器</strong>；</li>
+<li>重复执行1-8，直到<strong>调度器</strong>中没有新的请求处理，任务结束；</li>
+</ol>
+<a id="more"></a>
+
+<h1 id="核心模块的协作"><a href="#核心模块的协作" class="headerlink" title="核心模块的协作"></a>核心模块的协作</h1><p>可见，Scrapy 的架构图还是比较清晰的，各个模块之间互相协作，完成抓取任务。</p>
+<p>我在读完它的源码后，整理出了一个更详细的核心模块交互图，其中展示了更多模块的相关细节，你可以参考一下：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-arch.jpg" />
+
+<p>这里需要说明一下图中的 <code>Scrapyer</code> 模块，其实这也是 Scrapy 的一个核心模块，但官方的架构图中没有展示出来。这个模块其实是处于 <code>Engine</code>、<code>Spiders</code>、<code>Pipeline</code> 之间，是连接这 3 个模块的桥梁，我会在后面的源码分析文章中具体讲到。</p>
+<h1 id="核心类图"><a href="#核心类图" class="headerlink" title="核心类图"></a>核心类图</h1><p>另外，在读源码的过程中，我还整理了这些核心模块的类图，这对于你学习源码会有很大的帮助。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/scrapy-class.jpg" />
+
+<p>对于这个核心类图简单解释一下：</p>
+<ul>
+<li>没有样式的<strong>黑色文字</strong>是类的核心<strong>属性</strong>；</li>
+<li>标有<strong>黄色样式</strong>的高亮文字是类的核心<strong>方法</strong>；</li>
+</ul>
+<p>你在读源码的过程中，可以针对这些核心属性和方法重点关注。</p>
+<p>结合官方架构图以及我总结的核心模块交互图、核心类图，我们可以看到，Scrapy 涉及到的组件主要包括以下这些。</p>
+<ul>
+<li>五大核心类： <code>Scrapy Engine</code>、<code>Scheduler</code>、<code>Downloader</code>、<code>Spiders、Item Pipeline</code>；</li>
+<li>四个中间件管理器类：<code>DownloaderMiddlewareManager</code>、<code>SpiderMiddlewareManager</code>、<code>ItemPipelineMiddlewareManager</code>、<code>ExtensionManager</code>；</li>
+<li>其他辅助类：<code>Request</code>、<code>Response</code>、<code>Selector</code>；</li>
+</ul>
+<p>我们先对 Scrapy 整个架构有一个初步认识，在接下来的文章里，我会针对上述的这些类和方法进行更加详细的源码讲解。</p>
+<p>附：</p>
+<ul>
+<li>Scrapy源码分析（一）架构概览</li>
+<li><a href="http://kaito-kidd.com/2016/11/09/scrapy-code-analyze-entrance/">Scrapy源码分析（二）运行入口</a></li>
+<li><a href="http://kaito-kidd.com/2016/11/21/scrapy-code-analyze-component-initialization/">Scrapy源码分析（三）核心组件初始化</a></li>
+<li><a href="http://kaito-kidd.com/2016/12/07/scrapy-code-analyze-core-process/">Scrapy源码分析（四）核心抓取流程</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/" title="Scrapy源码分析（一）架构概览">http://kaito-kidd.com/2016/11/01/scrapy-code-analyze-architecture/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/scrapy/" rel="tag"><i class="fa fa-tag"></i> scrapy</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/" rel="tag"><i class="fa fa-tag"></i> 源码分析</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/10/19/markdown-image-alfred/" rel="prev" title="Markdown快速插入图片工具">
+      <i class="fa fa-chevron-left"></i> Markdown快速插入图片工具
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/11/09/scrapy-code-analyze-entrance/" rel="next" title="Scrapy源码分析（二）运行入口">
+      Scrapy源码分析（二）运行入口 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#介绍"><span class="nav-number">1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#架构"><span class="nav-number">2.</span> <span class="nav-text">架构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心模块"><span class="nav-number">3.</span> <span class="nav-text">核心模块</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行流程"><span class="nav-number">4.</span> <span class="nav-text">运行流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心模块的协作"><span class="nav-number">5.</span> <span class="nav-text">核心模块的协作</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#核心类图"><span class="nav-number">6.</span> <span class="nav-text">核心类图</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

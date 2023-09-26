@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="作为程序员，要想提高工作和开发效率，总是需要一些神兵利器的，正所谓工欲善其事，必先利其器，这样做事才能达到事半功倍的效果！这次就来介绍一下Mac平台下的利器软件。  先放一张到目前为止积累的利器图：  下面分别介绍一下用于系统的管理利器。 Alfred用过Mac的人都知道，必装神器，称得上Mac平台的利器TOP 1，自从用上了Alfred，键盘党真是爽到欲罢不能，从此解放双手，效率提升N倍。 A">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac效率利器（一）系统管理篇">
+<meta property="og:url" content="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="作为程序员，要想提高工作和开发效率，总是需要一些神兵利器的，正所谓工欲善其事，必先利其器，这样做事才能达到事半功倍的效果！这次就来介绍一下Mac平台下的利器软件。  先放一张到目前为止积累的利器图：  下面分别介绍一下用于系统的管理利器。 Alfred用过Mac的人都知道，必装神器，称得上Mac平台的利器TOP 1，自从用上了Alfred，键盘党真是爽到欲罢不能，从此解放双手，效率提升N倍。 A">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mac-used-apps.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-app.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-find-file.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-folder.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-1.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-2.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-calc.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard-his.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-system.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflows.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-2.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-1.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-3.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-4.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-5.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/clean-my-mac.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-config.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-cpu-mem.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-sencors-time.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/bartender.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/daisy-disk.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mounty.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/Unarchiver.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/XtraFinder-config.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/XtraFinder-many.png">
+<meta property="article:published_time" content="2016-09-13T20:58:59.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="利器">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="效率">
+<meta property="article:tag" content="Mac">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mac-used-apps.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mac效率利器（一）系统管理篇 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac效率利器（一）系统管理篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-13 20:58:59" itemprop="dateCreated datePublished" datetime="2016-09-13T20:58:59+00:00">2016-09-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/09/13/Mac-edge-tools-system/" class="post-meta-item leancloud_visitors" data-flag-title="Mac效率利器（一）系统管理篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/09/13/Mac-edge-tools-system/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/09/13/Mac-edge-tools-system/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>作为程序员，要想提高工作和开发效率，总是需要一些神兵利器的，正所谓工欲善其事，必先利其器，这样做事才能达到事半功倍的效果！这次就来介绍一下Mac平台下的利器软件。</p>
+</blockquote>
+<p>先放一张到目前为止积累的利器图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mac-used-apps.png" alt="Mac软件"></p>
+<p>下面分别介绍一下用于系统的管理利器。</p>
+<h1 id="Alfred"><a href="#Alfred" class="headerlink" title="Alfred"></a>Alfred</h1><p>用过Mac的人都知道，必装神器，称得上Mac平台的利器TOP 1，自从用上了Alfred，键盘党真是爽到欲罢不能，从此解放双手，效率提升N倍。</p>
+<p>Alfred提供一个快捷入口，这个快捷入口提供了非常多平时常用的功能，而且还提供强大的工作流控制。</p>
+<h2 id="快速打开应用"><a href="#快速打开应用" class="headerlink" title="快速打开应用"></a>快速打开应用</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-app.png" alt="Alfred快速打开应用"></p>
+<p>此功能可以快速打开某个应用程序，Mac的Dock可以隐藏起来了。</p>
+<h2 id="全局文件搜索、定位、文件内容搜索"><a href="#全局文件搜索、定位、文件内容搜索" class="headerlink" title="全局文件搜索、定位、文件内容搜索"></a>全局文件搜索、定位、文件内容搜索</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-find-file.png" alt="Alfred快速查找文件"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-open-folder.png" alt="Alfred快速打开文件夹"></p>
+<p>支持模糊检索，只要记得文件、文件夹、文件内容任意一项，便可以快速定位到文件位置，并且支持记录下文件后，多个文件进一步操作。</p>
+<h2 id="多网站快速搜索"><a href="#多网站快速搜索" class="headerlink" title="多网站快速搜索"></a>多网站快速搜索</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-1.png" alt="Alfred快速搜索"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-fast-search-2.png" alt="Alfred快速搜索"></p>
+<p>之前的操作是，先打开浏览器，再输入网址打开网站，然后在搜索框中输入搜索词，回车，才出现搜索结果。</p>
+<p>现在好了，流程大大简化，打开alfred，输出搜索词，选择网站，回车！</p>
+<h2 id="计算器"><a href="#计算器" class="headerlink" title="计算器"></a>计算器</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-calc.png" alt="Alfred在线计算器"></p>
+<p>不用打开任何计算器软件，直接在线计算得出结果，回车自动复制。</p>
+<h2 id="剪切板历史、文字片段"><a href="#剪切板历史、文字片段" class="headerlink" title="剪切板历史、文字片段"></a>剪切板历史、文字片段</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard.png" alt="Alfred剪切板配置"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-clipboard-his.png" alt="Alfred剪切板历史"></p>
+<p>传统的剪切板，每次复制之后，都会覆盖之前的内容，alfred自带剪切板历史功能，并且支持检索。</p>
+<p>同时还提供了文字片段功能，可以预先保存常用的内容片段，然后在使用时使用快捷键打开alfred片段功能，输出关键词，回车，直接粘贴出内容，非常方便！</p>
+<h2 id="系统控制"><a href="#系统控制" class="headerlink" title="系统控制"></a>系统控制</h2><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-system.png" alt="Alfred系统控制"></p>
+<p>alfred提供了系统管理的快捷命令，例如锁屏、睡眠、关机、退出程序、清理垃圾桶等等，全键盘操作控制系统状态。</p>
+<h2 id="工作流集成和开发（付费功能）"><a href="#工作流集成和开发（付费功能）" class="headerlink" title="工作流集成和开发（付费功能）"></a>工作流集成和开发（付费功能）</h2><p>alfred还提供了工作流功能，此功能是付费功能，不过非常超值。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflows.png" alt="Alfred工作流"></p>
+<p>这个功能可以让开发者开发自己的插件，根据自己的工作习惯，开发出符合自身的工作流。</p>
+<p>例如，我想在豆瓣上搜一本书，常规做法是，打开浏览器，打开豆瓣，输入书名，点击搜索。</p>
+<p>alfred的工作流，就是把这一流程，通过程序一步到位，如下图：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-2.png" alt="Alfred豆瓣工作流"></p>
+<p>其他的工作流：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-1.png" alt="Alfred豆瓣工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-3.png" alt="Alfred github工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-4.png" alt="Alfred知乎工作流"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/alfred-workflow-5.png" alt="Alfred翻译工作流"></p>
+<p>alfred工作流插件支持大部分主流语言开发，上手简单。</p>
+<p>网上有其他人开发好的插件，直接下载使用即可：<a href="http://www.alfredworkflow.com/" target="_blank" rel="noopener">http://www.alfredworkflow.com/</a></p>
+<h1 id="CleanMyMac"><a href="#CleanMyMac" class="headerlink" title="CleanMyMac"></a>CleanMyMac</h1><p>脱离了windows系统，总算脱离了各种全家桶，Mac的世界很清静，不过平时清理垃圾什么的还是很有必要的。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/clean-my-mac.png" alt="CleanMyMac"></p>
+<p>CleanMyMac操作简单，并且支持大型和旧文件扫描、干净卸载软件等功能，非常值得安装。</p>
+<a id="more"></a>
+
+
+<h1 id="IStat-Menus"><a href="#IStat-Menus" class="headerlink" title="IStat Menus"></a>IStat Menus</h1><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-config.png" alt="Istat Menus配置"></p>
+<p>此软件可以监控系统各个资源的使用情况，包括CPU、内存、硬盘、网络、电池资源情况，并且还增强了电池、日期的显示，而且提供了各种传感器的温度情况，对整个系统的资源一目了然。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-cpu-mem.png" alt="Istat Menus CPU、内存资源"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/istat-sencors-time.png" alt="Istat Menus 传感器、时间情况"></p>
+<h1 id="Bartender"><a href="#Bartender" class="headerlink" title="Bartender"></a>Bartender</h1><p>随着软件安装的越来越多，菜单栏图标就会变得混乱不堪，Bartender可以整理这些快捷菜单图标，提供折叠、排序等功能，并支持快捷键查找打开。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/bartender.png" alt="Bartender"></p>
+<h1 id="DaisyDisk"><a href="#DaisyDisk" class="headerlink" title="DaisyDisk"></a>DaisyDisk</h1><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/daisy-disk.png" alt="DaisyDisk"></p>
+<p>此工具可以快速扫描出磁盘上各文件夹的占用比例，并按文件大小排列，这对于定期清理旧文件和大文件非常有帮助！</p>
+<h1 id="Mounty"><a href="#Mounty" class="headerlink" title="Mounty"></a>Mounty</h1><p>Mac如果外接移动硬盘，默认只能读，不能写的。</p>
+<p>安装了这个Mounty这个软件后，不用任何配置，就可对NTFS格式的移动硬盘进行写入，很方便。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/mounty.png" alt="Mounty"></p>
+<h1 id="The-Unarchiver"><a href="#The-Unarchiver" class="headerlink" title="The Unarchiver"></a>The Unarchiver</h1><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/Unarchiver.png" alt="The Unarchiver"></p>
+<p>Mac如果要解压文件，默认支持的格式很少，The Unarchiver支持非常全的压缩包解压，安装后一劳永逸。</p>
+<h1 id="XtraFinder"><a href="#XtraFinder" class="headerlink" title="XtraFinder"></a>XtraFinder</h1><p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/XtraFinder-config.png" alt="XtraFinder"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/XtraFinder-many.png" alt="XtraFinder"></p>
+<p>Mac默认的Finder有很多实用不方便的，例如没有剪切、不支持多标签等共，XtraFinder增强了很多实用功能，是文件管理器更加方便和操作简单！</p>
+<blockquote>
+<p>这次介绍了使用Mac以来，比较好用的系统管理工具，其中有一部分是付费软件，不过作为开发人员，尊重别人的开发成果，支持正版还是很有必要的，更何况一次付出带来的是效率和生产力的提升，何乐不为？</p>
+</blockquote>
+<p>附：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/">Mac效率利器（二）开发篇</a></li>
+<li><a href="http://kaito-kidd.com/2016/10/09/Mac-edge-tools-assist/">Mac效率利器（三）辅助篇</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/" title="Mac效率利器（一）系统管理篇">http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%88%A9%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 利器</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E6%95%88%E7%8E%87/" rel="tag"><i class="fa fa-tag"></i> 效率</a>
+              <a href="/tags/Mac/" rel="tag"><i class="fa fa-tag"></i> Mac</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/09/03/HK-travel/" rel="prev" title="香港之旅">
+      <i class="fa fa-chevron-left"></i> 香港之旅
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/09/26/Mac-edge-tools-dev/" rel="next" title="Mac效率利器（二）开发篇">
+      Mac效率利器（二）开发篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Alfred"><span class="nav-number">1.</span> <span class="nav-text">Alfred</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#快速打开应用"><span class="nav-number">1.1.</span> <span class="nav-text">快速打开应用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#全局文件搜索、定位、文件内容搜索"><span class="nav-number">1.2.</span> <span class="nav-text">全局文件搜索、定位、文件内容搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多网站快速搜索"><span class="nav-number">1.3.</span> <span class="nav-text">多网站快速搜索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#计算器"><span class="nav-number">1.4.</span> <span class="nav-text">计算器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#剪切板历史、文字片段"><span class="nav-number">1.5.</span> <span class="nav-text">剪切板历史、文字片段</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#系统控制"><span class="nav-number">1.6.</span> <span class="nav-text">系统控制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工作流集成和开发（付费功能）"><span class="nav-number">1.7.</span> <span class="nav-text">工作流集成和开发（付费功能）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CleanMyMac"><span class="nav-number">2.</span> <span class="nav-text">CleanMyMac</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#IStat-Menus"><span class="nav-number">3.</span> <span class="nav-text">IStat Menus</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Bartender"><span class="nav-number">4.</span> <span class="nav-text">Bartender</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DaisyDisk"><span class="nav-number">5.</span> <span class="nav-text">DaisyDisk</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Mounty"><span class="nav-number">6.</span> <span class="nav-text">Mounty</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#The-Unarchiver"><span class="nav-number">7.</span> <span class="nav-text">The Unarchiver</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XtraFinder"><span class="nav-number">8.</span> <span class="nav-text">XtraFinder</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

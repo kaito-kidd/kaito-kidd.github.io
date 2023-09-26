@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="重要提示：本篇文章写于2020年，后来内容经过迭代和完善，有了V2版本，内容更全面、细节更丰富，请直接看2021年写的这篇文章：Redis为什么变慢了？一文讲透如何排查Redis性能问题 | 万字长文。  Redis作为内存数据库，拥有非常高的性能，单个实例的QPS能够达到10W左右。但我们在使用Redis时，经常时不时会出现访问延迟很大的情况，如果你不知道Redis的内部实现原理，在排查问题时">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis为什么变慢了？常见延迟问题定位与分析">
+<meta property="og:url" content="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="重要提示：本篇文章写于2020年，后来内容经过迭代和完善，有了V2版本，内容更全面、细节更丰富，请直接看2021年写的这篇文章：Redis为什么变慢了？一文讲透如何排查Redis性能问题 | 万字长文。  Redis作为内存数据库，拥有非常高的性能，单个实例的QPS能够达到10W左右。但我们在使用Redis时，经常时不时会出现访问延迟很大的情况，如果你不知道Redis的内部实现原理，在排查问题时">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-03T12:13:08.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis为什么变慢了？常见延迟问题定位与分析 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis为什么变慢了？常见延迟问题定位与分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-03 12:13:08" itemprop="dateCreated datePublished" datetime="2020-07-03T12:13:08+00:00">2020-07-03</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/07/03/redis-latency-analysis/" class="post-meta-item leancloud_visitors" data-flag-title="Redis为什么变慢了？常见延迟问题定位与分析" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/03/redis-latency-analysis/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/03/redis-latency-analysis/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p><strong>重要提示：本篇文章写于2020年，后来内容经过迭代和完善，有了V2版本，内容更全面、细节更丰富，请直接看2021年写的这篇文章：<a href="http://kaito-kidd.com/2021/01/23/redis-slow-latency-analysis/">Redis为什么变慢了？一文讲透如何排查Redis性能问题 | 万字长文</a>。</strong></p>
+</blockquote>
+<p>Redis作为内存数据库，拥有非常高的性能，单个实例的QPS能够达到10W左右。但我们在使用Redis时，经常时不时会出现访问延迟很大的情况，如果你不知道Redis的内部实现原理，在排查问题时就会一头雾水。</p>
+<p>很多时候，Redis出现访问延迟变大，都与我们的使用不当或运维不合理导致的。</p>
+<p>这篇文章我们就来分析一下Redis在使用过程中，经常会遇到的延迟问题以及如何定位和分析。</p>
+<a id="more"></a>
+
+<h1 id="使用复杂度高的命令"><a href="#使用复杂度高的命令" class="headerlink" title="使用复杂度高的命令"></a>使用复杂度高的命令</h1><p>如果在使用Redis时，发现访问延迟突然增大，如何进行排查？</p>
+<p>首先，第一步，建议你去查看一下Redis的慢日志。Redis提供了慢日志命令的统计功能，我们通过以下设置，就可以查看有哪些命令在执行时延迟比较大。</p>
+<p>首先设置Redis的慢日志阈值，只有超过阈值的命令才会被记录，这里的单位是微妙，例如设置慢日志的阈值为5毫秒，同时设置只保留最近1000条慢日志记录：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># 命令执行超过5毫秒记录慢日志</span><br><span class="line">CONFIG SET slowlog-log-slower-than 5000</span><br><span class="line"># 只保留最近1000条慢日志</span><br><span class="line">CONFIG SET slowlog-max-len 1000</span><br></pre></td></tr></table></figure>
+
+<p>设置完成之后，所有执行的命令如果延迟大于5毫秒，都会被Redis记录下来，我们执行<code>SLOWLOG get 5</code>查询最近5条慢日志：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">127.0.0.1:6379&gt; SLOWLOG get 5</span><br><span class="line">1) 1) (integer) 32693       # 慢日志ID</span><br><span class="line">   2) (integer) 1593763337  # 执行时间</span><br><span class="line">   3) (integer) 5299        # 执行耗时(微妙)</span><br><span class="line">   4) 1) &quot;LRANGE&quot;           # 具体执行的命令和参数</span><br><span class="line">      2) &quot;user_list_2000&quot;</span><br><span class="line">      3) &quot;0&quot;</span><br><span class="line">      4) &quot;-1&quot;</span><br><span class="line">2) 1) (integer) 32692</span><br><span class="line">   2) (integer) 1593763337</span><br><span class="line">   3) (integer) 5044</span><br><span class="line">   4) 1) &quot;GET&quot;</span><br><span class="line">      2) &quot;book_price_1000&quot;</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>通过查看慢日志记录，我们就可以知道在什么时间执行哪些命令比较耗时，如果你的业务<strong>经常使用<code>O(N)</code>以上复杂度的命令</strong>，例如<code>sort</code>、<code>sunion</code>、<code>zunionstore</code>，或者在执行<code>O(N)</code>命令时操作的数据量比较大，这些情况下Redis处理数据时就会很耗时。</p>
+<p>如果你的服务请求量并不大，但Redis实例的CPU使用率很高，很有可能是使用了复杂度高的命令导致的。</p>
+<p>解决方案就是，不使用这些复杂度较高的命令，并且一次不要获取太多的数据，每次尽量操作少量的数据，让Redis可以及时处理返回。</p>
+<h1 id="存储bigkey"><a href="#存储bigkey" class="headerlink" title="存储bigkey"></a>存储bigkey</h1><p>如果查询慢日志发现，并不是复杂度较高的命令导致的，例如都是<code>SET</code>、<code>DELETE</code>操作出现在慢日志记录中，那么你就要怀疑是否存在Redis写入了bigkey的情况。</p>
+<p>Redis在写入数据时，需要为新的数据分配内存，当从Redis中删除数据时，它会释放对应的内存空间。</p>
+<p>如果一个key写入的数据非常大，Redis在<strong>分配内存时也会比较耗时</strong>。同样的，当删除这个key的数据时，<strong>释放内存也会耗时比较久</strong>。</p>
+<p>你需要检查你的业务代码，是否存在写入bigkey的情况，需要评估写入数据量的大小，业务层应该避免一个key存入过大的数据量。</p>
+<p>那么有没有什么办法可以扫描现在Redis中是否存在bigkey的数据吗？</p>
+<p>Redis也提供了扫描bigkey的方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">redis-cli -h $host -p $port --bigkeys -i 0.01</span><br></pre></td></tr></table></figure>
+
+<p>使用上面的命令就可以扫描出整个实例key大小的分布情况，它是以类型维度来展示的。</p>
+<p>需要注意的是当我们在线上实例进行bigkey扫描时，Redis的QPS会突增，为了降低扫描过程中对Redis的影响，我们需要控制扫描的频率，使用<code>-i</code>参数控制即可，它表示扫描过程中每次扫描的时间间隔，单位是秒。</p>
+<p>使用这个命令的原理，其实就是Redis在内部执行<code>scan</code>命令，遍历所有key，然后针对不同类型的key执行<code>strlen</code>、<code>llen</code>、<code>hlen</code>、<code>scard</code>、<code>zcard</code>来获取字符串的长度以及容器类型(list/dict/set/zset)的元素个数。</p>
+<p>而对于容器类型的key，只能扫描出元素最多的key，但元素最多的key不一定占用内存最多，这一点需要我们注意下。不过使用这个命令一般我们是可以对整个实例中key的分布情况有比较清晰的了解。</p>
+<p>针对bigkey的问题，Redis官方在4.0版本推出了<code>lazy-free</code>的机制，用于异步释放bigkey的内存，降低对Redis性能的影响。即使这样，我们也不建议使用bigkey，bigkey在集群的迁移过程中，也会影响到迁移的性能，这个后面在介绍集群相关的文章时，会再详细介绍到。</p>
+<h1 id="集中过期"><a href="#集中过期" class="headerlink" title="集中过期"></a>集中过期</h1><p>有时你会发现，平时在使用Redis时没有延时比较大的情况，但在某个时间点突然出现一波延时，而且<strong>报慢的时间点很有规律，例如某个整点，或者间隔多久就会发生一次</strong>。</p>
+<p>如果出现这种情况，就需要考虑是否存在大量key集中过期的情况。</p>
+<p>如果有大量的key在某个固定时间点集中过期，在这个时间点访问Redis时，就有可能导致延迟增加。</p>
+<p>Redis的过期策略采用主动过期+懒惰过期两种策略：</p>
+<ul>
+<li>主动过期：Redis内部维护一个定时任务，默认每隔100毫秒会从过期字典中随机取出20个key，删除过期的key，如果过期key的比例超过了25%，则继续获取20个key，删除过期的key，循环往复，直到过期key的比例下降到25%或者这次任务的执行耗时超过了25毫秒，才会退出循环</li>
+<li>懒惰过期：只有当访问某个key时，才判断这个key是否已过期，如果已经过期，则从实例中删除</li>
+</ul>
+<p>注意，<strong>Redis的主动过期的定时任务，也是在Redis主线程中执行的</strong>，也就是说如果在执行主动过期的过程中，出现了需要大量删除过期key的情况，那么在业务访问时，必须等这个过期任务执行结束，才可以处理业务请求。此时就会出现，业务访问延时增大的问题，最大延迟为25毫秒。</p>
+<p>而且这个访问延迟的情况，<strong>不会记录在慢日志里</strong>。慢日志中<strong>只记录真正执行某个命令的耗时</strong>，Redis主动过期策略执行在操作命令之前，如果操作命令耗时达不到慢日志阈值，它是不会计算在慢日志统计中的，但我们的业务却感到了延迟增大。</p>
+<p>此时你需要检查你的业务，是否真的存在集中过期的代码，一般集中过期使用的命令是<code>expireat</code>或<code>pexpireat</code>命令，在代码中搜索这个关键字就可以了。</p>
+<p>如果你的业务确实需要集中过期掉某些key，又不想导致Redis发生抖动，有什么优化方案？</p>
+<p>解决方案是，<strong>在集中过期时增加一个随机时间，把这些需要过期的key的时间打散即可。</strong></p>
+<p>伪代码可以这么写：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 在过期时间点之后的5分钟内随机过期掉</span><br><span class="line">redis.expireat(key, expire_time + random(300))</span><br></pre></td></tr></table></figure>
+
+<p>这样Redis在处理过期时，不会因为集中删除key导致压力过大，阻塞主线程。</p>
+<p>另外，除了业务使用需要注意此问题之外，还可以通过运维手段来及时发现这种情况。</p>
+<p>做法是我们需要把Redis的各项运行数据监控起来，执行<code>info</code>可以拿到所有的运行数据，在这里我们需要重点关注<code>expired_keys</code>这一项，它代表整个实例到目前为止，累计删除过期key的数量。</p>
+<p>我们需要对这个指标监控，当在<strong>很短时间内这个指标出现突增</strong>时，需要及时报警出来，然后与业务报慢的时间点对比分析，确认时间是否一致，如果一致，则可以认为确实是因为这个原因导致的延迟增大。</p>
+<h1 id="实例内存达到上限"><a href="#实例内存达到上限" class="headerlink" title="实例内存达到上限"></a>实例内存达到上限</h1><p>有时我们把Redis当做纯缓存使用，就会给实例设置一个内存上限<code>maxmemory</code>，然后开启LRU淘汰策略。</p>
+<p>当实例的内存达到了<code>maxmemory</code>后，你会发现之后的每次写入新的数据，有可能变慢了。</p>
+<p>导致变慢的原因是，当Redis内存达到<code>maxmemory</code>后，每次写入新的数据之前，必须先踢出一部分数据，让内存维持在<code>maxmemory</code>之下。</p>
+<p>这个踢出旧数据的逻辑也是需要消耗时间的，而具体耗时的长短，要取决于配置的淘汰策略：</p>
+<ul>
+<li>allkeys-lru：不管key是否设置了过期，淘汰最近最少访问的key</li>
+<li>volatile-lru：只淘汰最近最少访问并设置过期的key</li>
+<li>allkeys-random：不管key是否设置了过期，随机淘汰</li>
+<li>volatile-random：只随机淘汰有设置过期的key</li>
+<li>allkeys-ttl：不管key是否设置了过期，淘汰即将过期的key</li>
+<li>noeviction：不淘汰任何key，满容后再写入直接报错</li>
+<li>allkeys-lfu：不管key是否设置了过期，淘汰访问频率最低的key（4.0+支持）</li>
+<li>volatile-lfu：只淘汰访问频率最低的过期key（4.0+支持）</li>
+</ul>
+<p>具体使用哪种策略，需要根据业务场景来决定。</p>
+<p>我们最常使用的一般是<code>allkeys-lru</code>或<code>volatile-lru</code>策略，它们的处理逻辑是，每次从实例中随机取出一批key（可配置），然后淘汰一个最少访问的key，之后把剩下的key暂存到一个池子中，继续随机取出一批key，并与之前池子中的key比较，再淘汰一个最少访问的key。以此循环，直到内存降到<code>maxmemory</code>之下。</p>
+<p>如果使用的是<code>allkeys-random</code>或<code>volatile-random</code>策略，那么就会快很多，因为是随机淘汰，那么就少了比较key访问频率时间的消耗了，随机拿出一批key后直接淘汰即可，因此这个策略要比上面的LRU策略执行快一些。</p>
+<p>但以上这些逻辑都是在访问Redis时，<strong>真正命令执行之前执行的</strong>，也就是它会影响我们访问Redis时执行的命令。</p>
+<p>另外，如果此时Redis实例中有存储bigkey，那么<strong>在淘汰bigkey释放内存时，这个耗时会更加久，延迟更大</strong>，这需要我们格外注意。</p>
+<p>如果你的业务访问量非常大，并且必须设置<code>maxmemory</code>限制实例的内存上限，同时面临淘汰key导致延迟增大的的情况，要想缓解这种情况，除了上面说的避免存储bigkey、使用随机淘汰策略之外，也可以考虑<strong>拆分实例</strong>的方法来缓解，拆分实例可以把一个实例淘汰key的压力<strong>分摊到多个实例</strong>上，可以在一定程度降低延迟。</p>
+<h1 id="fork耗时严重"><a href="#fork耗时严重" class="headerlink" title="fork耗时严重"></a>fork耗时严重</h1><p>如果你的Redis开启了自动生成RDB和AOF重写功能，那么有可能在后台生成RDB和AOF重写时导致Redis的访问延迟增大，而等这些任务执行完毕后，延迟情况消失。</p>
+<p>遇到这种情况，一般就是执行生成RDB和AOF重写任务导致的。</p>
+<p>生成RDB和AOF都需要父进程<code>fork</code>出一个子进程进行数据的持久化，<strong>在<code>fork</code>执行过程中，父进程需要拷贝内存页表给子进程，如果整个实例内存占用很大，那么需要拷贝的内存页表会比较耗时，此过程会消耗大量的CPU资源，在完成<code>fork</code>之前，整个实例会被阻塞住，无法处理任何请求，如果此时CPU资源紧张，那么<code>fork</code>的时间会更长，甚至达到秒级。这会严重影响Redis的性能</strong>。</p>
+<p>具体原理也可以参考我之前写的文章：<a href="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/">Redis持久化是如何做的？RDB和AOF对比分析</a>。</p>
+<p>我们可以执行<code>info</code>命令，查看最后一次<code>fork</code>执行的耗时<code>latest_fork_usec</code>，单位微妙。这个时间就是整个实例阻塞无法处理请求的时间。</p>
+<p>除了因为备份的原因生成RDB之外，<strong>在主从节点第一次建立数据同步时</strong>，主节点也会生成RDB文件给从节点进行一次全量同步，这时也会对Redis产生性能影响。</p>
+<p>要想避免这种情况，我们需要规划好数据备份的周期，建议在<strong>从节点上执行备份，而且最好放在低峰期执行</strong>。如果对于丢失数据不敏感的业务，那么不建议开启AOF和AOF重写功能。</p>
+<p>另外，<code>fork</code>的耗时也与系统有关，如果把Redis部署在虚拟机上，那么这个时间也会增大。所以使用Redis时建议部署在物理机上，降低<code>fork</code>的影响。</p>
+<h1 id="绑定CPU"><a href="#绑定CPU" class="headerlink" title="绑定CPU"></a>绑定CPU</h1><p>很多时候，我们在部署服务时，为了提高性能，降低程序在使用多个CPU时上下文切换的性能损耗，一般会采用进程绑定CPU的操作。</p>
+<p>但在使用Redis时，我们不建议这么干，原因如下。</p>
+<p><strong>绑定CPU的Redis，在进行数据持久化时，<code>fork</code>出的子进程，子进程会继承父进程的CPU使用偏好，而此时子进程会消耗大量的CPU资源进行数据持久化，子进程会与主进程发生CPU争抢，这也会导致主进程的CPU资源不足访问延迟增大。</strong></p>
+<p>所以在部署Redis进程时，如果需要开启RDB和AOF重写机制，一定不能进行CPU绑定操作！</p>
+<h1 id="AOF配合不合理"><a href="#AOF配合不合理" class="headerlink" title="AOF配合不合理"></a>AOF配合不合理</h1><p>上面提到了，当执行AOF文件重写时会因为<code>fork</code>执行耗时导致Redis延迟增大，除了这个之外，如果开启AOF机制，设置的策略不合理，也会导致性能问题。</p>
+<p>开启AOF后，Redis会把写入的命令实时写入到文件中，但写入文件的过程是先写入内存，等内存中的数据超过一定阈值或达到一定时间后，内存中的内容才会被真正写入到磁盘中。</p>
+<p>AOF为了保证文件写入磁盘的安全性，提供了3种刷盘机制：</p>
+<ul>
+<li><code>appendfsync always</code>：每次写入都刷盘，对性能影响最大，占用磁盘IO比较高，数据安全性最高</li>
+<li><code>appendfsync everysec</code>：1秒刷一次盘，对性能影响相对较小，节点宕机时最多丢失1秒的数据</li>
+<li><code>appendfsync no</code>：按照操作系统的机制刷盘，对性能影响最小，数据安全性低，节点宕机丢失数据取决于操作系统刷盘机制</li>
+</ul>
+<p>当使用第一种机制<code>appendfsync always</code>时，Redis每处理一次写命令，都会把这个命令写入磁盘，而且<strong>这个操作是在主线程中执行的</strong>。</p>
+<p>内存中的的数据写入磁盘，这个会加重磁盘的IO负担，操作磁盘成本要比操作内存的代价大得多。如果写入量很大，那么每次更新都会写入磁盘，此时机器的磁盘IO就会非常高，拖慢Redis的性能，因此我们不建议使用这种机制。</p>
+<p>与第一种机制对比，<code>appendfsync everysec</code>会每隔1秒刷盘，而<code>appendfsync no</code>取决于操作系统的刷盘时间，安全性不高。因此我们推荐使用<code>appendfsync everysec</code>这种方式，在最坏的情况下，只会丢失1秒的数据，但它能保持较好的访问性能。</p>
+<p>当然，对于有些业务场景，对丢失数据并不敏感，也可以不开启AOF。</p>
+<h1 id="使用Swap"><a href="#使用Swap" class="headerlink" title="使用Swap"></a>使用Swap</h1><p>如果你发现Redis突然变得非常慢，<strong>每次访问的耗时都达到了几百毫秒甚至秒级</strong>，那此时就检查Redis是否使用到了Swap，这种情况下Redis基本上已经无法提供高性能的服务。</p>
+<p>我们知道，操作系统提供了Swap机制，目的是为了当内存不足时，可以把一部分内存中的数据换到磁盘上，以达到对内存使用的缓冲。</p>
+<p>但当内存中的数据被换到磁盘上后，访问这些数据就需要从磁盘中读取，这个速度要比内存慢太多！</p>
+<p><strong>尤其是针对Redis这种高性能的内存数据库来说，如果Redis中的内存被换到磁盘上，对于Redis这种性能极其敏感的数据库，这个操作时间是无法接受的。</strong></p>
+<p>我们需要检查机器的内存使用情况，确认是否确实是因为内存不足导致使用到了Swap。</p>
+<p>如果确实使用到了Swap，要及时整理内存空间，释放出足够的内存供Redis使用，然后释放Redis的Swap，让Redis重新使用内存。</p>
+<p>释放Redis的Swap过程通常要重启实例，为了避免重启实例对业务的影响，一般先进行主从切换，然后释放旧主节点的Swap，重新启动服务，待数据同步完成后，再切换回主节点即可。</p>
+<p>可见，当Redis使用到Swap后，此时的Redis的高性能基本被废掉，所以我们需要提前预防这种情况。</p>
+<p><strong>我们需要对Redis机器的内存和Swap使用情况进行监控，在内存不足和使用到Swap时及时报警出来，及时进行相应的处理。</strong></p>
+<h1 id="网卡负载过高"><a href="#网卡负载过高" class="headerlink" title="网卡负载过高"></a>网卡负载过高</h1><p>如果以上产生性能问题的场景，你都规避掉了，而且Redis也稳定运行了很长时间，但在某个时间点之后开始，访问Redis开始变慢了，而且一直持续到现在，这种情况是什么原因导致的？</p>
+<p>之前我们就遇到这种问题，<strong>特点就是从某个时间点之后就开始变慢，并且一直持续</strong>。这时你需要检查一下机器的网卡流量，是否存在网卡流量被跑满的情况。</p>
+<p><strong>网卡负载过高，在网络层和TCP层就会出现数据发送延迟、数据丢包等情况。Redis的高性能除了内存之外，就在于网络IO，请求量突增会导致网卡负载变高。</strong></p>
+<p>如果出现这种情况，你需要排查这个机器上的哪个Redis实例的流量过大占满了网络带宽，然后确认流量突增是否属于业务正常情况，如果属于那就需要及时扩容或迁移实例，避免这个机器的其他实例受到影响。</p>
+<p>运维层面，我们需要对机器的各项指标增加监控，包括网络流量，在达到阈值时提前报警，及时与业务确认并扩容。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上我们总结了Redis中常见的可能导致延迟增大甚至阻塞的场景，这其中既涉及到了业务的使用问题，也涉及到Redis的运维问题。</p>
+<p>可见，要想保证Redis高性能的运行，其中涉及到CPU、内存、网络，甚至磁盘的方方面面，其中还包括操作系统的相关特性的使用。</p>
+<p>作为开发人员，我们需要了解Redis的运行机制，例如各个命令的执行时间复杂度、数据过期策略、数据淘汰策略等，使用合理的命令，并结合业务场景进行优化。</p>
+<p>作为DBA运维人员，需要了解数据持久化、操作系统<code>fork</code>原理、Swap机制等，并对Redis的容量进行合理规划，预留足够的机器资源，对机器做好完善的监控，才能保证Redis的稳定运行。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/" title="Redis为什么变慢了？常见延迟问题定位与分析">http://kaito-kidd.com/2020/07/03/redis-latency-analysis/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/02/redis-sentinel/" rel="prev" title="Redis如何实现故障自动恢复？浅析哨兵的工作原理">
+      <i class="fa fa-chevron-left"></i> Redis如何实现故障自动恢复？浅析哨兵的工作原理
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/04/redis-best-practices/" rel="next" title="Redis最佳实践：业务层面和运维层面优化">
+      Redis最佳实践：业务层面和运维层面优化 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#使用复杂度高的命令"><span class="nav-number">1.</span> <span class="nav-text">使用复杂度高的命令</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#存储bigkey"><span class="nav-number">2.</span> <span class="nav-text">存储bigkey</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#集中过期"><span class="nav-number">3.</span> <span class="nav-text">集中过期</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实例内存达到上限"><span class="nav-number">4.</span> <span class="nav-text">实例内存达到上限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#fork耗时严重"><span class="nav-number">5.</span> <span class="nav-text">fork耗时严重</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#绑定CPU"><span class="nav-number">6.</span> <span class="nav-text">绑定CPU</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AOF配合不合理"><span class="nav-number">7.</span> <span class="nav-text">AOF配合不合理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用Swap"><span class="nav-number">8.</span> <span class="nav-text">使用Swap</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#网卡负载过高"><span class="nav-number">9.</span> <span class="nav-text">网卡负载过高</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">10.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

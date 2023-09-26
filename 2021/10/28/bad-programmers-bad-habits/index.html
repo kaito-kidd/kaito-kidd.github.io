@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="你好，我是 Kaito。 今天我想和你聊一聊优秀程序员的基本素养。 我想你肯定遇到过这样一类程序员：他们无论是写代码，还是写文档，又或是和别人沟通，都显得特别专业。每次遇到这类人，我都在想，他们到底是怎么做到的？ 随着工作时间的增长，渐渐地我也总结出一些经验，他们身上都保持着一些看似很微小的优秀习惯，但正是因为这些习惯，体现出了一个优秀程序员的基本素养。 但今天我们来换个角度，来看看一个糟糕程序员">
+<meta property="og:type" content="article">
+<meta property="og:title" content="糟糕程序员的20个坏习惯">
+<meta property="og:url" content="http://kaito-kidd.com/2021/10/28/bad-programmers-bad-habits/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="你好，我是 Kaito。 今天我想和你聊一聊优秀程序员的基本素养。 我想你肯定遇到过这样一类程序员：他们无论是写代码，还是写文档，又或是和别人沟通，都显得特别专业。每次遇到这类人，我都在想，他们到底是怎么做到的？ 随着工作时间的增长，渐渐地我也总结出一些经验，他们身上都保持着一些看似很微小的优秀习惯，但正是因为这些习惯，体现出了一个优秀程序员的基本素养。 但今天我们来换个角度，来看看一个糟糕程序员">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2021-10-28T10:44:38.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="编程素养">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2021/10/28/bad-programmers-bad-habits/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>糟糕程序员的20个坏习惯 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2021/10/28/bad-programmers-bad-habits/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          糟糕程序员的20个坏习惯
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-10-28 10:44:38" itemprop="dateCreated datePublished" datetime="2021-10-28T10:44:38+00:00">2021-10-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E6%88%90%E9%95%BF/" itemprop="url" rel="index"><span itemprop="name">个人成长</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2021/10/28/bad-programmers-bad-habits/" class="post-meta-item leancloud_visitors" data-flag-title="糟糕程序员的20个坏习惯" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2021/10/28/bad-programmers-bad-habits/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2021/10/28/bad-programmers-bad-habits/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>你好，我是 Kaito。</p>
+<p>今天我想和你聊一聊优秀程序员的基本素养。</p>
+<p>我想你肯定遇到过这样一类程序员：<strong>他们无论是写代码，还是写文档，又或是和别人沟通，都显得特别专业</strong>。每次遇到这类人，我都在想，他们到底是怎么做到的？</p>
+<p>随着工作时间的增长，渐渐地我也总结出一些经验，他们身上都保持着一些看似很微小的优秀习惯，但正是因为这些习惯，体现出了一个优秀程序员的基本素养。</p>
+<p>但今天我们来换个角度，来看看一个糟糕程序员有哪些坏习惯？只要我们都能避开这些问题，就可以逐渐向一个优秀程序员靠近。</p>
+<a id="more"></a>
+
+<p><strong>1、技术名词拼写不规范</strong></p>
+<p>无论是个人简历，还是技术文档，我经常看到拼写不规范的技术名词，例如 JAVA、javascript、python、MySql、Hbase、restful。</p>
+<p>正确的拼写应该是 Java、JavaScript、Python、MySQL、HBase、RESTful，不要小看这个问题，很多面试官很有可能因为这一点刷掉你的简历。</p>
+<p><strong>2、写文档，中英文混排不规范</strong></p>
+<p>中文描述使用英文标点符号，中文和英文括号配合使用，英文和数字使用了全角字符，中文与英文、数字之间没有空格等等。</p>
+<p>正确的写法是中文描述使用中文符号，中文和英文、数字之间间隔一个「空格」，阅读起来会更舒服。之前我写的文章你觉得排版舒服，都是遵循了这些细节。</p>
+<p><strong>3、重要逻辑不写注释，或写得很拖沓</strong></p>
+<p>复杂且重要的逻辑代码，很多程序员不写注释，除了自己能看懂代码逻辑，其他人根本看不懂。或者是注释虽然写了，但写得很拖沓，没有逻辑可言，依旧难读懂。</p>
+<p>重要的逻辑不止要写注释，还要写得简洁、清晰。如果是一眼就能读懂的简单代码，可以不加注释。</p>
+<p><strong>4、写复杂冗长的函数</strong></p>
+<p>一个函数几百行，一个文件上千行代码，复杂函数不做拆分，导致代码变得越来越难维护，最后谁也不敢动。</p>
+<p>基本的设计模式还是要遵守的，例如单一职责，一个函数只做一件事，开闭原则，对扩展开放，对修改关闭。</p>
+<p>如果函数逻辑确实复杂，也至少要保证主干逻辑足够清晰。</p>
+<p><strong>5、不看官方文档，只看垃圾博客</strong></p>
+<p>很多人遇到问题不先去看官方文档，而是热衷于去看垃圾博客，这些博客的内容都是互相抄袭，错误百出。</p>
+<p>其实很多软件的官方文档写已经非常好了，常见问题都能找到答案，认真读一读官方文档，比看垃圾博客强一百倍，要养成看官方文档的好习惯。</p>
+<p><strong>6、宣扬内功无用论</strong></p>
+<p>有些人天天追求日新月异的开源项目和框架，却不肯定花时间去啃一啃底层原理，常见问题虽然可以解决，但遇到稍微深一点的问题就束手无策。</p>
+<p>很多高大上的架构设计，思路其实都源于底层。想一想，像计算机体系结构、操作系统、网络协议这些东西，经过多少年演进才变为现在的样子，演进过程中遇到的复杂问题比比皆是，理解了解决这些问题的思路，再看上层技术会变得很简单。</p>
+<p><strong>7、乐于炫技</strong></p>
+<p>有些人天天把「高大上」的技术名词挂在嘴边，生怕别人不知道自己学了什么高深技术，嘴上乐于炫技，但别人一问他细节就会哑口无言。</p>
+<p><strong>8、不接受质疑</strong></p>
+<p>自己设计的方案，别人提出疑问时只会回怼，而不是理性分析利弊，抱着学习的心态交流。</p>
+<p>这些人学了点东西就觉得自己很有本事，殊不知只是自己见识太少。</p>
+<p><strong>9、接口协议不规范</strong></p>
+<p>和别人定 API 协议全靠口头沟通，不给规范的文档说明，甚至到了测试联调时会发现，竟然和协商的还不一样，或者改协议了却不通知对接方，合作体验极差。</p>
+<p><strong>10、遇到问题自己死磕</strong></p>
+<p>很初级程序员容易犯的问题，遇到问题只会自己死磕，拖到 deadline 也没有产出，领导来问才知道有问题解决不了。</p>
+<p>你要有问题及时反馈才是对自己负责，对团队负责。</p>
+<p><strong>11、一说就会，一写就废</strong></p>
+<p>平时技术方案吹得天花乱坠，但一让他写代码就废，典型的眼高手低选手。</p>
+<p><strong>12、表达没有逻辑，不站在对方角度看问题</strong></p>
+<p>讨论问题不交代背景，上来就说自己的方案，别人听得云里雾里，让你从头描述你又讲不明白。</p>
+<p>学会沟通和表达，是合作的基础。</p>
+<p><strong>13、不主动思考，伸手党</strong></p>
+<p>遇到问题不去 google，不做思考就向别人提问，喜欢做伸手党。</p>
+<p>每个人的时间都很宝贵，大家都更喜欢你带着自己的思考来提问，一来可以规避很多低级问题，二来可以提高交流质量。</p>
+<p><strong>14、经常犯重复的错误</strong></p>
+<p>出问题后说下次会注意，但下次问题依旧，对自己不负责任，说到底是态度问题。</p>
+<p><strong>15、加功能不考虑扩展性</strong></p>
+<p>加新功能只关注某一小块业务，不考虑系统整体的扩展性，堆代码行为严重。</p>
+<p>要学会分析需求和未来可能发生的变化，设计更通用的解决方案，降低后期开发成本。</p>
+<p><strong>16、接口不自测，出问题不打日志</strong></p>
+<p>自己开发的接口不自测就和别人联调，出了问题又说没打日志，协作效率极低。</p>
+<p><strong>17、提交代码不规范</strong></p>
+<p>很多人提交代码不写描述，或者写的是无意义的描述，尤其是修改很少代码时，这种情况会导致回溯问题成本变高。</p>
+<p>制定代码提交规范，能让你在每一次提交代码时，不会做太随意的代码修改。</p>
+<p><strong>18、手动修改生产环境数据库</strong></p>
+<p>直连生产环境数据库修改数据，更有 UPDATE / DELETE SQL 忘写 WEHRE 条件的情况，产生数据事故。</p>
+<p>修改生产环境数据库一定要谨慎再谨慎，建议操作前先找同事 review 代码再操作。</p>
+<p><strong>19、没理清需求就直接写代码</strong></p>
+<p>很多程序员接到需求后，不怎么思考就开始写代码，需求和自己理解的有偏差，造成无意义返工。</p>
+<p>多花些时间梳理需求，能规避很多不合理的需求。</p>
+<p><strong>20、重要设计不写文档</strong></p>
+<p>重要的设计没有文档输出，和别人交接系统时只做口头描述，丢失关键信息。</p>
+<p>有时候理解一个设计方案，一个好的文档要比看几百行代码更高效。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>以上这些不良习惯，你命中几个呢？或者你身边有没有碰到这样的人？</p>
+<p>我认为提早规避这些问题，是成为一个优秀程序员必须要做的。这些习惯总结起来大致分为这 4 个方面：</p>
+<ul>
+<li>良好的编程修养</li>
+<li>谦虚的学习心态</li>
+<li>良好的沟通和表达</li>
+<li>注重团队协作</li>
+</ul>
+<p>优秀程序员的专业技能，我们可能很难在短时间内学会，但这些基本的职业素养，是可以在短期内做到的。</p>
+<p>希望你我可以有则改之，无则加勉。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2021/10/28/bad-programmers-bad-habits/" title="糟糕程序员的20个坏习惯">http://kaito-kidd.com/2021/10/28/bad-programmers-bad-habits/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%BC%96%E7%A8%8B%E7%B4%A0%E5%85%BB/" rel="tag"><i class="fa fa-tag"></i> 编程素养</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/10/19/macbook-pro-m1pro-m1max/" rel="prev" title="新款MacBook Pro高燃发布，2款高端芯片吊打M1">
+      <i class="fa fa-chevron-left"></i> 新款MacBook Pro高燃发布，2款高端芯片吊打M1
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/11/02/my-first-live-broadcast/" rel="next" title="第一次公开直播，我的启发和思考">
+      第一次公开直播，我的启发和思考 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">1.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

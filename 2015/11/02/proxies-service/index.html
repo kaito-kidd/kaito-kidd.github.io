@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="由于之前一直在做爬虫采集相关的开发，这个过程那肯定少不了跟「代理 IP」打交道，这篇文章就来记录一下，如何实现一个爬虫代理服务，本篇文章主要以讲解思路为主。 起因做过爬虫的人应该都知道，抓的网站和数据多了，如果爬虫抓取速度过快，免不了触发网站的防爬机制。而这些网站应对爬虫的办法，几乎用的同一招就是封 IP 。 那么我们还想稳定、持续地抓取这些网站的数据，如何解决呢？一般解决方案有2个：  使用同一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何构建一个爬虫代理服务？">
+<meta property="og:url" content="http://kaito-kidd.com/2015/11/02/proxies-service/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="由于之前一直在做爬虫采集相关的开发，这个过程那肯定少不了跟「代理 IP」打交道，这篇文章就来记录一下，如何实现一个爬虫代理服务，本篇文章主要以讲解思路为主。 起因做过爬虫的人应该都知道，抓的网站和数据多了，如果爬虫抓取速度过快，免不了触发网站的防爬机制。而这些网站应对爬虫的办法，几乎用的同一招就是封 IP 。 那么我们还想稳定、持续地抓取这些网站的数据，如何解决呢？一般解决方案有2个：  使用同一">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2015-11-02T23:08:29.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="爬虫">
+<meta property="article:tag" content="代理">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2015/11/02/proxies-service/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>如何构建一个爬虫代理服务？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2015/11/02/proxies-service/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何构建一个爬虫代理服务？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2015-11-02 23:08:29" itemprop="dateCreated datePublished" datetime="2015-11-02T23:08:29+00:00">2015-11-02</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2015/11/02/proxies-service/" class="post-meta-item leancloud_visitors" data-flag-title="如何构建一个爬虫代理服务？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2015/11/02/proxies-service/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2015/11/02/proxies-service/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>由于之前一直在做爬虫采集相关的开发，这个过程那肯定少不了跟「代理 IP」打交道，这篇文章就来记录一下，如何实现一个爬虫代理服务，本篇文章主要以讲解思路为主。</p>
+<h1 id="起因"><a href="#起因" class="headerlink" title="起因"></a>起因</h1><p>做过爬虫的人应该都知道，抓的网站和数据多了，如果爬虫抓取速度过快，免不了触发网站的防爬机制。而这些网站应对爬虫的办法，几乎用的同一招就是封 IP 。</p>
+<p>那么我们还想稳定、持续地抓取这些网站的数据，如何解决呢？一般解决方案有2个：</p>
+<ul>
+<li>使用同一个服务器 IP 抓取网站数据，但是放慢速度</li>
+<li>使用多个代理 IP 抓取数据</li>
+</ul>
+<p>第一种方案牺牲的是时间和速度，但是一般情况下我们的时间是很宝贵的，理想情况下是，用最短的时间获取最多的数据。所以第二种方案是推荐的，那么从哪里可以找到这么多代理 IP 呢？</p>
+<h1 id="寻找代理"><a href="#寻找代理" class="headerlink" title="寻找代理"></a>寻找代理</h1><p>最直接地，使用搜索引擎去检索。</p>
+<p>例如使用 Google、Bing、百度，输入关键字：<strong>免费代理 IP</strong>，前几页几乎都是提供代理 IP 的网站，逐个打开后观察可以发现，几乎都是一个列表页，这个列表页展示的代理 IP 少则几十个、多则几百个。</p>
+<p>但是仔细观察你就会发现，每个网站提供的免费 IP 是有限的，而且拿来用之后你就会发现，有的也已经失效了。毕竟，人家更倾向于你购买他们的付费代理 IP。</p>
+<p>身为狡猾的程序猿，当然不能因为这点困难就退缩了。仔细想一下，既然搜索引擎能搜到这么多提供代理的网站，每个网站提供几十或几百个代理 IP，假如有 10 家代理网站，那加在一起也有几百到几千个了。</p>
+<p>那么很简单，你要做的事情就是，把这些提供代理 IP 的网站收集起来，写一个采集程序把这些免费代理 IP 抓过来就好了，想想是不是很简单？</p>
+<h1 id="测试代理"><a href="#测试代理" class="headerlink" title="测试代理"></a>测试代理</h1><p>好了，通过刚才的思路，你可以编写一个采集代理 IP 的程序，然后就可以拿到成百上千的代理 IP 了。当然，收集的代理网站越多，采集到的代理 IP 也就越多，所以我们尽量多收集一些代理网站，越多越好。</p>
+<p>等等，这么多代理 IP ，难道别人真的就免费送给你了吗？</p>
+<p>当然不是，前面也提到过，这些代理中，有很大一部分已经是失效的了。那怎么办？如何知道哪些代理是有效，哪些是不可用的呢？</p>
+<p>很简单，写一个 HTTP 程序，挂上这些代理，访问某一个稳定的网站，然后看是否能正常访问，如果可以正常访问，那么代理 IP 就是可用的，访问失败则说明代理 IP 已失效。</p>
+<p>最简单地，我们可以使用 <code>curl</code> 命令就可以测试一个代理是否真的可用：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 使用代理 48.139.133.93:3128 访问 网易首页</span><br><span class="line">curl -x &quot;48.139.133.93:3128&quot; &quot;http:&#x2F;&#x2F;www.163.com&quot;</span><br></pre></td></tr></table></figure>
+
+<p>当然，这种方式只是为了演示方便，实际最好的方式是：<strong>编写一个多线程的代理测试程序，然后分别使用这些代理去访问某个网站，根据访问的结果，最终就可以输出一批可用的代理 IP。</strong></p>
+<a id="more"></a>
+
+<h1 id="使用代理"><a href="#使用代理" class="headerlink" title="使用代理"></a>使用代理</h1><p>通过编写测试代理 IP 的程序，我们就可以找出可用的代理了。</p>
+<p>接下来，如何使用也就变得很简单了。</p>
+<p>例如，我们把刚才得到的可用代理 IP 输出到一个文件中，每一行是一个 IP，那么我们的程序就可以这样使用：</p>
+<ul>
+<li>程序读取代理文件，加载代理列表到数组中</li>
+<li>从数组中随机选择一个代理 IP，发起 HTTP 请求</li>
+</ul>
+<p>这样下来，如果可用的代理 IP 稳定在几百上千个，基本上可以保持一段时间抓取某个网站的数据了，一般来说，抓个几千几万条数据不成问题。</p>
+<p>但是，如果我想<strong>持续不断</strong>地从某个网站采集数据，或者是抓取上百万甚至上亿的网页数据，这一批代理 IP 还是有可能逐渐都失效的。这种情况下怎么办呢？</p>
+<h1 id="持续不断供应代理"><a href="#持续不断供应代理" class="headerlink" title="持续不断供应代理"></a>持续不断供应代理</h1><p>使用刚才的方式，抓取一批代理网站，然后通过测试程序输出可用的代理 IP 列表，但是这只是一次性的，而且代理 IP 的数量往往很少，在我们的持续采集需求中，肯定无法满足需要。那么怎么才能持续不断的找到可用代理 IP 呢？</p>
+<p>依据前面所说的方法，我们可以这样优化：</p>
+<ul>
+<li>收集更多的代理 IP 网站（数据基础）</li>
+<li>定时监控这些网站，采集代理 IP 列表</li>
+<li>程序自动检测代理 IP 可用性，输出可用代理 IP（文件或数据库）</li>
+<li>程序加载文件或数据库，随机选取代理 IP 发起 HTTP 请求</li>
+</ul>
+<p>按照这种优化思路，我们可以写出一个自动采集代理 IP 的程序。这样我们的爬虫端就可以定时去文件/数据库中获取可用的代理 IP 使用。</p>
+<p>但是有一个小问题，怎样知道每个代理 IP 的质量如何？也就是说，每个代理 IP 的速度怎么样？</p>
+<p>我们在测试代理 IP 的可用性时，可以记录访问网站<strong>请求响应时间</strong>，这个响应时间就是代理 IP 的质量。响应时间越短，说明代理 IP 的质量越高。</p>
+<p>有了代理 IP 的质量后，我们在使用这些代理 IP 时，就可以优先使用质量高的，提高我们爬虫抓取网页的成功率。</p>
+<p>但是也不能一直频繁使用这些高质量的代理 IP，否则对方网站会很快把这些 IP 封禁掉。那如何应对呢？</p>
+<p>我们继续优化，在使用代理 IP 时，我们可以限制某短时间内同一个 IP 的<strong>使用次数</strong>，例如 5 分钟内同一个代理 IP 只允许使用 10 次，如果超过使用次数了，再随机选取其他代理 IP 使用。</p>
+<p>这样既然保证我们的抓取质量，也能保证代理 IP 不会因为短时间内大量使用而被封禁。</p>
+<h1 id="服务化"><a href="#服务化" class="headerlink" title="服务化"></a>服务化</h1><p>经过前面一系列的优化，我们已经搭建好一个可用的代理服务，只不过是基于文件或数据库的。</p>
+<p>爬虫端要想使用这些代理，只能是读取文件或数据库，然后根据某种规则选择代理 IP 使用，这样做比较繁琐，能不能让爬虫端使用代理变得简单一些？此时我们就需要把代理访问做成服务化。</p>
+<p>有个大名鼎鼎的服务器软件 <code>squid</code>，它是一个正向代理软件。利用它的 <code>cache_peer</code> 机制，就可以帮这个事情做得很好。</p>
+<p>我们可以把可用的代理 IP 列表，根据 <code>squid</code> 的 <code>cache_peer</code> 规则，按照一定格式，写在它配置文件中即可。而且 <code>cache_peer</code> 配置文件规则，也支持设置每个代理 IP 的使用权重、最大使用次数，也就是说 <code>squid</code> 可以根据配置，<strong>自动地调度、选择</strong>我们的代理 IP。</p>
+<p>配置完成后，启动 <code>squid</code>，我们就可以通过 <code>squid</code> 的这一个端口来使用配置好的代理 IP 了。</p>
+<p>假设我们的爬虫部署在 A 服务器，<code>squid</code> 部署在 B 服务器，需要爬取的网站服务器是 C，而我们的代理 IP 是D/E/F。</p>
+<ul>
+<li>不使用代理时：爬虫服务器 A 直接请求网站服务器 C</li>
+<li>正常使用代理时：爬虫服务器 A，通过设置代理 IP D / E / F，请求网站服务器 C</li>
+<li>使用<code>squid</code>时：爬虫服务器 A，通过部署在服务器B的<code>squid</code>的<code>cache_peer</code>机制，自动调度代理 IP D / E / F，最终访问网站服务器 C</li>
+</ul>
+<p>可见，使用 <code>squid</code> 的好处是：<strong>爬虫端不用考虑如何加载和选择代理，只需要把代理 IP 列表按照配置文件的规则，配置到 <code>squid</code> 中，<code>squid</code> 就可以帮我们管理和选择代理。最重要的是，爬虫端使用代理只需配置 <code>squid</code> 的这一个端口就可以了！</strong></p>
+<h1 id="整合"><a href="#整合" class="headerlink" title="整合"></a>整合</h1><p>好了，现在服务化也搭建完成了，唯一还差的一步就是整合，我们把整个过程梳理一下：</p>
+<p>1、收集尽可能多的代理网站，使用采集代理 IP 程序定时采集代理网站（30分/1小时都可），解析出所有代理 IP，写入数据库</p>
+<p>2、代理测试程序从数据库中取出所有代理 IP，然后挂上代理，访问某个稳定的网站，根据访问结果，在数据库中标记代理是否可用，同时，也在数据库中记录访问网站的响应时间</p>
+<p>3、写一个程序，从数据库中加载出所有可用代理，根据代理响应时间，计算一个使用权重和设置好最大使用次数，按照 <code>cache_peer</code> 格式写入到 <code>squid</code> 的配置文件中</p>
+<p>4、写一个程序或脚本，触发自动重新加载 <code>squid</code> 配置文件，让 <code>squid</code> 加载最新的代理 IP 列表<br>5、定时重复1-4，不断输出可用代理到 <code>squid</code> 中</p>
+<p>6、爬虫指定 <code>squid</code> 的服务 IP 和端口，进行纯粹的网站采集操作</p>
+<p><strong>通过以上方式，一个完整的代理服务就可以搭建完成，而且这个代理服务可以定时输出保证质量的代理 IP。爬虫端不用关心代理的采集和测试，只管使用 <code>squid</code> 的统一服务入口爬取数据即可。</strong></p>
+<blockquote>
+<p>以上只是提供一个代理服务搭建的设计思路，有了思路之后，剩下写代码实现就变得比较简单了。</p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2015/11/02/proxies-service/" title="如何构建一个爬虫代理服务？">http://kaito-kidd.com/2015/11/02/proxies-service/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E7%88%AC%E8%99%AB/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+              <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 代理</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2015/10/19/mactalk-technology/" rel="prev" title="科技与人文">
+      <i class="fa fa-chevron-left"></i> 科技与人文
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2015/11/09/6s-experience/" rel="next" title="iPhone6s使用感受">
+      iPhone6s使用感受 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#起因"><span class="nav-number">1.</span> <span class="nav-text">起因</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#寻找代理"><span class="nav-number">2.</span> <span class="nav-text">寻找代理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#测试代理"><span class="nav-number">3.</span> <span class="nav-text">测试代理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用代理"><span class="nav-number">4.</span> <span class="nav-text">使用代理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持续不断供应代理"><span class="nav-number">5.</span> <span class="nav-text">持续不断供应代理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务化"><span class="nav-number">6.</span> <span class="nav-text">服务化</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#整合"><span class="nav-number">7.</span> <span class="nav-text">整合</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

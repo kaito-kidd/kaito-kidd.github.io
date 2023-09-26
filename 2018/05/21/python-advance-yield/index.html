@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在 Python 开发中，yield 关键字的使用其实较为频繁，例如大集合的生成，简化代码结构、协程与并发都会用到它。 但是，你是否真正了解 yield 的运行过程呢？ 这篇文章，我们就来看一下 yield 的运行流程，以及在开发中哪些场景适合使用 yield。 生成器如果在一个方法内，包含了 yield 关键字，那么这个函数就是一个「生成器」。 生成器其实就是一个特殊的迭代器，它可以像迭代器那样">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python技术进阶——如何正确使用yield？">
+<meta property="og:url" content="http://kaito-kidd.com/2018/05/21/python-advance-yield/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在 Python 开发中，yield 关键字的使用其实较为频繁，例如大集合的生成，简化代码结构、协程与并发都会用到它。 但是，你是否真正了解 yield 的运行过程呢？ 这篇文章，我们就来看一下 yield 的运行流程，以及在开发中哪些场景适合使用 yield。 生成器如果在一个方法内，包含了 yield 关键字，那么这个函数就是一个「生成器」。 生成器其实就是一个特殊的迭代器，它可以像迭代器那样">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-05-21T12:20:28.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/05/21/python-advance-yield/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python技术进阶——如何正确使用yield？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/21/python-advance-yield/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python技术进阶——如何正确使用yield？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-21 12:20:28" itemprop="dateCreated datePublished" datetime="2018-05-21T12:20:28+00:00">2018-05-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/21/python-advance-yield/" class="post-meta-item leancloud_visitors" data-flag-title="Python技术进阶——如何正确使用yield？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/21/python-advance-yield/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/21/python-advance-yield/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 Python 开发中，<code>yield</code> 关键字的使用其实较为频繁，例如大集合的生成，简化代码结构、协程与并发都会用到它。</p>
+<p>但是，你是否真正了解 <code>yield</code> 的运行过程呢？</p>
+<p>这篇文章，我们就来看一下 <code>yield</code> 的运行流程，以及在开发中哪些场景适合使用 <code>yield</code>。</p>
+<h1 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h1><p>如果在一个方法内，包含了 <code>yield</code> 关键字，那么这个函数就是一个「生成器」。</p>
+<p>生成器其实就是一个特殊的迭代器，它可以像迭代器那样，迭代输出方法内的每个元素。</p>
+<p>如果你还不清楚「迭代器」是什么，可以参考我写的这篇文章：<a href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">Python进阶——迭代器和可迭代对象有什么区别？</a>。</p>
+<p>我们来看一个包含 <code>yield</code> 关键字的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成器</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line"></span><br><span class="line">g = gen(<span class="number">5</span>)      <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g)        <span class="comment"># &lt;generator object gen at 0x10bb46f50&gt;</span></span><br><span class="line">print(type(g))  <span class="comment"># &lt;type 'generator'&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 迭代生成器中的数据</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> g:</span><br><span class="line">    print(i)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># 0 1 2 3 4</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，在这个例子中，当我们执行 <code>g = gen(5)</code> 时，<code>gen</code> 中的代码其实并没有执行，此时我们只是创建了一个「生成器对象」，它的类型是 <code>generator</code>。</p>
+<p>然后，当我们执行 <code>for i in g</code>，每执行一次循环，就会执行到 <code>yield</code> 处，返回一次 <code>yield</code> 后面的值。</p>
+<p>这个迭代过程是和迭代器最大的区别。</p>
+<p>换句话说，如果我们想输出 5 个元素，在创建生成器时，这个 5 个元素其实还并没有产生，什么时候产生呢？只有在执行 <code>for</code> 循环遇到 <code>yield</code> 时，才会依次生成每个元素。</p>
+<p>此外，生成器除了和迭代器一样实现迭代数据之外，还包含了其他方法：</p>
+<ul>
+<li><code>generator.__next__()</code>：执行 <code>for</code> 时调用此方法，每次执行到 <code>yield</code> 就会停止，然后返回 <code>yield</code> 后面的值，如果没有数据可迭代，抛出 <code>StopIterator</code> 异常，<code>for</code> 循环结束</li>
+<li><code>generator.send(value)</code>：外部传入一个值到生成器内部，改变 <code>yield</code> 前面的值</li>
+<li><code>generator.throw(type[, value[, traceback]])</code>：外部向生成器抛出一个异常</li>
+<li><code>generator.close()</code>：关闭生成器</li>
+</ul>
+<p>通过使用生成器的这些方法，我们可以完成很多有意思的功能。</p>
+<a id="more"></a>
+
+<h2 id="next"><a href="#next" class="headerlink" title="next"></a><strong>next</strong></h2><p>先来看生成器的 <code>__next__</code> 方法，我们看下面这个例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        print(<span class="string">'yield before'</span>)</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line">        print(<span class="string">'yield after'</span>)</span><br><span class="line"></span><br><span class="line">g = gen(<span class="number">3</span>)      <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g.__next__())  <span class="comment"># 0</span></span><br><span class="line">print(<span class="string">'----'</span>)</span><br><span class="line">print(g.__next__())  <span class="comment"># 1</span></span><br><span class="line">print(<span class="string">'----'</span>)</span><br><span class="line">print(g.__next__())  <span class="comment"># 2</span></span><br><span class="line">print(<span class="string">'----'</span>)</span><br><span class="line">print(g.__next__())  <span class="comment"># StopIteration</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># yield before</span></span><br><span class="line"><span class="comment"># 0</span></span><br><span class="line"><span class="comment"># ----</span></span><br><span class="line"><span class="comment"># yield after</span></span><br><span class="line"><span class="comment"># yield before</span></span><br><span class="line"><span class="comment"># 1</span></span><br><span class="line"><span class="comment"># ----</span></span><br><span class="line"><span class="comment"># yield after</span></span><br><span class="line"><span class="comment"># yield before</span></span><br><span class="line"><span class="comment"># 2</span></span><br><span class="line"><span class="comment"># ----</span></span><br><span class="line"><span class="comment"># yield after</span></span><br><span class="line"><span class="comment"># Traceback (most recent call last):</span></span><br><span class="line"><span class="comment">#   File "gen.py", line 16, in &lt;module&gt;</span></span><br><span class="line"><span class="comment">#     print(g.__next__())  # StopIteration</span></span><br><span class="line"><span class="comment"># StopIteration</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了 <code>gen</code> 方法，这个方法包含了 <code>yield</code> 关键字。然后我们执行 <code>g = gen(3)</code> 创建一个生成器，但是这次没有执行 <code>for</code> 去迭代它，而是多次调用 <code>g.__next__()</code> 去输出生成器中的元素。</p>
+<p>我们看到，当执行 <code>g.__next__()</code>时，代码就会执行到 <code>yield</code> 处，然后返回 <code>yield</code> 后面的值，如果继续调用 <code>g.__next__()</code>，注意，你会发现，这次执行的开始位置，是上次 <code>yield</code> 结束的地方，并且它还保留了上一次执行的上下文，继续向后迭代。</p>
+<p>这就是使用 <code>yield</code> 的作用，在迭代生成器时，每一次执行都可以保留上一次的状态，而不是像普通方法那样，遇到 <code>return</code> 就返回结果，下一次执行只能再次重复上一次的流程。</p>
+<p>生成器除了能保存状态之外，我们还可以通过其他方式，改变其内部的状态，这就是下面要讲的 <code>send</code> 和 <code>throw</code> 方法。</p>
+<h2 id="send"><a href="#send" class="headerlink" title="send"></a>send</h2><p>上面的例子中，我们只展示了在 <code>yield</code> 后有值的情况，其实还可以使用 <code>j = yield i</code> 这种语法，我们看下面的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">()</span>:</span></span><br><span class="line">    i = <span class="number">1</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        j = <span class="keyword">yield</span> i</span><br><span class="line">        i *= <span class="number">2</span></span><br><span class="line">        <span class="keyword">if</span> j == <span class="number">-1</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br></pre></td></tr></table></figure>
+
+<p>此时如果我们执行下面的代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> gen():</span><br><span class="line">    print(i)</span><br><span class="line">    time.sleep(<span class="number">1</span>)</span><br></pre></td></tr></table></figure>
+
+<p>输出结果会是 <code>1 2 4 8 16 32 64 ...</code> 一直循环下去， 直到我们杀死这个进程才能停止。</p>
+<p>这段代码一直循环的原因在于，它无法执行到 <code>j == -1</code> 这个分支里 <code>break</code> 出来，如果我们想让代码执行到这个地方，如何做呢？</p>
+<p>这里就要用到生成器的 <code>send</code> 方法了，<strong><code>send</code> 方法可以把外部的值传入生成器内部，从而改变生成器的状态。</strong></p>
+<p>代码可以像下面这样写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">g = gen()   <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g.__next__())  <span class="comment"># 1</span></span><br><span class="line">print(g.__next__())  <span class="comment"># 2</span></span><br><span class="line">print(g.__next__())  <span class="comment"># 4</span></span><br><span class="line"><span class="comment"># send 把 -1 传入生成器内部 走到了 j = -1 这个分支</span></span><br><span class="line">print(g.send(<span class="number">-1</span>))   <span class="comment"># StopIteration 迭代停止</span></span><br></pre></td></tr></table></figure>
+
+<p>当我们执行 <code>g.send(-1)</code> 时，相当于把 <code>-1</code> 传入到了生成器内部，然后赋值给了 <code>yield</code> 前面的 <code>j</code>，此时 <code>j = -1</code>，然后这个方法就会 <code>break</code> 出来，不会继续迭代下去。</p>
+<h2 id="throw"><a href="#throw" class="headerlink" title="throw"></a>throw</h2><p>外部除了可以向生成器内部传入一个值外，还可以传入一个异常，也就是调用 <code>throw</code> 方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">yield</span> <span class="number">1</span></span><br><span class="line">    <span class="keyword">except</span> ValueError:</span><br><span class="line">        <span class="keyword">yield</span> <span class="string">'ValueError'</span></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        print(<span class="string">'finally'</span>)</span><br><span class="line"></span><br><span class="line">g = gen()   <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g.__next__()) <span class="comment"># 1</span></span><br><span class="line"><span class="comment"># 向生成器内部传入异常 返回ValueError</span></span><br><span class="line">print(g.throw(ValueError))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output：</span></span><br><span class="line"><span class="comment"># 1</span></span><br><span class="line"><span class="comment"># ValueError</span></span><br><span class="line"><span class="comment"># finally</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子创建好生成器后，使用 <code>g.throw(ValueError)</code> 的方式，向生成器内部传入了一个异常，走到了生成器异常处理的分支逻辑。</p>
+<h2 id="close"><a href="#close" class="headerlink" title="close"></a>close</h2><p>生成器的 <code>close</code> 方法也比较简单，就是手动关闭这个生成器，关闭后的生成器无法再进行操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>g = gen()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g.close() <span class="comment"># 关闭生成器</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>g.__next__() <span class="comment"># 无法迭代数据</span></span><br><span class="line">Traceback (most recent call last):</span><br><span class="line">  File <span class="string">"&lt;stdin&gt;"</span>, line <span class="number">1</span>, <span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">StopIteration</span><br></pre></td></tr></table></figure>
+
+<p><code>close</code> 方法我们在开发中使用得比较少，了解一下就好。</p>
+<h1 id="使用场景"><a href="#使用场景" class="headerlink" title="使用场景"></a>使用场景</h1><p>了解了 <code>yield</code> 和生成器的使用方式，那么 <code>yield</code> 和生成器一般用在哪些业务场景中呢？</p>
+<p>下面我介绍几个例子，分别是大集合的生成、简化代码结构、协程与并发，你可以参考这些使用场景来使用 <code>yield</code>。</p>
+<h2 id="大集合的生成"><a href="#大集合的生成" class="headerlink" title="大集合的生成"></a>大集合的生成</h2><p>如果你想生成一个非常大的集合，如果使用 <code>list</code> 创建一个集合，这会导致在内存中申请一个很大的存储空间，例如想下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">big_list</span><span class="params">()</span>:</span></span><br><span class="line">    result = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10000000000</span>):</span><br><span class="line">        result.append(i)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line"><span class="comment"># 一次性在内存中生成大集合 内存占用非常大</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> big_list():</span><br><span class="line">    print(i)</span><br></pre></td></tr></table></figure>
+
+<p>这种场景，我们使用生成器就能很好地解决这个问题。</p>
+<p>因为生成器只有在执行到 <code>yield</code> 时才会迭代数据，这时只会申请需要返回元素的内存空间，代码可以这样写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">big_list</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10000000000</span>):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line"></span><br><span class="line"><span class="comment"># 只有在迭代时 才依次生成元素 减少内存占用</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> big_list():</span><br><span class="line">    print(i)</span><br></pre></td></tr></table></figure>
+
+<h2 id="简化代码结构"><a href="#简化代码结构" class="headerlink" title="简化代码结构"></a>简化代码结构</h2><p>我们在开发时还经常遇到这样一种场景，如果一个方法要返回一个 <code>list</code>，但这个 <code>list</code> 是多个逻辑块组合后才能产生的，这就会导致我们的代码结构变得很复杂：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_list</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 多个逻辑块 组成生成一个列表</span></span><br><span class="line">    result = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">        result.append(i)</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        result.append(j * j)</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]:</span><br><span class="line">        result.append(k)</span><br><span class="line">    <span class="keyword">return</span> result</span><br><span class="line">    </span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> gen_list():</span><br><span class="line">    print(item)</span><br></pre></td></tr></table></figure>
+
+<p>这种情况下，我们只能在每个逻辑块内使用 <code>append</code> 向 <code>list</code> 中追加元素，代码写起来比较啰嗦。</p>
+<p>此时如果使用 <code>yield</code> 来生成这个 <code>list</code>，代码就简洁很多：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen_list</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="comment"># 多个逻辑块 使用yield 生成一个列表</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">10</span>):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line">    <span class="keyword">for</span> j <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        <span class="keyword">yield</span> j * j</span><br><span class="line">    <span class="keyword">for</span> k <span class="keyword">in</span> [<span class="number">100</span>, <span class="number">200</span>, <span class="number">300</span>]:</span><br><span class="line">        <span class="keyword">yield</span> k</span><br><span class="line">        </span><br><span class="line"><span class="keyword">for</span> item <span class="keyword">in</span> gen_list():</span><br><span class="line">    print(i)</span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>yield</code> 后，就不再需要定义 <code>list</code> 类型的变量，只需在每个逻辑块直接 <code>yield</code> 返回元素即可，可以达到和前面例子一样的功能。</p>
+<p>我们看到，使用 <code>yield</code> 的代码更加简洁，结构也更清晰，另外的好处是只有在迭代元素时才申请内存空间，降低了内存资源的消耗。</p>
+<h2 id="协程与并发"><a href="#协程与并发" class="headerlink" title="协程与并发"></a>协程与并发</h2><p>还有一种场景是 <code>yield</code> 使用非常多的，那就是「协程与并发」。</p>
+<p>如果我们想提高程序的执行效率，通常会使用多进程、多线程的方式编写程序代码，最常用的编程模型就是「生产者-消费者」模型，即一个进程 / 线程生产数据，其他进程 / 线程消费数据。</p>
+<p>在开发多进程、多线程程序时，为了防止共享资源被篡改，我们通常还需要加锁进行保护，这样就增加了编程的复杂度。</p>
+<p>在 Python 中，除了使用进程和线程之外，我们还可以使用「协程」来提高代码的运行效率。</p>
+<p>什么是协程？</p>
+<p>简单来说，<strong>由多个程序块组合协作执行的程序，称之为「协程」。</strong></p>
+<p>而在 Python 中使用「协程」，就需要用到 <code>yield</code> 关键字来配合。</p>
+<p>可能这么说还是太好理解，我们用 <code>yield</code> 实现一个协程生产者、消费者的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">consumer</span><span class="params">()</span>:</span></span><br><span class="line">    i = <span class="literal">None</span></span><br><span class="line">    <span class="keyword">while</span> <span class="literal">True</span>:</span><br><span class="line">        <span class="comment"># 拿到 producer 发来的数据</span></span><br><span class="line">        j = <span class="keyword">yield</span> i </span><br><span class="line">        print(<span class="string">'consume %s'</span> % j)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">producer</span><span class="params">(c)</span>:</span></span><br><span class="line">    c.__next__()</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        print(<span class="string">'produce %s'</span> % i)</span><br><span class="line">        <span class="comment"># 发数据给 consumer</span></span><br><span class="line">        c.send(i)</span><br><span class="line">    c.close()</span><br><span class="line"></span><br><span class="line">c = consumer()</span><br><span class="line">producer(c)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># produce 0</span></span><br><span class="line"><span class="comment"># consume 0</span></span><br><span class="line"><span class="comment"># produce 1</span></span><br><span class="line"><span class="comment"># consume 1</span></span><br><span class="line"><span class="comment"># produce 2</span></span><br><span class="line"><span class="comment"># consume 2</span></span><br><span class="line"><span class="comment"># produce 3</span></span><br><span class="line"><span class="comment"># consume 3</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+
+<p>这个程序的执行流程如下：</p>
+<ol>
+<li><code>c = consumer()</code> 创建一个生成器对象</li>
+<li><code>producer(c)</code> 开始执行，<code>c.__next()__</code> 会启动生成器 <code>consumer</code> 直到代码运行到 <code>j = yield i</code> 处，此时 <code>consumer</code> 第一次执行完毕，返回</li>
+<li><code>producer</code> 函数继续向下执行，直到 <code>c.send(i)</code> 处，这里利用生成器的 <code>send</code> 方法，向 <code>consumer</code> 发送数据</li>
+<li><code>consumer</code> 函数被唤醒，从 <code>j = yield i</code> 处继续开始执行，并且接收到 <code>producer</code> 传来的数据赋值给 <code>j</code>，然后打印输出，直到再次执行到 <code>yield</code> 处，返回</li>
+<li><code>producer</code> 继续循环执行上面的过程，依次发送数据给 <code>cosnumer</code>，直到循环结束</li>
+<li>最终 <code>c.close()</code> 关闭 <code>consumer</code> 生成器，程序退出</li>
+</ol>
+<p>在这个例子中我们发现，程序在 <code>producer</code> 和 <code>consumer</code> 这 2 个函数之间<strong>来回切换</strong>执行，相互协作，完成了生产任务、消费任务的业务场景，最重要的是，整个程序是在<strong>单进程单线程</strong>下完成的。</p>
+<p>这个例子用到了上面讲到的 <code>yield</code>、生成器的 <code>__next__</code>、<code>send</code>、<code>close</code> 方法。如果不好理解，你可以多看几遍这个例子，最好自己测试一下。</p>
+<p>我们使用协程编写生产者、消费者的程序时，它的好处是：</p>
+<ul>
+<li>整个程序运行过程中无锁，不用考虑共享变量的保护问题，降低了编程复杂度</li>
+<li>程序在函数之间来回切换，这个过程是用户态下进行的，不像进程 / 线程那样，会陷入到内核态，这就减少了内核态上下文切换的消耗，执行效率更高</li>
+</ul>
+<p>所以，<strong>Python 的 <code>yield</code> 和生成器实现了协程的编程方式，为程序的并发执行提供了编程基础。</strong></p>
+<p>Python 中的很多第三方库，都是基于这一特性进行封装的，例如 <code>gevent</code>、<code>tornado</code>，它们都大大提高了程序的运行效率。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总结一下，这篇文章我们主要讲了 <code>yield</code> 的使用方式，以及生成器的各种特性。</p>
+<p>生成器是一种特殊的迭代器，它除了可以迭代数据之外，在执行时还可以保存方法中的状态，除此之外，它还提供了外部改变内部状态的方式，把外部的值传入到生成器内部。</p>
+<p>利用 <code>yield</code> 和生成器的特性，我们在开发中可以用在大集成的生成、简化代码结构、协程与并发的业务场景中。</p>
+<p>Python 的 <code>yield</code> 也是实现协程和并发的基础，它提供了协程这种用户态的编程模式，提高了程序运行的效率。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/05/21/python-advance-yield/" title="Python技术进阶——如何正确使用yield？">http://kaito-kidd.com/2018/05/21/python-advance-yield/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/05/11/python-advance-process-thread/" rel="prev" title="Python技术进阶——如何正确使用进程和线程？">
+      <i class="fa fa-chevron-left"></i> Python技术进阶——如何正确使用进程和线程？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/05/30/ascii-gb18030-unicode-utf8/" rel="next" title="字符集和字符编码：ASCII、GB18030、Unicode、UTF-8">
+      字符集和字符编码：ASCII、GB18030、Unicode、UTF-8 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#生成器"><span class="nav-number">1.</span> <span class="nav-text">生成器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#next"><span class="nav-number">1.1.</span> <span class="nav-text">next</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#send"><span class="nav-number">1.2.</span> <span class="nav-text">send</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#throw"><span class="nav-number">1.3.</span> <span class="nav-text">throw</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#close"><span class="nav-number">1.4.</span> <span class="nav-text">close</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用场景"><span class="nav-number">2.</span> <span class="nav-text">使用场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#大集合的生成"><span class="nav-number">2.1.</span> <span class="nav-text">大集合的生成</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#简化代码结构"><span class="nav-number">2.2.</span> <span class="nav-text">简化代码结构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#协程与并发"><span class="nav-number">2.3.</span> <span class="nav-text">协程与并发</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

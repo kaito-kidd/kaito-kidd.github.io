@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="之前买的科学上网服务从不稳定到不可用，也没有通知一声，貌似跑路了，太没有职业道德，这年头只想稳定的上网真的这么难么？ 还好，之前买过一台VPS，本想业余时间开发一些小东西，目前只部署了个爬虫在上面跑，这次先用它搭个梯子代理，至少自己动手，比别人的要稳定吧！  原理首先说一下shadowsocks的工作原理，正常情况下，如果你想访问外面的世界，由于有GFW的存在，直连是访问不了的，但如果你有一台外">
+<meta property="og:type" content="article">
+<meta property="og:title" content="VPS搭建Shadowsocks代理服务">
+<meta property="og:url" content="http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="之前买的科学上网服务从不稳定到不可用，也没有通知一声，貌似跑路了，太没有职业道德，这年头只想稳定的上网真的这么难么？ 还好，之前买过一台VPS，本想业余时间开发一些小东西，目前只部署了个爬虫在上面跑，这次先用它搭个梯子代理，至少自己动手，比别人的要稳定吧！  原理首先说一下shadowsocks的工作原理，正常情况下，如果你想访问外面的世界，由于有GFW的存在，直连是访问不了的，但如果你有一台外">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484119054.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484118589.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484118706.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484122704.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484122974.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125248.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125504.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125619.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125950.png">
+<meta property="article:published_time" content="2017-01-11T11:12:22.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.562Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="代理">
+<meta property="article:tag" content="shadowsocks">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484119054.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>VPS搭建Shadowsocks代理服务 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          VPS搭建Shadowsocks代理服务
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-01-11 11:12:22" itemprop="dateCreated datePublished" datetime="2017-01-11T11:12:22+00:00">2017-01-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/01/11/vps-shadowsocks-proxy/" class="post-meta-item leancloud_visitors" data-flag-title="VPS搭建Shadowsocks代理服务" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/01/11/vps-shadowsocks-proxy/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/01/11/vps-shadowsocks-proxy/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>之前买的科学上网服务从不稳定到不可用，也没有通知一声，貌似跑路了，太没有职业道德，这年头只想稳定的上网真的这么难么？</p>
+<p>还好，之前买过一台VPS，本想业余时间开发一些小东西，目前只部署了个爬虫在上面跑，这次先用它搭个梯子代理，至少自己动手，比别人的要稳定吧！</p>
+</blockquote>
+<h1 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h1><p>首先说一下<code>shadowsocks</code>的工作原理，正常情况下，如果你想访问外面的世界，由于有GFW的存在，直连是访问不了的，但如果你有一台外面世界的VPS，而你可以直连到这台VPS上，那么就可以通过这台VPS搭一条通道，也就是所谓的梯子，来让我们间接的连通外面的世界。</p>
+<p>说白了就是在这台VPS上自己搭建一个服务，可以使我们的请求数据包经过这个服务转发出去，然后将响应数据包再通过这个服务正常返回给我们，但是由于我们上网都会经过GFW，它会验证我们的数据包，如果是被屏蔽的域名或IP，则会拒绝访问。怎样才能跨越屏障呢？</p>
+<p>那就是在发送请求数据给代理服务时，先进行加密，这样就能跨越GFW到达代理服务，代理服务再通过同样的算法解密数据包，然后转发到我们请求的网站，之后得到响应后再通过先加密后解密的方式返回到我们本机，这样就能实现与外部连通。所以我们需要<strong>客户端</strong>和<strong>服务端</strong>配合来完成，大致流程如下：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484119054.png" />
+
+<p>明白了原理之后，我们怎样搭建这样一个服务呢？</p>
+<p><code>shadowsocks</code>就已经实现了这些东西，我们只需要经过配置就可以轻松完成这个服务。</p>
+<a id="more"></a>
+
+<h1 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h1><p>这里主要介绍<code>Linux</code>系统服务器装过程，由于<code>Linux</code>系统已自带<code>Python</code>，我们只需要安装<code>shadowsocks</code>模块搭建代理服务就可以了。</p>
+<p>安装<code>shadowscoks</code>：</p>
+<ul>
+<li><p>Debian / Ubuntu：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装shadowsocks依赖的加密库</span></span><br><span class="line">apt-get install python-m2crypto</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装shadowsocks</span></span><br><span class="line">pip install shadowsocks</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>CentOS：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 安装shadowsocks依赖的加密库</span></span><br><span class="line">yum install m2crypto</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装pip</span></span><br><span class="line">yum install python-setuptools &amp;&amp; easy_install pip</span><br><span class="line"><span class="meta">#</span><span class="bash"> 安装shadowsocks</span></span><br><span class="line">pip install shadowsocks</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Windows：</p>
+<p>参考<a href="https://github.com/shadowsocks/shadowsocks/wiki/Install-Shadowsocks-Server-on-Windows" target="_blank" rel="noopener">这里</a></p>
+</li>
+</ul>
+<h1 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h1><p>安装完成后，然后进行服务端配置，例如端口、密码等信息。</p>
+<p>创建配置文件<code>/etc/config.json</code>：</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"server"</span>:<span class="string">"0.0.0.0"</span>,</span><br><span class="line">    <span class="attr">"server_port"</span>: <span class="number">9988</span>,</span><br><span class="line">    <span class="attr">"local_address"</span>: <span class="string">"127.0.0.1”,</span></span><br><span class="line"><span class="string">    "</span>local_port<span class="string">": 1080,</span></span><br><span class="line"><span class="string">    "</span>password<span class="string">": "</span>your-password<span class="string">",</span></span><br><span class="line"><span class="string">    "</span>method<span class="string">": "</span>aes<span class="number">-256</span>-cfb<span class="string">"</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+
+<p>各配置信息：</p>
+<ul>
+<li>server：服务端IP，填写你VPS的IP地址</li>
+<li>server_port：服务端监听端口</li>
+<li>local_address：客户端服务IP，一般写本机127.0.0.1</li>
+<li>local_port：客户端监听端口</li>
+<li>password：密码，服务端指定后，客户端连接需填写此密码</li>
+<li>method：传输数据的加密方式</li>
+</ul>
+<p>这里指定了服务端的端口是9988，客户端的端口是1080，这个客户端端口最好不要修改，因为Mac的<code>shadowsocks</code>客户端不能修改端口，而默认指定就是1080端口。如果是Windows客户端则可以随意修改，自己指定即可。</p>
+<h1 id="启动-停止服务"><a href="#启动-停止服务" class="headerlink" title="启动/停止服务"></a>启动/停止服务</h1><ul>
+<li>后台启动：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssserver -c /etc/config.json -d start --log-file /tmp/shadowsocks.log --pid-file /tmp/shadowsocks.pid</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>-c：指定配置文件</li>
+<li>-d start：模式：启动</li>
+<li>—log-file：日志路径</li>
+<li>—pid-file：<code>pid</code>进程号文件</li>
+</ul>
+<p>查看日志文件，如果显示<code>starting server at x.x.x.x:xxxx</code>即为启动成功。</p>
+<ul>
+<li>停止服务：</li>
+</ul>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssserver -d stop --pid-file /tmp/shadowsocks.pid</span><br></pre></td></tr></table></figure>
+
+<h1 id="配置防火墙"><a href="#配置防火墙" class="headerlink" title="配置防火墙"></a>配置防火墙</h1><p><code>shadowsocks</code>服务启动成功后，就会在配置的端口监听服务，客户端要想通过此端口访问，首先配置防火墙，打开端口访问，默认端口应该都是被关闭的。如何配置防火墙，请参考<code>iptables</code>文档，这里不再阐述。</p>
+<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><p>服务端配置完成之后，就需要本地下载客户端来连接此服务了。</p>
+<p>下载客户端：<a href="http://sourceforge.net/projects/shadowsocksgui/files/dist/" target="_blank" rel="noopener">http://sourceforge.net/projects/shadowsocksgui/files/dist/</a></p>
+<p>Mac和Windows平台请自行根据后缀名和日期下载最新版即可。</p>
+<p>以为Mac客户端为例，打开客户端，找到<code>Servers</code>，打开配置：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484118589.png" />
+
+<p>按照上面服务端的配置，填写IP、端口、密码、加密方式，保存。</p>
+<p>选择<code>Turn On</code>启动客户端即可：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484118706.png" />
+
+<p>试着访问google、twitter、youtube等网站，然后观察服务端的日志文件，看是否有请求进来，如果网站可以正常访问，且日志有访问记录，则说明配置正确，现在就可以愉快的科学上网了！</p>
+<p>客户端默认是以<code>Auto Proxy Mode</code>方式启动的，也就是自动分流方式，没有被屏蔽的网站，还是走本机直连方式，只有被屏蔽的网站才会走<code>shadowsocks</code>代理访问。</p>
+<p>你也可以选择<code>Global Mode</code>全局代理模式，即所有流量都走代理访问。当然还是推荐使用自动分流模式，这样保证访问速度的同时还可节省VPS的流量。</p>
+<h1 id="配合SwitchyOmega使用"><a href="#配合SwitchyOmega使用" class="headerlink" title="配合SwitchyOmega使用"></a>配合SwitchyOmega使用</h1><p>其实到上面为止，你的本机已经可以正常访问外面的世界了。</p>
+<p>但如果你在工作中，例如访问线上服务需要使用HTTP代理来访问，例如访问线上服务<code>http://192.168.3.22</code>，需要通过HTTP代理，而其他网站则不使用代理。那么你可能要用到<code>Chrome</code>的插件<code>SwitchyOmega</code> 来进行自动分流。</p>
+<p>一般配置为，先建立一个<code>Proxy Profile</code>配置，名字叫<code>Online Proxy</code>（线上服务代理），配置HTTP代理的IP和端口，例如：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484122704.png" />
+
+<p>然后建立一个<code>Switch Profile</code>配置，名字叫<code>Auto Switch</code>（自动切换），然后匹配规则如果是访问线上服务器<code>192.168.3.22</code>的服务，则自动使用上面建立的<code>Online Proxy</code>规则：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484122974.png" />
+
+<p>而默认使用的是<code>Direct</code>，意为本机直连，也就是说，如果没有匹配到上面的规则，则默认使用直连方式进行访问，不会走任何代理。</p>
+<p>如果没有使用<code>shadowsocks</code>之前，按照上面的配置就可以访问线上服务和正常浏览网站了，但现在我们想访问外面的世界，按照上面<code>shadowsocks</code>的配置，然后使用<code>Chrome</code>还是无法访问的。问题就是因为我们配置了<code>SwitchyOmega</code>，默认匹配不到任何规则，则使用直连的方式访问网络的，不会经过我们配置的<code>shadowsocks</code>代理。</p>
+<p>那么怎么才能使<code>Chrome</code>既能像之前那样可以访问线上服务，又可以通过代理服务访问被屏蔽的那些网站呢？</p>
+<p>其实，在我们打开<code>shadowsocks</code>客户端时，只要代理配置正确，不管你是否开启代理服务（<code>Turn On</code>），都会在本机启动2个服务，监听2个端口：1080端口、8090端口，使用命令可以查看到：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#</span><span class="bash"> 查看1080端口</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt; netstat -ant | grep 1080 | grep LISTEN</span></span><br><span class="line">tcp4       0      0  *.1080                 *.*                    LISTEN</span><br><span class="line"></span><br><span class="line"><span class="meta">#</span><span class="bash"> 查看8090端口</span></span><br><span class="line"><span class="meta">&gt;</span><span class="bash">&gt; netstat -ant | grep 8090 | grep LISTEN</span></span><br><span class="line">tcp4       0      0  *.8090                 *.*                    LISTEN</span><br></pre></td></tr></table></figure>
+
+<p>这到底是什么情况？你可以仔细观察一下，就算你在客户端点击<code>Turn Off</code>，使用上面命令查看着2个端口还是存在的。如果你撤掉关掉了客户端，那么这2个端口服务将被关闭。</p>
+<p>打开/关闭客户端发生了什么？</p>
+<p>打开<code>shadowsocks</code>客户端，<code>shadowsocks</code>会在本机启动上面2个服务，关闭客户端同时停止这2个服务。</p>
+<p>这2个服务的功能：</p>
+<ul>
+<li>1080端口：提供<code>SOCKS v5</code>代理，真正的请求代理入口，本机通过此端口转发请求</li>
+<li>8090端口：提供<code>PAC</code>服务，<code>shadowsocks</code>点击<code>Turn On</code>，会配置<code>PAC</code>地址到系统代理</li>
+</ul>
+<p><code>Turn On/Off</code>发生了什么？</p>
+<p>在我们的系统配置中，找到<code>网络</code> -&gt; <code>Wi-Fi</code> -&gt; <code>高级</code>-&gt; <code>代理</code> -&gt; <code>自动代理配置</code>，你会看到URL配置会随着你<code>Turn On/Off</code>打开和关闭，然后填充配置/删除配置。</p>
+<p>这个配置地址是：<code>http://127.0.0.1:8090/proxy.pac</code>，访问这个地址，你就会得到一个<code>proxy.pac</code>的文件，这个配置文件是用<code>JavaScript</code>编写的，而在第一行也会看到我们熟悉的代码：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> proxy = <span class="string">"SOCKS5 127.0.0.1:1080; SOCKS 127.0.0.1:1080; DIRECT;"</span>;</span><br></pre></td></tr></table></figure>
+
+<p>后面的逻辑大致就是，配置了一系列的域名，还有一些逻辑判断，意思为，如果我们访问的域名能匹配到这一些列域名，则使用<code>SOCK5 127.0.0.1:1080</code>代理访问，否则直连访问，这个文件就是一个自动分流的逻辑。</p>
+<p>也就是说，我们<code>Turn On/Off</code>也就是给系统加上了这个自动分流的逻辑，而这个代理入口，就是使用的1080端口这个服务！</p>
+<p>得知此结论后，那我们的使用就很方便了，如果想通过代理访问，使用<code>SOCK5 127.0.0.1:1080</code>访问即可，如果想使用分流代理，使用<code>http://127.0.0.1:8090/proxy.pac</code>这个地址即可。</p>
+<p>那么我们就可以在<code>SwitchyOmega</code>上再建一个<code>Proxy Profile</code>规则，叫做<code>Global Proxy</code>（全局代理），使用这个代理，就强制所有的请求都通过代理访问：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125248.png" />
+
+<p>配置完成后，我们在使用<code>Chrome</code>时，在地址栏的右边，就可以通过点击<code>SwitchyOmega</code>按钮来手动切换使用哪个模式进行访问了。这样既可以访问线上服务，也可以切换到代理模式访问外面世界了！</p>
+<p>到这里我们还是需要手动切换来达到我们想要的效果，那我们可不可以让这些模式自动切换呢？答案是可以的。</p>
+<p>新建一个<code>PAC Profile</code>规则，叫做<code>Auto Shunt</code>（自动分流），配置上面的<code>PAC</code>地址：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125504.png" />
+
+<p>配置完成后，切换到之前配置好的<code>Auto Switch</code>（自动切换模式）规则，把<code>Default</code>选择为刚才配置好的<code>Auto Shunt</code>模式即可，最后配置如下：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125619.png" />
+
+<p>最后选择使用<code>Auto Switch</code>模式：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1484125950.png" />
+
+<p>使用如上的配置后，访问线上服务时，会走HTTP代理访问，而其他网站默认通过<code>PAC</code>规则，这个<code>PAC</code>规则会再次匹配访问网站是否为配置文件中那一系列域名网站，如果能匹配到，那么使用<code>SOCK 127.0.0.1</code>代理服务访问，否则直连访问。</p>
+<p>到此为止，相当于3个规则根据配置自动切换，省去了手动切换的烦恼！当然，上面也保留了<code>Global Proxy</code>（全局代理）配置，如果在无法直连某个网站，且<code>PAC</code>配置文件中没有配置时，可以强制选择使用此模式进行访问。</p>
+<p>通过上面的配置只是对<code>Chrome</code>生效，当然我们最好还是开启客户端的<code>Turn On</code>，这样其他浏览器访问网络时，也会通过<code>PAC</code>规则进行智能分流访问。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/" title="VPS搭建Shadowsocks代理服务">http://kaito-kidd.com/2017/01/11/vps-shadowsocks-proxy/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E4%BB%A3%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 代理</a>
+              <a href="/tags/shadowsocks/" rel="tag"><i class="fa fa-tag"></i> shadowsocks</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/12/26/delay-queue-based-on-redis/" rel="prev" title="基于Redis实现延迟队列">
+      <i class="fa fa-chevron-left"></i> 基于Redis实现延迟队列
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2017/02/06/python-advance-decorator/" rel="next" title="Python进阶——如何实现一个装饰器？">
+      Python进阶——如何实现一个装饰器？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#原理"><span class="nav-number">1.</span> <span class="nav-text">原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装依赖"><span class="nav-number">2.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#服务端配置"><span class="nav-number">3.</span> <span class="nav-text">服务端配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#启动-停止服务"><span class="nav-number">4.</span> <span class="nav-text">启动&#x2F;停止服务</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配置防火墙"><span class="nav-number">5.</span> <span class="nav-text">配置防火墙</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端配置"><span class="nav-number">6.</span> <span class="nav-text">客户端配置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#配合SwitchyOmega使用"><span class="nav-number">7.</span> <span class="nav-text">配合SwitchyOmega使用</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

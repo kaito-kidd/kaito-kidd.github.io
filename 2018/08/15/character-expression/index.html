@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="之前的文章讲完了数字在计算机内部的表示方式，那英文、中文字符在计算机内部是如何表示的呢？这篇文章我们来看字符的表示方式。  西文字符西文字符主要由拉丁字母、数字、标点符号及一些特殊符号组成，它们统称为字符，所有字符的集合叫做字符集。 但字符不能直接在计算机内部处理，必须对字符进行数字化编码，转换成二进制0&#x2F;1序列，因此构成了字符和数字化编码对应的代码表，简称码表，码表中的字符与代码一一对应。 世">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（六）字符的表示">
+<meta property="og:url" content="http://kaito-kidd.com/2018/08/15/character-expression/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="之前的文章讲完了数字在计算机内部的表示方式，那英文、中文字符在计算机内部是如何表示的呢？这篇文章我们来看字符的表示方式。  西文字符西文字符主要由拉丁字母、数字、标点符号及一些特殊符号组成，它们统称为字符，所有字符的集合叫做字符集。 但字符不能直接在计算机内部处理，必须对字符进行数字化编码，转换成二进制0&#x2F;1序列，因此构成了字符和数字化编码对应的代码表，简称码表，码表中的字符与代码一一对应。 世">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1527575706.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-08-15T13:59:28.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="编码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1527575706.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/08/15/character-expression/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（六）字符的表示 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/15/character-expression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（六）字符的表示
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-15 13:59:28" itemprop="dateCreated datePublished" datetime="2018-08-15T13:59:28+00:00">2018-08-15</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/15/character-expression/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（六）字符的表示" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/15/character-expression/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/15/character-expression/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>之前的文章讲完了数字在计算机内部的表示方式，那英文、中文字符在计算机内部是如何表示的呢？这篇文章我们来看字符的表示方式。</p>
+</blockquote>
+<h1 id="西文字符"><a href="#西文字符" class="headerlink" title="西文字符"></a>西文字符</h1><p>西文字符主要由拉丁字母、数字、标点符号及一些特殊符号组成，它们统称为<strong>字符</strong>，所有字符的集合叫做<strong>字符集</strong>。</p>
+<p>但字符不能直接在计算机内部处理，必须对字符进行数字化编码，转换成二进制0/1序列，因此构成了字符和数字化编码对应的代码表，简称<strong>码表</strong>，码表中的字符与代码一一对应。</p>
+<p>世界各国都有自己的语言，即各国都有自己的字符，每个国家的字符组合起来也就产生了多种字符集。</p>
+<p>由于计算机是美国人发明的，所以对于英文字符，美国人制定了一个字符和二进制对应的码表，这个码表就是<strong>ASCII码</strong>，即美国标准信息交换码（American Standard Code for Information Interchange）。</p>
+<a id="more"></a>
+
+<p>ASCII字符编码具体对应关系如下：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1527575706.png?imageMogr2/thumbnail/!70p" alt="ASCII字符编码"></p>
+<p>ASCII码用1个字节8位表示一个字符，但只使用了后7位就可以表示英文字符、标点符号、控制字符，所以默认最高位是0。</p>
+<p>ASCII码能表示128个不同的字符，其中包括10个数字、26个小写字母、26个大写字母、算术运算符、标点符号、商业符号等可打印显示的字符。另外还包括33个控制字符，在传输打印或显示时起控制作用。</p>
+<p>ASCII字符编码有2个规律：</p>
+<ul>
+<li>字符0-9去掉高3位时，低4位正好是这10个数字的8421码，既满足排序关系，又利于ASCII码到十进制数的转换</li>
+<li>英文字符也满足字母排序关系，且大、小写字母的编码差别在于第6位，若这一位是0，则是大写字母，若为1，则是小写字母，使得大、小写字母转换非常方便</li>
+</ul>
+<h1 id="汉字字符"><a href="#汉字字符" class="headerlink" title="汉字字符"></a>汉字字符</h1><p>了解完英文字符，再来看下汉字字符在计算机内部是如何表示的。</p>
+<p>随着计算机的发展，计算机在中国也逐渐流行起来，那汉字字符也需要经过编码，才能在计算机内部表示。</p>
+<p>但汉字字符与英文字符不同，英文字符很少，使用8个二进制位即可表示。汉字一个字就是一个方块图形，且汉字总数超过6万个，数量巨大，汉字的传输转换、输入输出都是问题。</p>
+<p>计算机要处理汉字，要经过3个过程，即如何把汉字输入到计算机、计算机内部如何存储、计算机如何显示出汉字图形，简单来说就是<strong>输入编码、计算机内部编码、汉字图形输出</strong>。</p>
+<h2 id="输入编码"><a href="#输入编码" class="headerlink" title="输入编码"></a>输入编码</h2><p>英文字符输入非常简单，我们平时使用的键盘，每一个键都代表着一个字符，想要输入什么字符直接按下键盘上的一个按键即可。</p>
+<p>但汉字不同，要想输入一个汉字，需要多个按键组合后才能输出，这个组合的过程就是输入编码，叫做<strong>输入码</strong>，由于此时内容还没有传到计算机内部，所以也称为<strong>外码</strong>。</p>
+<p>说白了输入码就是我们常见的各种输入法，例如输入同一个汉字，可以使用拼音输入法，也可以使用五笔输入法。</p>
+<p>除了我们常见的输入法之外，其实还有非常多的编码方案，但我们输入汉字的目的要既简单又易用，所以常用的输入编码也就4大类：</p>
+<ul>
+<li>数字编码：一串数字表示汉字的编码，例如电报码、区位码等，难记忆，不易推广</li>
+<li>字音编码：基于汉语拼音的编码，简单易学，适合非专业人员，缺点是同音字引起的重码多，需要选择操作，例如最常用的微软拼音输入法、智能ABC输入法</li>
+<li>字形编码：将汉字自行分解归类制定的编码，重码少、输入速度快，但编码规则不易掌握，五笔输入法就是这类编码</li>
+<li>形音编码：将读音和形状结合起来的编码，吸收上面2种编码的优点，但不易掌握</li>
+</ul>
+<h2 id="内部编码"><a href="#内部编码" class="headerlink" title="内部编码"></a>内部编码</h2><p>通过<strong>输入码</strong>，就可以把汉字从键盘输入到计算机内部了，到了计算机内部，也需要一种编码在计算机内部存储，这个编码也叫<strong>内码</strong>。</p>
+<p>对于西文字符来说，它的内码就是ASCII码，对于汉字来说，先后产生了GB2312、GBK、GB18030编码方案。</p>
+<p>之后为了统一全世界的字符，推出了Unicode编码方案，它们之前的联系和区别可参考我之前写的这篇文章：<a href="http://kaito-kidd.com/2018/05/30/ascii-gb18030-unicode-utf8/">字符集和字符编码：ASCII、GB18030、Unicode、UTF-8</a>。</p>
+<p>有了这些针对汉字字符的编码方案，汉字字符就可以在计算机内部表示和存储了。</p>
+<h2 id="图形输出"><a href="#图形输出" class="headerlink" title="图形输出"></a>图形输出</h2><p>汉字经过了键盘输入、计算机内部存储后，要想输出显示在屏幕或打印出来，这时就需要从汉字的内码转换成对应的图形，然后输出到屏幕上。</p>
+<p>每个汉字都是什么样的图形？如何根据内码找到对应的汉字图形？</p>
+<p>这就需要我们的每一个汉字的字形都必须预先存放在计算机内，一套字符集对应着一套字库，且不同的字体，如宋体、黑体、楷体都对应着不同的字库。在输出一个汉字时，计算机要先找到字库对应的图形信息，然后把图形信息送到相应的设备输出。</p>
+<p>汉字的输出方式分为2种：字模点阵描述和轮廓描述。</p>
+<p>字模点阵描述是将字库中的各个汉字，由0和1组成的方阵画出来，有黑点的地方用1表示，空白处用0表示。</p>
+<p>轮廓描述比较复杂，它把汉字笔画的轮廓用一组直线或曲线勾画出来，记下每一条直线和曲线的数学描述公式，这种方式精度更高，字型大小可以任意变化。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对于字符的表示总结如下：</p>
+<ul>
+<li>西文字符主要用ASCII码表示</li>
+<li>汉字字符处理需要经过输入编码、计算机内部编码、图形输出3个阶段</li>
+<li>这3个阶段分别对应的是输入码、内码、字模点阵码或轮廓描述</li>
+<li>汉字字符的计算机内部编码方案有GB2312、GBK、GB18030、Unicode编码方案</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/08/15/character-expression/" title="计算机系统基础（六）字符的表示">http://kaito-kidd.com/2018/08/15/character-expression/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/14/decimal-expression/" rel="prev" title="计算机系统基础（五）十进制数的表示">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（五）十进制数的表示
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/23/computer-system-cpu-cache/" rel="next" title="计算机系统基础（七）高速缓存Cache">
+      计算机系统基础（七）高速缓存Cache <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#西文字符"><span class="nav-number">1.</span> <span class="nav-text">西文字符</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#汉字字符"><span class="nav-number">2.</span> <span class="nav-text">汉字字符</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#输入编码"><span class="nav-number">2.1.</span> <span class="nav-text">输入编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内部编码"><span class="nav-number">2.2.</span> <span class="nav-text">内部编码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图形输出"><span class="nav-number">2.3.</span> <span class="nav-text">图形输出</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

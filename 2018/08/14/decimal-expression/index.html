@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="我们知道计算机中数字都是使用的二进制表示和运算，对于我们熟悉的十进制数字，可以通过数值进制公式进行转换后计算和显示。 但除了这种编码方式之外，计算机有时为了显示和计算方便，对十进制还定义了新的编码方式：ASCII码字符表示、BCD码表示。这篇文章我们来了解一下这2种编码方式的特点。  ASCCI码字符表示如果只是对十进制数进行打印或显示，那么可以把十进制数看成字符串，直接用ASCII码表示，09">
+<meta property="og:type" content="article">
+<meta property="og:title" content="计算机系统基础（五）十进制数的表示">
+<meta property="og:url" content="http://kaito-kidd.com/2018/08/14/decimal-expression/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="我们知道计算机中数字都是使用的二进制表示和运算，对于我们熟悉的十进制数字，可以通过数值进制公式进行转换后计算和显示。 但除了这种编码方式之外，计算机有时为了显示和计算方便，对十进制还定义了新的编码方式：ASCII码字符表示、BCD码表示。这篇文章我们来了解一下这2种编码方式的特点。  ASCCI码字符表示如果只是对十进制数进行打印或显示，那么可以把十进制数看成字符串，直接用ASCII码表示，09">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534237803.png?imageMogr2/thumbnail/!70p">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534237963.png?imageMogr2/thumbnail/!70p">
+<meta property="article:published_time" content="2018-08-14T16:01:43.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="计算机组成原理">
+<meta property="article:tag" content="编码">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534237803.png?imageMogr2/thumbnail/!70p">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/08/14/decimal-expression/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>计算机系统基础（五）十进制数的表示 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/08/14/decimal-expression/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          计算机系统基础（五）十进制数的表示
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-08-14 16:01:43" itemprop="dateCreated datePublished" datetime="2018-08-14T16:01:43+00:00">2018-08-14</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/08/14/decimal-expression/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（五）十进制数的表示" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/08/14/decimal-expression/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/08/14/decimal-expression/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>我们知道计算机中数字都是使用的二进制表示和运算，对于我们熟悉的十进制数字，可以通过数值进制公式进行转换后计算和显示。</p>
+<p>但除了这种编码方式之外，计算机有时为了显示和计算方便，对十进制还定义了新的编码方式：ASCII码字符表示、BCD码表示。这篇文章我们来了解一下这2种编码方式的特点。</p>
+</blockquote>
+<h1 id="ASCCI码字符表示"><a href="#ASCCI码字符表示" class="headerlink" title="ASCCI码字符表示"></a>ASCCI码字符表示</h1><p>如果只是对十进制数进行打印或显示，那么可以把十进制数看成字符串，直接用ASCII码表示，0<del>9分别对应ASCII码的30H</del>39H，这种表示方式，1位十进制用8位二进制数表示。</p>
+<p>用ASCII码表示的十进制又分为<strong>前分隔数字串</strong>和<strong>后嵌入数字串</strong>。</p>
+<h2 id="前分隔数字串"><a href="#前分隔数字串" class="headerlink" title="前分隔数字串"></a>前分隔数字串</h2><p>前分隔数字串将符号位单独用一个字节表示，放在数字串之前。</p>
+<p>正号（+）用ASCII码2B(H)表示，符号（-）用2D(H)表示。</p>
+<p>例如十进制数+236用前分隔数字串表示为<code>0010 1011 0011 0010 0011 0011 0011 0110</code>，对应的十六进制为<code>2B 32 33 36</code>，在内存中占用4个字节。</p>
+<p>十进制数-2369用前分隔数字串表示为<code>0010 1101 0011 0010 0011 0011 0011 0110 0011 1001</code>，对应的十六进制为<code>2D 32 33 36 39</code>，在内存中占用5个字节。</p>
+<p>可见，十进制数每增加一位，就要多一个字节表示对应数字。</p>
+<a id="more"></a>
+
+<h2 id="后嵌入数字串"><a href="#后嵌入数字串" class="headerlink" title="后嵌入数字串"></a>后嵌入数字串</h2><p>后嵌入数字串的符号位不单独用一个字节表示，而是嵌入到最低一位数字的ASCII码中。</p>
+<p>正数的最低一位数字编码不变，负数的最低一位数字编码的高4位由原来的<code>0011</code>变为<code>0111</code>。</p>
+<p>同样是上面2个数字，+236用后嵌入数字串方式表示为<code>0011 0010 0011 0011 0011 0110</code>，对应的十六进制为<code>32 33 36</code>，在内存中占用3个字节。</p>
+<p>十进制-2369用后嵌入数字串方式表示为<code>0011 0010 0011 0011 0011 0110 0111 1001</code>，对应的十六进制为<code>32 33 36 79</code>，在内存中占用4个字节。</p>
+<p>后嵌入数字串方式比前分隔数字串方式少占用一个字节，但对于负数来说，最低一位数字不是采用十进制数字的ASCII码，所以在显示或打印前必须先转换成可打印字符编码。</p>
+<p>用ASCII码表示十进制是为了方便十进制数的输入和输出，但这种方式对于十进制数的计算很不方便。如果要对这种十进制数字进行计算，则必须要转换成二进制数或用BCD码表示十进制了。</p>
+<h1 id="BCD码表示"><a href="#BCD码表示" class="headerlink" title="BCD码表示"></a>BCD码表示</h1><p>在数据输入输出量很大的商用领域，由于涉及到非常多的十进制数字计算，如果每次都要转换为二进制计算，再转换回十进制显示，那么这之间会对硬件的运算造成较大压力。如何解决这个问题，BCD码就是一种解决大量十进制数输入、输出、运算的场景的一种编码方式。计算机中可用专门的逻辑线路对BCD码进行计算。</p>
+<p>十进制0~9共10个数字，因此可用4位二进制位表示即可。4位二进制位可以组合出16种状态，所以从16种状态中选取10种状态就可以表示十进制数，并且可以产生多种BCD码。</p>
+<p>BCD码又分为有权BCD码和无权BCD码。</p>
+<h2 id="有权BCD码"><a href="#有权BCD码" class="headerlink" title="有权BCD码"></a>有权BCD码</h2><p>有权码是指表示每个十进制数位的4个二进制位，都有一个确定的权，以下是常用的几种有权码方案：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534237803.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>其中最常用的编码是842码，它选取4位二进制数并按顺序取前10个代码与十进制数字对应，每位权从左到右分贝为8、4、2、1，因此称为8421码。</p>
+<h2 id="无权BCD码"><a href="#无权BCD码" class="headerlink" title="无权BCD码"></a>无权BCD码</h2><p>与有权码相对应，每个十进制位没有确定的权，这种编码叫做无权码。</p>
+<p>无权码方案中用的较多的是余3码和格码：</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1534237963.png?imageMogr2/thumbnail/!70p" alt=""></p>
+<p>余3码是在8421码的基础上，把每个代码都加0011形成的，优点是执行十进制数加法时，能正确进位，且减法运算提供便利。</p>
+<p>格雷码规则是任何两个相邻的代码只有一个二进制位的状态不同，其余3个二进制必须相同，这样设计的好处在于从一个编码变到下一个编码试，只有一位发生变化，变码速度最快，利于电路的设计和运行。</p>
+<p>使用BCD码会耗费更多的设备量，所以通常情况下，计算机内部一般使用二进制数进行数据的表示和运算。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>我们总结十进制数的编码方案：</p>
+<ul>
+<li>十进制数字除了用数值进制转换编码外，还可以用ASCII码和BCD码进行编码和运算</li>
+<li>ASCII码一般用于输入和输出的表示，转换位数一一对应，简单直观</li>
+<li>BCD码则用于大量商业运算领域，减少十进制和二进制大量转换而提出的编码方案</li>
+<li>计算机内部一般还是使用二进制数对数据进行表示和运算，我们对十进制数的编码方案了解即可</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/08/14/decimal-expression/" title="计算机系统基础（五）十进制数的表示">http://kaito-kidd.com/2018/08/14/decimal-expression/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" rel="tag"><i class="fa fa-tag"></i> 计算机组成原理</a>
+              <a href="/tags/%E7%BC%96%E7%A0%81/" rel="tag"><i class="fa fa-tag"></i> 编码</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2018/08/08/computer-system-float-point/" rel="prev" title="计算机系统基础（四）浮点数">
+      <i class="fa fa-chevron-left"></i> 计算机系统基础（四）浮点数
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/08/15/character-expression/" rel="next" title="计算机系统基础（六）字符的表示">
+      计算机系统基础（六）字符的表示 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ASCCI码字符表示"><span class="nav-number">1.</span> <span class="nav-text">ASCCI码字符表示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#前分隔数字串"><span class="nav-number">1.1.</span> <span class="nav-text">前分隔数字串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#后嵌入数字串"><span class="nav-number">1.2.</span> <span class="nav-text">后嵌入数字串</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#BCD码表示"><span class="nav-number">2.</span> <span class="nav-text">BCD码表示</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#有权BCD码"><span class="nav-number">2.1.</span> <span class="nav-text">有权BCD码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无权BCD码"><span class="nav-number">2.2.</span> <span class="nav-text">无权BCD码</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

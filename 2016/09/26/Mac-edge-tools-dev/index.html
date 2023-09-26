@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="上一篇文章，主要推荐了Mac上系统管理相关的效率利器：Mac效率利器（一）系统管理篇，今天这篇文章主要推荐下Mac平台与开发相关的效率利器。  iTerm2如果是服务端开发，自然少不了终端工具，iTerm2算是Mac平台的王牌终端工具，它增强了普通终端，提供了开发中很常用的功能，例如分屏、检索高亮、命令自动补全、选中自动复制、剪贴板历史、终端主题等强大功能。总之，用上了iTerm2，在开发中能达">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Mac效率利器（二）开发篇">
+<meta property="og:url" content="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="上一篇文章，主要推荐了Mac上系统管理相关的效率利器：Mac效率利器（一）系统管理篇，今天这篇文章主要推荐下Mac平台与开发相关的效率利器。  iTerm2如果是服务端开发，自然少不了终端工具，iTerm2算是Mac平台的王牌终端工具，它增强了普通终端，提供了开发中很常用的功能，例如分屏、检索高亮、命令自动补全、选中自动复制、剪贴板历史、终端主题等强大功能。总之，用上了iTerm2，在开发中能达">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474881929.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474882035.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885255.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885284.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474884157.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885786.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885827.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886595.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886531.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886095.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897180.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897205.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474896597.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897358.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897661.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897975.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898024.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898057.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898147.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897932.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898250.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474899692.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900266.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900358.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900992.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900951.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474901500.png">
+<meta property="article:published_time" content="2016-09-26T22:30:50.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="利器">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="效率">
+<meta property="article:tag" content="Mac">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474881929.png">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Mac效率利器（二）开发篇 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Mac效率利器（二）开发篇
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-09-26 22:30:50" itemprop="dateCreated datePublished" datetime="2016-09-26T22:30:50+00:00">2016-09-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%95%88%E7%8E%87%E4%B8%8E%E5%B7%A5%E5%85%B7/" itemprop="url" rel="index"><span itemprop="name">效率与工具</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/09/26/Mac-edge-tools-dev/" class="post-meta-item leancloud_visitors" data-flag-title="Mac效率利器（二）开发篇" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/09/26/Mac-edge-tools-dev/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/09/26/Mac-edge-tools-dev/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>1.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>3 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>上一篇文章，主要推荐了Mac上系统管理相关的效率利器：<a href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system">Mac效率利器（一）系统管理篇</a>，今天这篇文章主要推荐下Mac平台与开发相关的效率利器。</p>
+</blockquote>
+<h1 id="iTerm2"><a href="#iTerm2" class="headerlink" title="iTerm2"></a>iTerm2</h1><p>如果是服务端开发，自然少不了终端工具，iTerm2算是Mac平台的王牌终端工具，它增强了普通终端，提供了开发中很常用的功能，例如分屏、检索高亮、命令自动补全、选中自动复制、剪贴板历史、终端主题等强大功能。总之，用上了iTerm2，在开发中能达到事半功倍的效果。</p>
+<h2 id="会话分屏"><a href="#会话分屏" class="headerlink" title="会话分屏"></a>会话分屏</h2><p><code>command + d</code>(水平分割)、<code>command + shift + d</code>(垂直分割)：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474881929.png" />
+
+<h2 id="检索高亮"><a href="#检索高亮" class="headerlink" title="检索高亮"></a>检索高亮</h2><p><code>command + f</code>，按<code>Tab</code>自动补全，然后按<code>option + 回车</code>自动粘贴：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474882035.png" />
+
+<h2 id="命令自动补全"><a href="#命令自动补全" class="headerlink" title="命令自动补全"></a>命令自动补全</h2><p>快捷键：<code>command + ;</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885255.png" />
+
+<h2 id="剪贴板历史"><a href="#剪贴板历史" class="headerlink" title="剪贴板历史"></a>剪贴板历史</h2><p>快捷键：<code>command + shift + h</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885284.png" />
+
+<h2 id="主题配置"><a href="#主题配置" class="headerlink" title="主题配置"></a>主题配置</h2><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474884157.png" />
+
+<h1 id="Dash"><a href="#Dash" class="headerlink" title="Dash"></a>Dash</h1><p>在写代码时，肯定少不了查文档，打开官方网站，找到Document，然后搜索关键字，之后打开N个网页，不但网页越开越多，而且每次这个流程大部分都是重复的工作。</p>
+<p><code>Dash</code>很好的把这些工作集成在一起，只需打开<code>Dash</code>，搜索关键字即可，<code>Dash</code>提供了非常多官方文档，例如：JQuery、CSS、HTML、Python、Git、Java，在工具中直接下载即可。没有收录到<code>Dash</code>的文档，自己也可以制作导入。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885786.png" />
+
+<h2 id="模糊检索"><a href="#模糊检索" class="headerlink" title="模糊检索"></a>模糊检索</h2><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474885827.png" />
+
+<h2 id="代码片段"><a href="#代码片段" class="headerlink" title="代码片段"></a>代码片段</h2><p><code>Dash</code>除了支持管理、搜索文档之外，还提供了代码片段的收录存储。</p>
+<p>例如，我先定义了一段代码片段，然后定义别名为<code>hello</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886595.png" />
+
+<p>当我在开发工具中输入<code>hello</code>后，就会出现：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886531.png" />
+
+<p>最重要的是，代码片段中可以预留<strong>占位符</strong>，然后在用的时候再进行填充。这个<code>__name__</code>就是代码片段中预留的占位符，在使用的时候，就可以自定义填充内容。</p>
+<p><code>Dash</code>还与其他很多开发工具和软件友好集成，例如<code>Alfred</code>：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474886095.png" />
+
+<a id="more"></a>
+
+<h1 id="Chrome"><a href="#Chrome" class="headerlink" title="Chrome"></a>Chrome</h1><p>浏览器我只用Chrome和Safari，但更多还是用Chrome，书签、插件实时同步，太方便了。</p>
+<p>这里介绍下平时用的比较多的插件。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897180.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897205.png" />
+
+<h2 id="Adblock-Plus"><a href="#Adblock-Plus" class="headerlink" title="Adblock Plus"></a>Adblock Plus</h2><p>广告过滤插件，自从用上它，再也看不到页面上弹的各种广告，世界一下就清净了。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474896597.png" />
+
+<h2 id="Anything-to-QRcode"><a href="#Anything-to-QRcode" class="headerlink" title="Anything to QRcode"></a>Anything to QRcode</h2><p>一键生成网页的二维码：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897358.png" />
+
+<h2 id="Full-Page-Screen-Capture"><a href="#Full-Page-Screen-Capture" class="headerlink" title="Full Page Screen Capture"></a>Full Page Screen Capture</h2><p>一键快照当前整个网页，解决了截屏不能截整个网页的烦恼：</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897661.png" />
+
+<h2 id="Vimium"><a href="#Vimium" class="headerlink" title="Vimium"></a>Vimium</h2><p>Vimium提供了使用<code>Vim</code>的方式操作网页，例如<code>j/k</code>分别代表网页的上下滚动，快捷键<code>f</code>可以提取出当前可点击的链接，并分配对应的快捷键，彻底脱离鼠标。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897975.png" />
+
+<h2 id="SwitchyOmega"><a href="#SwitchyOmega" class="headerlink" title="SwitchyOmega"></a>SwitchyOmega</h2><p>Chrome浏览器代理插件，科学上网必备。除此之外，在访问线上服务器的时可配置不同的代理进行访问，非常方便！</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898024.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898057.png" />
+
+<h2 id="JSONView"><a href="#JSONView" class="headerlink" title="JSONView"></a>JSONView</h2><p>格式化<code>json</code>格式的数据，方便调试接口数据。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898147.png" />
+
+<h2 id="LastPass"><a href="#LastPass" class="headerlink" title="LastPass"></a>LastPass</h2><p>注册了太多的网站，每次输入账号和密码都很繁琐。LastPass不仅能管理账号密码，还能自动根据不同的网站自动填充账号密码，非常方便，从此再也不用记那么多密码了。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474897932.png" />
+
+<h2 id="Octotree"><a href="#Octotree" class="headerlink" title="Octotree"></a>Octotree</h2><p>Github看代码的时候，每次点开文件，只能后退再打开其他文件，操作很繁琐。</p>
+<p>这个插件提高了代码目录以树形结构展示，大大方便了查看代码和跳转文件的便捷性。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474898250.png" />
+
+<h1 id="Gliffy-Diagrams"><a href="#Gliffy-Diagrams" class="headerlink" title="Gliffy Diagrams"></a>Gliffy Diagrams</h1><p>在编写程序的同时，肯定避免不了要画架构图、流程图，这个插件非常的简洁、轻量，基本能满足大多数画图的要求。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474899692.png" />
+
+<p>Gliffy还可以画流程图、时序图，简洁实用，上手简单。</p>
+<h1 id="XMind"><a href="#XMind" class="headerlink" title="XMind"></a>XMind</h1><p>当然，使用思维导图也能画图很多漂亮的图形，XMind可与Gliffy相互补充，各司其职。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900266.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900358.png" />
+
+<h1 id="Sequel-Pro"><a href="#Sequel-Pro" class="headerlink" title="Sequel Pro"></a>Sequel Pro</h1><p>自认为是Mac平台下的最好用的MySQL图形界面工具，功能强大，操作友好。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900992.png" />
+
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474900951.png" />
+
+<h1 id="Typora"><a href="#Typora" class="headerlink" title="Typora"></a>Typora</h1><p>程序员当然少不了写文档，这里推荐Typora，一款markdown文档编辑器。</p>
+<p>它与其他markdown编辑器不同，Typora是一款所写即所得的实时转换编辑器，即在你写下<code># 标题一</code>或<code>**加粗文字**</code>后，按下回车，随即这些效果就会实时显示出来，不需要两栏来展示源代码和预览，它把源码编写和预览在一个栏目中实时的反馈出来。</p>
+<img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/1474901500.png" />
+
+<blockquote>
+<p>本篇文章主要介绍了与开发相关的效率利器，主要围绕开发、画图、文档这些在工作中可以用来提升效率的利器进行了介绍和推荐，如果你也在找这些利器，不妨一试？</p>
+</blockquote>
+<p>附：</p>
+<ul>
+<li><a href="http://kaito-kidd.com/2016/09/13/Mac-edge-tools-system/">Mac效率利器（一）系统管理篇</a></li>
+<li><a href="http://kaito-kidd.com/2016/10/09/Mac-edge-tools-assist/">Mac效率利器（三）辅助篇</a></li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/" title="Mac效率利器（二）开发篇">http://kaito-kidd.com/2016/09/26/Mac-edge-tools-dev/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%88%A9%E5%99%A8/" rel="tag"><i class="fa fa-tag"></i> 利器</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E6%95%88%E7%8E%87/" rel="tag"><i class="fa fa-tag"></i> 效率</a>
+              <a href="/tags/Mac/" rel="tag"><i class="fa fa-tag"></i> Mac</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/09/13/Mac-edge-tools-system/" rel="prev" title="Mac效率利器（一）系统管理篇">
+      <i class="fa fa-chevron-left"></i> Mac效率利器（一）系统管理篇
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/10/09/Mac-edge-tools-assist/" rel="next" title="Mac效率利器（三）辅助篇">
+      Mac效率利器（三）辅助篇 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#iTerm2"><span class="nav-number">1.</span> <span class="nav-text">iTerm2</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#会话分屏"><span class="nav-number">1.1.</span> <span class="nav-text">会话分屏</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#检索高亮"><span class="nav-number">1.2.</span> <span class="nav-text">检索高亮</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#命令自动补全"><span class="nav-number">1.3.</span> <span class="nav-text">命令自动补全</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#剪贴板历史"><span class="nav-number">1.4.</span> <span class="nav-text">剪贴板历史</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#主题配置"><span class="nav-number">1.5.</span> <span class="nav-text">主题配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Dash"><span class="nav-number">2.</span> <span class="nav-text">Dash</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模糊检索"><span class="nav-number">2.1.</span> <span class="nav-text">模糊检索</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#代码片段"><span class="nav-number">2.2.</span> <span class="nav-text">代码片段</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Chrome"><span class="nav-number">3.</span> <span class="nav-text">Chrome</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Adblock-Plus"><span class="nav-number">3.1.</span> <span class="nav-text">Adblock Plus</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Anything-to-QRcode"><span class="nav-number">3.2.</span> <span class="nav-text">Anything to QRcode</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Full-Page-Screen-Capture"><span class="nav-number">3.3.</span> <span class="nav-text">Full Page Screen Capture</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Vimium"><span class="nav-number">3.4.</span> <span class="nav-text">Vimium</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#SwitchyOmega"><span class="nav-number">3.5.</span> <span class="nav-text">SwitchyOmega</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#JSONView"><span class="nav-number">3.6.</span> <span class="nav-text">JSONView</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LastPass"><span class="nav-number">3.7.</span> <span class="nav-text">LastPass</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Octotree"><span class="nav-number">3.8.</span> <span class="nav-text">Octotree</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Gliffy-Diagrams"><span class="nav-number">4.</span> <span class="nav-text">Gliffy Diagrams</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#XMind"><span class="nav-number">5.</span> <span class="nav-text">XMind</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Sequel-Pro"><span class="nav-number">6.</span> <span class="nav-text">Sequel Pro</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Typora"><span class="nav-number">7.</span> <span class="nav-text">Typora</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

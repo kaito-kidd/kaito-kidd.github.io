@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="从这篇文章开始，我们来介绍Redis高可用相关的机制。Redis要想实现高可用，主要有以下方面来保证：  数据持久化 主从复制 自动故障恢复 集群化  这篇文章我们先介绍Redis的高可用保障的基础：数据持久化。因为Redis的主从复制和自动故障恢复，都需要依赖Redis持久化相关的东西。同时，Redis的数据持久化也可以用来做数据备份，用来保障数据的安全性。 Redis是一个内存数据库，它的数据">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis持久化是如何做的？RDB和AOF对比分析">
+<meta property="og:url" content="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="从这篇文章开始，我们来介绍Redis高可用相关的机制。Redis要想实现高可用，主要有以下方面来保证：  数据持久化 主从复制 自动故障恢复 集群化  这篇文章我们先介绍Redis的高可用保障的基础：数据持久化。因为Redis的主从复制和自动故障恢复，都需要依赖Redis持久化相关的东西。同时，Redis的数据持久化也可以用来做数据备份，用来保障数据的安全性。 Redis是一个内存数据库，它的数据">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15934974687516.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15934974687520.jpg">
+<meta property="article:published_time" content="2020-06-29T10:36:19.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="RDB">
+<meta property="article:tag" content="AOF">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15934974687516.jpg">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis持久化是如何做的？RDB和AOF对比分析 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis持久化是如何做的？RDB和AOF对比分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-06-29 10:36:19" itemprop="dateCreated datePublished" datetime="2020-06-29T10:36:19+00:00">2020-06-29</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/06/29/redis-persistence-rdb-aof/" class="post-meta-item leancloud_visitors" data-flag-title="Redis持久化是如何做的？RDB和AOF对比分析" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/06/29/redis-persistence-rdb-aof/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/06/29/redis-persistence-rdb-aof/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>3.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>从这篇文章开始，我们来介绍Redis高可用相关的机制。Redis要想实现高可用，主要有以下方面来保证：</p>
+<ul>
+<li>数据持久化</li>
+<li>主从复制</li>
+<li>自动故障恢复</li>
+<li>集群化</li>
+</ul>
+<p>这篇文章我们先介绍Redis的高可用保障的基础：数据持久化。因为Redis的主从复制和自动故障恢复，都需要依赖Redis持久化相关的东西。同时，Redis的数据持久化也可以用来做数据备份，用来保障数据的安全性。</p>
+<p>Redis是一个内存数据库，它的数据都保存在内存中，如果实例宕机，那么数据则全部丢失。如何保证数据的完整性和安全性也是提高服务高可用的重要机制之一。</p>
+<p>Redis提供了完善的持久化机制，可以把内存中的数据持久化到磁盘上，方便我们进行备份数据和快速恢复数据。</p>
+<p>这篇文章我们就来分析Redis的数据持久化是如何实现的？我们经常听的RDB和AOF有什么区别？以及它们不同的使用场景。</p>
+<a id="more"></a>
+
+<h1 id="持久化方式"><a href="#持久化方式" class="headerlink" title="持久化方式"></a>持久化方式</h1><p>Redis提供的数据持久化方式主要有2种：</p>
+<ul>
+<li>RDB：产生一个数据快照文件</li>
+<li>AOF：实时追加命令的日志文件</li>
+</ul>
+<p>它们分别对应了不同的使用场景，下面我们就来依次分析。</p>
+<h1 id="RDB"><a href="#RDB" class="headerlink" title="RDB"></a>RDB</h1><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>RDB全称<code>Redis Database Backup file</code>（Redis数据备份文件），也被叫做<strong>Redis数据快照</strong>。</p>
+<p>我们可以通过执行<code>save</code>或<code>bgsave</code>命令让Redis在本地生成RDB快照文件，这个RDB文件包含了整个实例接近完整的数据内容。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15934974687516.jpg" alt=""></p>
+<p>它的优点如下：</p>
+<ul>
+<li>RDB文件数据是被压缩写入的，因此RDB文件的体积要比整个实例内存要小</li>
+<li>当实例宕机恢复时，加载RDB文件的速度很快，能够在很短时间内迅速恢复文件中的数据</li>
+</ul>
+<p>它的缺点也很明显：</p>
+<ul>
+<li>由于是某一时刻的数据快照，因此它的数据并不全</li>
+<li>生成RDB文件的代价是比较大的，它会消耗大量的CPU和内存资源</li>
+</ul>
+<p>因此RDB比较适用于以下场景：</p>
+<ul>
+<li>主从全量同步数据</li>
+<li>数据库备份</li>
+<li>对于丢失数据不敏感的业务场景，实例宕机后快速恢复数据</li>
+</ul>
+<p>Redis主从全量同步数据就是使用RDB文件进行的，我们会在后面的文章详细讲到。</p>
+<p>由此可以看出，RDB非常适合做数据备份，我们可以定时让Redis生成RDB文件，然后备份这个快照文件即可。</p>
+<h2 id="定时生成RDB"><a href="#定时生成RDB" class="headerlink" title="定时生成RDB"></a>定时生成RDB</h2><p>Redis也提供了定时触发生成RDB文件的配置项：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"># 最近15分钟内 至少产生1次写入</span><br><span class="line">save 900 1</span><br><span class="line"># 最近5分钟内 至少产生10次写入</span><br><span class="line">save 300 10</span><br><span class="line"># 最近1分钟内 至少产生10000次写入</span><br><span class="line">save 60 10000</span><br></pre></td></tr></table></figure>
+
+<p>如果达到以上任意条件，则Redis会自动生成新的RDB文件，降低RDB数据内容与实例数据的差异。</p>
+<h2 id="Copy-On-Write"><a href="#Copy-On-Write" class="headerlink" title="Copy On Write"></a>Copy On Write</h2><p>在Redis上执行<code>save</code>和<code>bgsave</code>命令都可以生成RDB文件，但前者是在前台执行的，也就是说在生成RDB文件时，会<strong>阻塞整个实例</strong>，在RDB未生成之前，任何请求都是无法处理的，对于内存很大的实例，生成RDB文件非常耗时，显然这是我们不能接受的。</p>
+<p>所以通常我们会选择执行<code>bgsave</code>让Redis在后台生成RDB文件，这样Redis依旧可以处理客户端请求，不会阻塞整个实例。</p>
+<p>但不是说后台生成RDB就是没有代价的，Redis为了实现后台把内存数据的快照写入文件，采用了操作系统提供的<code>Copy On Write</code>技术，也就是我们熟知的<code>fork</code>系统调用。</p>
+<p><strong><code>fork</code>系统调用会产生一个子进程，它与父进程共享相同的内存地址空间，这样子进程在这一时刻就能拥有与父进程的相同的内存数据。</strong></p>
+<p>虽然子进程与父进程共享同一块内存地址空间，但在<code>fork</code>子进程时，操作系统需要<strong>拷贝父进程的内存页表</strong>给子进程，如果整个Redis实例内存占用很大，那么它的内存页表也会很大，在拷贝时就会比较耗时，同时这个过程会<strong>消耗大量的CPU资源</strong>。在完成拷贝之前父进程也处于阻塞状态，无法处理客户端请求。</p>
+<p><code>fork</code>执行完之后，子进程就可以扫描自身所有的内存数据，然后把全部数据写入到RDB文件中。</p>
+<p>之后父进程依旧处理客户端的请求，当在处理写命令时，父进程会<strong>重新分配新的内存地址空间</strong>，从操作系统申请新的内存使用，不再与子进程共享，这个过程就是<code>Copy On Write</code>（写实复制）名字的由来。这样父子进程的内存就会<strong>逐渐分离</strong>，父进程申请新的内存空间并更改内存数据，子进程的内存数据不受影响。</p>
+<p>由此可以看出，在生成RDB文件时，不仅消耗CPU资源，还有需要占用<strong>最多一倍的内存空间</strong>。</p>
+<p>我们在Redis执行<code>info</code>命令，可以看到<code>fork</code>子进程的耗时，可以通过这个耗时来评估<code>fork</code>时间是否符合预期。同时我们应该保证Redis机器拥有<strong>足够的CPU和内存资源</strong>，并合理设置生成RDB的时机。</p>
+<h1 id="AOF"><a href="#AOF" class="headerlink" title="AOF"></a>AOF</h1><h2 id="介绍-1"><a href="#介绍-1" class="headerlink" title="介绍"></a>介绍</h2><p>AOF全称为<code>Append Only File</code>（追加日志文件）。它与RDB不同的是，AOF中记录的是每一个命令的详细信息，包括完整的命令类型、参数等。只要产生写命令，就会实时写入到AOF文件中。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/06/15934974687520.jpg" alt=""></p>
+<p>我们可以通过配置文件开启AOF：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 开启AOF</span><br><span class="line">appendonly yes</span><br><span class="line"></span><br><span class="line"># AOF文件名</span><br><span class="line">appendfilename &quot;appendonly.aof&quot;</span><br><span class="line"></span><br><span class="line"># 文件刷盘方式</span><br><span class="line">appendfsync everysec</span><br></pre></td></tr></table></figure>
+
+<h2 id="刷盘方式"><a href="#刷盘方式" class="headerlink" title="刷盘方式"></a>刷盘方式</h2><p>开启AOF后，Redis会把每个写操作的命令记录到文件并持久化到磁盘中，为了保证数据文件的安全性，Redis还提供了文件刷盘的时机：</p>
+<ul>
+<li><code>appendfsync always</code>：每次写入都刷盘，对性能影响最大，占用磁盘IO比较高，数据安全性最高</li>
+<li><code>appendfsync everysec</code>：1秒刷一次盘，对性能影响相对较小，节点宕机时最多丢失1秒的数据</li>
+<li><code>appendfsync no</code>：按照操作系统的机制刷盘，对性能影响最小，数据安全性低，节点宕机丢失数据取决于操作系统刷盘机制</li>
+</ul>
+<p>以上可以看出AOF相对于RDB的优点是，AOF数据文件更新比较及时，比RDB保存更完整的数据，这样在数据恢复时能够恢复尽量完整的数据，降低丢失数据的风险。</p>
+<p>如果同时存在RDB文件和AOF文件，Redis会<strong>优先使用</strong>AOF文件进行数据恢复。</p>
+<p>但它的缺点也很易见：</p>
+<ul>
+<li>随着时间增长，AOF文件会越来越大</li>
+<li>AOF文件刷盘会增加磁盘IO的负担，可能影响Redis的性能（开启每秒刷盘时）</li>
+</ul>
+<h2 id="AOF重写"><a href="#AOF重写" class="headerlink" title="AOF重写"></a>AOF重写</h2><p>针对第一种情况，Redis提供了AOF瘦身的功能，可以设置在AOF文件很大时，自动触发AOF重写，Redis会扫描整个实例的数据，重新生成一个AOF文件达成瘦身的效果。但这个重写过程也需要消耗大量的CPU资源。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"># AOF文件距离上次文件增长超过多少百分比则触发重写</span><br><span class="line">auto-aof-rewrite-percentage 100</span><br><span class="line"># AOF文件体积最小多大以上才触发重写</span><br><span class="line">auto-aof-rewrite-min-size 64mb</span><br></pre></td></tr></table></figure>
+
+<p>由于AOF可以最大可能降低丢失数据的风险，所以它一般适用于对丢失数据很敏感的业务场景，例如涉及金钱交易的业务。</p>
+<h2 id="性能影响"><a href="#性能影响" class="headerlink" title="性能影响"></a>性能影响</h2><p>如果AOF的刷盘时机设置为每次写入都刷盘，那么会大大降低Redis的写入性能，因为<strong>每次写命令都需要写入文件并刷到磁盘中才会返回</strong>，当写入量很大时，会增加磁盘IO的负担。</p>
+<p>性能与数据安全不能兼得，虽然Redis提供了实时刷盘的机制，但是在真正场景中使用的不多。</p>
+<p>通常我们会选择每秒刷盘这种方式，既能保证良好的写入性能，在实例宕机时最多丢失1秒的数据，做到性能和安全的平衡。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>我们对RDB和AOF的总结如下表。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>RDB</th>
+<th>AOF</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>持久化方式</td>
+<td>生成某一时刻的数据快照文件</td>
+<td>实时记录每一个写命令到文件</td>
+</tr>
+<tr>
+<td>数据完整性</td>
+<td>不完整，取决于备份周期</td>
+<td>相对完整性高，取决于文件刷盘方式</td>
+</tr>
+<tr>
+<td>文件大小</td>
+<td>压缩二进制写入，文件较小</td>
+<td>原始的操作命令，文件大</td>
+</tr>
+<tr>
+<td>宕机恢复时间</td>
+<td>快</td>
+<td>慢</td>
+</tr>
+<tr>
+<td>恢复优先级</td>
+<td>低</td>
+<td>高</td>
+</tr>
+<tr>
+<td>持久化代价</td>
+<td>高，消耗大量CPU和内存</td>
+<td>低，只占用磁盘IO资源</td>
+</tr>
+<tr>
+<td>使用场景</td>
+<td>数据备份、主从全量复制、对丢数据不敏感的业务场景快速数据恢复</td>
+<td>对于丢失数据敏感的场景，例如涉及金钱交易相关的业务</td>
+</tr>
+</tbody></table>
+<p>我们需要针对不同的业务场景选择合适的持久化方式，也可以根据RDB和AOF的优点配合使用，保证Redis数据的安全性，又可以兼顾它的性能。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/" title="Redis持久化是如何做的？RDB和AOF对比分析">http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+              <a href="/tags/RDB/" rel="tag"><i class="fa fa-tag"></i> RDB</a>
+              <a href="/tags/AOF/" rel="tag"><i class="fa fa-tag"></i> AOF</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/28/why-redis-so-fast/" rel="prev" title="为什么Redis单线程还这么快？">
+      <i class="fa fa-chevron-left"></i> 为什么Redis单线程还这么快？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/06/30/redis-replication/" rel="next" title="Redis的主从复制是如何做的？复制过程中也会产生各种问题？">
+      Redis的主从复制是如何做的？复制过程中也会产生各种问题？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#持久化方式"><span class="nav-number">1.</span> <span class="nav-text">持久化方式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#RDB"><span class="nav-number">2.</span> <span class="nav-text">RDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">2.1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#定时生成RDB"><span class="nav-number">2.2.</span> <span class="nav-text">定时生成RDB</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Copy-On-Write"><span class="nav-number">2.3.</span> <span class="nav-text">Copy On Write</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AOF"><span class="nav-number">3.</span> <span class="nav-text">AOF</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍-1"><span class="nav-number">3.1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#刷盘方式"><span class="nav-number">3.2.</span> <span class="nav-text">刷盘方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#AOF重写"><span class="nav-number">3.3.</span> <span class="nav-text">AOF重写</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#性能影响"><span class="nav-number">3.4.</span> <span class="nav-text">性能影响</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

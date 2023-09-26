@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在上一篇文章：Redis为什么变慢了？常见延迟问题定位与分析，主要分析了Redis常见的导致变慢的场景以及问题定位和分析，主要是由业务使用不合理和运维不当导致的。 我们在了解了导致Redis变慢的原因之后，针对性地优化，就可以让Redis稳定发挥出更高性能。 这篇文章我们就来总结一下，在使用Redis时的最佳实践方式，主要包含两个层面：业务层面、运维层面。 由于我之前写过很多UGC后端服务，在大量">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis最佳实践：业务层面和运维层面优化">
+<meta property="og:url" content="http://kaito-kidd.com/2020/07/04/redis-best-practices/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在上一篇文章：Redis为什么变慢了？常见延迟问题定位与分析，主要分析了Redis常见的导致变慢的场景以及问题定位和分析，主要是由业务使用不合理和运维不当导致的。 我们在了解了导致Redis变慢的原因之后，针对性地优化，就可以让Redis稳定发挥出更高性能。 这篇文章我们就来总结一下，在使用Redis时的最佳实践方式，主要包含两个层面：业务层面、运维层面。 由于我之前写过很多UGC后端服务，在大量">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-07-04T17:55:22.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/07/04/redis-best-practices/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis最佳实践：业务层面和运维层面优化 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/07/04/redis-best-practices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis最佳实践：业务层面和运维层面优化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-04 17:55:22" itemprop="dateCreated datePublished" datetime="2020-07-04T17:55:22+00:00">2020-07-04</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/07/04/redis-best-practices/" class="post-meta-item leancloud_visitors" data-flag-title="Redis最佳实践：业务层面和运维层面优化" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/04/redis-best-practices/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/04/redis-best-practices/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>5 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在上一篇文章：<a href="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/">Redis为什么变慢了？常见延迟问题定位与分析</a>，主要分析了Redis常见的导致变慢的场景以及问题定位和分析，主要是由业务使用不合理和运维不当导致的。</p>
+<p>我们在了解了导致Redis变慢的原因之后，针对性地优化，就可以让Redis稳定发挥出更高性能。</p>
+<p>这篇文章我们就来总结一下，在使用Redis时的最佳实践方式，主要包含两个层面：<strong>业务层面、运维层面</strong>。</p>
+<p>由于我之前写过很多UGC后端服务，在大量场景下用到了Redis，这个过程中也踩过很多坑，所以在使用过程中也总结了一套合理的使用方法。</p>
+<p>后来做基础架构，开发Codis、Redis相关的中间件，在这个阶段关注领域从使用层面下沉到Redis的开发和运维，更多聚焦在Redis的内部实现和运维过程中产生的各种问题，在这块也积累了一些经验。</p>
+<p>下面就针对这两块，分享一下我认为比较合理的Redis使用和运维方法，不一定最全面，也可能与你使用Redis的方法不同，但以下这些方法都是我在踩坑之后总结的实际经验，供你参考。</p>
+<a id="more"></a>
+
+<h1 id="业务层面"><a href="#业务层面" class="headerlink" title="业务层面"></a>业务层面</h1><p>业务层面主要是开发人员需要关注，也就是开发人员在写业务代码时，如何合理地使用Redis。开发人员需要对Redis有基本的了解，才能在合适的业务场景使用Redis，从而避免业务层面导致的延迟问题。</p>
+<p>在开发过程中，业务层面的优化建议如下：</p>
+<ul>
+<li>key的长度尽量要短，在数据量非常大时，过长的key名会占用更多的内存</li>
+<li>一定避免存储过大的bigkey，bigkey在分配内存和释放内存时耗时严重，会阻塞主线程</li>
+<li>Redis 4.0以上建议开启<code>lazy-free</code>机制，释放bigkey时异步操作，不阻塞主线程</li>
+<li>建议设置过期时间，把Redis当做缓存使用，尤其在数量很大的时，不设置过期时间会导致内存的无限增长</li>
+<li>不使用复杂度过高的命令，例如<code>SORT</code>、<code>SINTER</code>、<code>SINTERSTORE</code>、<code>ZUNIONSTORE</code>、<code>ZINTERSTORE</code>，使用这些命令耗时较久，会阻塞主线程</li>
+<li>查询数据时，一次尽量获取较少的数据，在不确定容器元素个数的情况下，避免使用<code>LRANGE key 0 -1</code>，<code>ZRANGE key 0 -1</code>这类操作，应该设置具体查询的元素个数，推荐一次查询100个以下元素</li>
+<li>写入数据时，一次尽量写入较少的数据，例如<code>HSET key value1 value2 value3...</code>，控制一次写入元素的数量，推荐在100以下，大数据量分多个批次写入</li>
+<li>批量操作数据时，用<code>MGET/MSET</code>替换<code>GET/SET</code>、<code>HMGET/MHSET</code>替换<code>HGET/HSET</code>，减少请求来回的网络IO次数，降低延迟，对于没有批量操作的命令，推荐使用<code>pipeline</code>，一次性发送多个命令到服务端</li>
+<li>禁止使用<code>KEYS</code>命令，需要扫描实例时，建议使用<code>SCAN</code>，线上操作一定要控制扫描的频率，避免对Redis产生性能抖动</li>
+<li>避免某个时间点集中过期大量的key，集中过期时推荐增加一个随机时间，把过期时间打散，降低集中过期key时Redis的压力，避免阻塞主线程</li>
+<li>根据业务场景，选择合适的淘汰策略，通常随机过期要比LRU过期淘汰数据更快</li>
+<li>使用连接池访问Redis，并配置合理的连接池参数，避免短连接，TCP三次握手和四次挥手的耗时也很高</li>
+<li>只使用<code>db0</code>，不推荐使用多个db，使用多个db会增加Redis的负担，每次访问不同的db都需要执行<code>SELECT</code>命令，如果业务线不同，建议拆分多个实例，还能提高单个实例的性能</li>
+<li>读的请求量很大时，推荐使用读写分离，前提是可以容忍从节数据更新不及时的问题</li>
+<li>写请求量很大时，推荐使用集群，部署多个实例分摊写压力</li>
+</ul>
+<h1 id="运维层面"><a href="#运维层面" class="headerlink" title="运维层面"></a>运维层面</h1><p>运维层面主要是DBA需要关注的，目的是合理规划Redis的部署和保障Redis的稳定运行，主要优化如下：</p>
+<ul>
+<li>不同业务线部署不同的实例，各自独立，避免混用，推荐不同业务线使用不同的机器，根据业务重要程度划分不同的分组来部署，避免某一个业务线出现问题影响其他业务线</li>
+<li>保证机器有足够的CPU、内存、带宽、磁盘资源，防止负载过高影响Redis性能</li>
+<li>以master-slave集群方式部署实例，并分布在不同机器上，避免单点，slave必须设置为<code>readonly</code></li>
+<li>master和slave节点所在机器，各自独立，不要交叉部署实例，通常备份工作会在slave上做，做备份时会消耗机器资源，交叉部署会影响到master的性能</li>
+<li>推荐部署哨兵节点增加可用性，节点数量至少3个，并分布在不同机器上，实现故障自动故障转移</li>
+<li>提前做好容量规划，一台机器部署实例的内存上限，最好是机器内存的一半，主从全量同步时会占用最多额外一倍的内存空间，防止网络大面积故障引发所有master-slave的全量同步导致机器内存被吃光</li>
+<li>做好机器的CPU、内存、带宽、磁盘监控，在资源不足时及时报警处理，Redis使用Swap后性能急剧下降，网络带宽负载过高访问延迟明显增大，磁盘IO过高时开启AOF会拖慢Redis的性能</li>
+<li>设置最大连接数上限，防止过多的客户端连接导致服务负载过高</li>
+<li>单个实例的使用内存建议控制在10G以下，过大的实例会导致备份时间久、资源消耗多，主从全量同步数据时间阻塞时间更长</li>
+<li>设置合理的<code>slowlog</code>阈值，推荐10毫秒，并对其进行监控，产生过多的慢日志需要及时报警</li>
+<li>设置合理的复制缓冲区<code>repl-backlog</code>大小，适当调大<code>repl-backlog</code>可以降低主从全量复制的概率</li>
+<li>设置合理的slave节点<code>client-output-buffer-limit</code>大小，对于写入量很大的实例，适当调大可以避免主从复制中断问题</li>
+<li>备份时推荐在slave节点上做，不影响master性能</li>
+<li>不开启AOF或开启AOF配置为每秒刷盘，避免磁盘IO消耗降低Redis性能</li>
+<li>当实例设置了内存上限，需要调大内存上限时，先调整slave再调整master，否则会导致主从节点数据不一致</li>
+<li>对Redis增加监控，监控采集<code>info</code>信息时，使用长连接，频繁的短连接也会影响Redis性能</li>
+<li>线上扫描整个实例数时，记得设置休眠时间，避免扫描时QPS突增对Redis产生性能抖动</li>
+<li>做好Redis的运行时监控，尤其是<code>expired_keys</code>、<code>evicted_keys</code>、<code>latest_fork_usec</code>指标，短时间内这些指标值突增可能会阻塞整个实例，引发性能问题</li>
+</ul>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>以上就是我在使用Redis和开发Redis相关中间件时，总结出来Redis推荐的实践方法，以上提出的这些方面，都或多或少在实际使用中遇到过。</p>
+<p>如果对上面的建议产生疑问，可以我之前写的这篇文章：<a href="http://kaito-kidd.com/2020/07/03/redis-latency-analysis/">Redis为什么变慢了？常见延迟问题定位与分析</a>，里面详细描述了产生问题的原因。</p>
+<p>可见，要想稳定发挥Redis的高性能，需要在各个方面做好工作，但凡某一个方面出现问题，必然会影响到Redis的性能，这对我们使用和运维提出了更高的要求。</p>
+<p>如果你在使用Redis过程中，遇到更多的问题或者有更好的使用经验，可以留言一起探讨！</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/07/04/redis-best-practices/" title="Redis最佳实践：业务层面和运维层面优化">http://kaito-kidd.com/2020/07/04/redis-best-practices/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/03/redis-latency-analysis/" rel="prev" title="Redis为什么变慢了？常见延迟问题定位与分析">
+      <i class="fa fa-chevron-left"></i> Redis为什么变慢了？常见延迟问题定位与分析
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/07/07/redis-cluster-codis-twemproxy/" rel="next" title="Redis集群化方案对比：Codis、Twemproxy、Redis Cluster">
+      Redis集群化方案对比：Codis、Twemproxy、Redis Cluster <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#业务层面"><span class="nav-number">1.</span> <span class="nav-text">业务层面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运维层面"><span class="nav-number">2.</span> <span class="nav-text">运维层面</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1849 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Kaito&#39;s Blog">
+<meta property="og:url" content="http://kaito-kidd.com/page/5/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&amp;云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:author" content="Kaito">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/page/5/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : true,
+    isPost : false,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content index posts-expand">
+            
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/07/12/computer-system-summary/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/07/12/computer-system-summary/" class="post-title-link" itemprop="url">计算机系统基础（一）概览</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-07-12 12:10:17" itemprop="dateCreated datePublished" datetime="2018-07-12T12:10:17+00:00">2018-07-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E7%BB%84%E6%88%90%E5%8E%9F%E7%90%86/" itemprop="url" rel="index"><span itemprop="name">计算机组成原理</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/07/12/computer-system-summary/" class="post-meta-item leancloud_visitors" data-flag-title="计算机系统基础（一）概览" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/07/12/computer-system-summary/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/07/12/computer-system-summary/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>如果你想对计算机的组成和系统结构有个系统的了解，推荐你看一本书，叫做《深入理解计算机系统》。这本书也是计算机界的经典书籍，如果能吃透这本书里的内容，你会对计算机系统和软件开发有一个全新的认识。</p>
+</blockquote>
+<blockquote>
+<p>由于这本书不太容易学习，有很多程序员买了这本书，但可能读了一两个章节发现太过枯燥理解不了，便放下珍藏了。</p>
+<p>我和你一样，每次拿起这本书都刻意让自己学下去，但都败下阵来。</p>
+<p>后来在知乎发现有人指导如何阅读这本书时，有网友推荐了国人写的教材，与《深入理解计算机系统》内容非常类似，但更易读。</p>
+<p>这本书的作者叫袁春风，她是南京大学计算机系的教授，写过2本书《计算机组成与系统结构》（2010年出版)、《计算机系统基础》(2014年出版)，两者内容差不多，第二本更像是第一本的升级版。</p>
+<p>在阅读这2本书时，发现还是比较容易理解的，这个系列整理出了相关知识点，加深记忆以备忘。</p>
+</blockquote>
+<h1 id="计算机的功能和特性"><a href="#计算机的功能和特性" class="headerlink" title="计算机的功能和特性"></a>计算机的功能和特性</h1><p>我们现在使用计算机能做的事情非常多，能够看网页、听音乐、看视频、社交聊天，这背后其实都是对信息的处理。</p>
+<p>计算机背后是如何工作的呢？我们先来看计算机的一个简单定义：</p>
+<p>计算机是一种能自动化对数字信息进行运算和逻辑处理的高速处理装置，计算机处理的对象都是数字化信息。</p>
+<p>计算机的基本功能包括以下3个方面：</p>
+<ul>
+<li>数据处理：计算机最基本的功能，可以计算加减乘除等运算，也可以处理文字、数字、音乐、视频信息。</li>
+<li>数据存储：计算机能够自动工作的最基本保证，数据和程序事先被存储好，在需要时被取出自动执行。</li>
+<li>数据传送：计算机内部各功能部件之间的数据传输，以达到信息交换，计算机外部连接使得信息得以传输到另一台计算机，从而构建出了计算机网络。</li>
+</ul>
+<p>有了这些基本功能，计算机中肯定需要有对数据处理、数据存储、数据传送相对应的功能部件，它们分别是<strong>：算术逻辑运算器、存储器、总线和IO接口</strong>。</p>
+<p>计算机主要的核心部件都采用高速电子元器件制造，处理速度极快，这就为运算速度提供了基础保证。</p>
+<p>计算机可以处理各种信息，应用也极其广泛，只要现实世界中某个问题能找到相应的算法，就能编写成程序通过计算机执行算出结果，这为计算机的准确性和智能化提供了重要的基础。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/07/12/computer-system-summary/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/30/ascii-gb18030-unicode-utf8/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/30/ascii-gb18030-unicode-utf8/" class="post-title-link" itemprop="url">字符集和字符编码：ASCII、GB18030、Unicode、UTF-8</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-30 16:00:35" itemprop="dateCreated datePublished" datetime="2018-05-30T16:00:35+00:00">2018-05-30</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81/" itemprop="url" rel="index"><span itemprop="name">字符编码</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/30/ascii-gb18030-unicode-utf8/" class="post-meta-item leancloud_visitors" data-flag-title="字符集和字符编码：ASCII、GB18030、Unicode、UTF-8" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/30/ascii-gb18030-unicode-utf8/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/30/ascii-gb18030-unicode-utf8/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>只要你是做软件开发的，就肯定听说过ASCII、Unicode、UTF-8、GBK这些字符编码，而且字符编码时刻与我们开发相关联。</p>
+<p>它们之间到底有什么区别？为什么会有这么多字符编码？这篇文章我们来看一下它们之间的的关系以及区别。</p>
+</blockquote>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><p>在开始之前，作为程序员，我希望大家能够先理清楚两个概念：<strong>字符集、字符编码</strong>。</p>
+<p>很多人搞不清楚这两者的关系与区别，以至于对于字符编码方面的知识了解不深，甚至混乱。</p>
+<h2 id="字符集"><a href="#字符集" class="headerlink" title="字符集"></a>字符集</h2><p>平时我们生活中使用的文字、标点符号、图形符号、数字，这些可以统称为<strong>字符</strong>。</p>
+<p>由非常多个字符组合后产生的集合，这个集合称为<strong>字符集</strong>。</p>
+<p>也就是说，我们可以人为的根据某个规则归纳一些我们使用的文字、符号，这些文字、符号的集合就称为一个字符集，并且可以根据不同的规则划分不同的字符集。</p>
+<h2 id="字符编码"><a href="#字符编码" class="headerlink" title="字符编码"></a>字符编码</h2><p>那字符编码是什么？</p>
+<p>我们知道计算机内部使用的是二进制运算，如果要想让计算机识别我们人类的文字、符号、数字，就需要一个转换规则，把我们人类使用的这些字符转换成计算机认识的二进制，也就是0和1。</p>
+<p>这个转换的规则就称为<strong>字符编码</strong>。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/30/ascii-gb18030-unicode-utf8/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/21/python-advance-yield/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/21/python-advance-yield/" class="post-title-link" itemprop="url">Python技术进阶——如何正确使用yield？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-21 12:20:28" itemprop="dateCreated datePublished" datetime="2018-05-21T12:20:28+00:00">2018-05-21</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/21/python-advance-yield/" class="post-meta-item leancloud_visitors" data-flag-title="Python技术进阶——如何正确使用yield？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/21/python-advance-yield/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/21/python-advance-yield/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.8k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，<code>yield</code> 关键字的使用其实较为频繁，例如大集合的生成，简化代码结构、协程与并发都会用到它。</p>
+<p>但是，你是否真正了解 <code>yield</code> 的运行过程呢？</p>
+<p>这篇文章，我们就来看一下 <code>yield</code> 的运行流程，以及在开发中哪些场景适合使用 <code>yield</code>。</p>
+<h1 id="生成器"><a href="#生成器" class="headerlink" title="生成器"></a>生成器</h1><p>如果在一个方法内，包含了 <code>yield</code> 关键字，那么这个函数就是一个「生成器」。</p>
+<p>生成器其实就是一个特殊的迭代器，它可以像迭代器那样，迭代输出方法内的每个元素。</p>
+<p>如果你还不清楚「迭代器」是什么，可以参考我写的这篇文章：<a href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">Python进阶——迭代器和可迭代对象有什么区别？</a>。</p>
+<p>我们来看一个包含 <code>yield</code> 关键字的方法：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成器</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">gen</span><span class="params">(n)</span>:</span></span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">        <span class="keyword">yield</span> i</span><br><span class="line"></span><br><span class="line">g = gen(<span class="number">5</span>)      <span class="comment"># 创建一个生成器</span></span><br><span class="line">print(g)        <span class="comment"># &lt;generator object gen at 0x10bb46f50&gt;</span></span><br><span class="line">print(type(g))  <span class="comment"># &lt;type 'generator'&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 迭代生成器中的数据</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> g:</span><br><span class="line">    print(i)</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># 0 1 2 3 4</span></span><br></pre></td></tr></table></figure>
+
+<p>注意，在这个例子中，当我们执行 <code>g = gen(5)</code> 时，<code>gen</code> 中的代码其实并没有执行，此时我们只是创建了一个「生成器对象」，它的类型是 <code>generator</code>。</p>
+<p>然后，当我们执行 <code>for i in g</code>，每执行一次循环，就会执行到 <code>yield</code> 处，返回一次 <code>yield</code> 后面的值。</p>
+<p>这个迭代过程是和迭代器最大的区别。</p>
+<p>换句话说，如果我们想输出 5 个元素，在创建生成器时，这个 5 个元素其实还并没有产生，什么时候产生呢？只有在执行 <code>for</code> 循环遇到 <code>yield</code> 时，才会依次生成每个元素。</p>
+<p>此外，生成器除了和迭代器一样实现迭代数据之外，还包含了其他方法：</p>
+<ul>
+<li><code>generator.__next__()</code>：执行 <code>for</code> 时调用此方法，每次执行到 <code>yield</code> 就会停止，然后返回 <code>yield</code> 后面的值，如果没有数据可迭代，抛出 <code>StopIterator</code> 异常，<code>for</code> 循环结束</li>
+<li><code>generator.send(value)</code>：外部传入一个值到生成器内部，改变 <code>yield</code> 前面的值</li>
+<li><code>generator.throw(type[, value[, traceback]])</code>：外部向生成器抛出一个异常</li>
+<li><code>generator.close()</code>：关闭生成器</li>
+</ul>
+<p>通过使用生成器的这些方法，我们可以完成很多有意思的功能。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/21/python-advance-yield/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/05/11/python-advance-process-thread/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/05/11/python-advance-process-thread/" class="post-title-link" itemprop="url">Python技术进阶——如何正确使用进程和线程？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-05-11 18:03:17" itemprop="dateCreated datePublished" datetime="2018-05-11T18:03:17+00:00">2018-05-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/05/11/python-advance-process-thread/" class="post-meta-item leancloud_visitors" data-flag-title="Python技术进阶——如何正确使用进程和线程？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/05/11/python-advance-process-thread/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/05/11/python-advance-process-thread/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>16k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>26 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>为了提高程序的运行效率，Python与其他语言一样，提供了多进程和多线程的开发方式，这篇文章我们来讲Python的多进程和多线程开发。</p>
+<h1 id="进程"><a href="#进程" class="headerlink" title="进程"></a>进程</h1><p>Python提供了<code>mutilprocessing</code>模块，为多进程编程提供了友好的API，并且提供了多进程之间信息同步和通信的相关组件，如<code>Queue</code>、<code>Event</code>、<code>Pool</code>、<code>Lock</code>、<code>Pipe</code>、<code>Semaphore</code>、<code>Condition</code>等模块。</p>
+<h2 id="函数当做进程"><a href="#函数当做进程" class="headerlink" title="函数当做进程"></a>函数当做进程</h2><p>Python中创建多进程的方式有2种：</p>
+<ul>
+<li>函数当做进程</li>
+<li>类当做进程</li>
+</ul>
+<p>逻辑简单的任务一般使用函数当做进程，逻辑较多或代码结构复杂的建议使用类当做进程。</p>
+<p>首先来看函数当做进程的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> random</span><br><span class="line"><span class="keyword">from</span> multiprocessing <span class="keyword">import</span> Process</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">task</span><span class="params">(name)</span>:</span></span><br><span class="line">    s = random.randint(<span class="number">1</span>, <span class="number">10</span>)</span><br><span class="line">    <span class="keyword">print</span> <span class="string">'pid: %s, name: %s, sleep %s ...'</span> % (os.getpid(), name, s)</span><br><span class="line">    time.sleep(s)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># 创建5个子进程执行</span></span><br><span class="line">    ps = []</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">5</span>):</span><br><span class="line">        p = Process(target=task, args=(<span class="string">'p%s'</span> % i, ))</span><br><span class="line">        ps.append(p)</span><br><span class="line">        p.start()</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 主进程等待子进程结束</span></span><br><span class="line">    <span class="keyword">for</span> p <span class="keyword">in</span> ps:</span><br><span class="line">        p.join()</span><br><span class="line">    </span><br><span class="line"><span class="comment"># Output:</span></span><br><span class="line"><span class="comment"># pid: 52361, name: p0, sleep 8 ...</span></span><br><span class="line"><span class="comment"># pid: 52362, name: p1, sleep 7 ...</span></span><br><span class="line"><span class="comment"># pid: 52363, name: p2, sleep 8 ...</span></span><br><span class="line"><span class="comment"># pid: 52364, name: p3, sleep 3 ...</span></span><br><span class="line"><span class="comment"># pid: 52365, name: p4, sleep 2 ...</span></span><br></pre></td></tr></table></figure>
+
+<p>使用<code>p = Process(target=func, args=(arg1, arg2...))</code>即可创建一个进程，调用<code>p.start()</code>启动一个进程，<code>p.join()</code>使得主进程等待子进程执行结束后才退出。</p>
+<p>当这个程序执行时，你可以<code>ps</code>查看一下进程，会发现一共有6个进程在执行，其中包括1个主进程，5个子进程。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/05/11/python-advance-process-thread/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/26/python-advance-global-interpreter-lock/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/26/python-advance-global-interpreter-lock/" class="post-title-link" itemprop="url">Python进阶——为什么GIL让多线程变得如此鸡肋？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-26 13:58:55" itemprop="dateCreated datePublished" datetime="2018-04-26T13:58:55+00:00">2018-04-26</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/26/python-advance-global-interpreter-lock/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——为什么GIL让多线程变得如此鸡肋？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/26/python-advance-global-interpreter-lock/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/26/python-advance-global-interpreter-lock/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.1k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>8 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>做 Python 开发时，想必你肯定听过 GIL，它经常被 Python 程序员吐槽，说 Python 的多线程非常鸡肋，因为 GIL 的存在，Python 无法利用多线程提高性能。</p>
+<p>但事实真的如此吗？</p>
+<p>这篇文章，我们就来看一下 Python 的 GIL 到底是什么？以及它的存在，究竟对我们的程序有哪些影响。</p>
+<h1 id="GIL是什么？"><a href="#GIL是什么？" class="headerlink" title="GIL是什么？"></a>GIL是什么？</h1><p>查阅官方文档，GIL 全称 Global Interpreter Lock，即<strong>全局解释器锁</strong>，它的官方解释如下：</p>
+<blockquote>
+<p>In CPython, the global interpreter lock, or GIL, is a mutex that protects access to Python objects, preventing multiple threads from executing Python bytecodes at once. This lock is necessary mainly because CPython’s memory management is not thread-safe. (However, since the GIL exists, other features have grown to depend on the guarantees that it enforces.)</p>
+</blockquote>
+<p>翻译成中文就是：</p>
+<blockquote>
+<p>在 CPython 解释器中，全局解释锁 GIL 是在于执行 Python 字节码时，为了保护访问 Python 对象而阻止多个线程执行的一把互斥锁。这把锁的存在主要是因为 CPython 解释器的内存管理不是线程安全的。然而直到今天 GIL 依旧存在，现在的很多功能已经习惯于依赖它作为执行的保证。</p>
+</blockquote>
+<p>我们从这个定义中，可以看到几个重点：</p>
+<ol>
+<li>GIL 是存在于 CPython 解释器中的，属于解释器层级，而并非属于 Python 的语言特性。也就是说，如果你自己有能力实现一个 Python 解释器，完全可以不使用 GIL</li>
+<li>GIL 是为了让解释器在执行 Python 代码时，同一时刻只有一个线程在运行，以此保证内存管理是安全的</li>
+<li>历史原因，现在很多 Python 项目已经习惯依赖 GIL（开发者认为 Python 就是线程安全的，写代码时对共享资源的访问不会加锁）</li>
+</ol>
+<p>在这里我想强调的是，<strong>因为 Python 默认的解释器是 CPython，GIL 是存在于 CPython 解释器中的，我们平时说到 GIL 就认为它是 Python 语言的问题，其实这个表述是不准确的。</strong></p>
+<p>其实除了 CPython 解释器，常见的 Python 解释器还有如下几种：</p>
+<ul>
+<li>CPython：C 语言开发的解释器，官方默认使用，目前使用也最为广泛，存在 GIL</li>
+<li>IPython：基于 CPython 开发的交互式解释器，只是增强了交互功能，执行过程与 CPython 完全一样</li>
+<li>PyPy：目标是加快执行速度，采用 JIT 技术，对 Python 代码进行动态编译（不是解释），可以显著提高代码的执行速度，但执行结果可能与 CPython 不同，存在 GIL</li>
+<li>Jython：运行在 Java 平台的 Python 解释器，可以把 Python 代码编译成 Java 字节码，依赖 Java 平台，不存在 GIL</li>
+<li>IronPython：和 Jython 类似，运行在微软的 .Net 平台下的 Python 解释器，可以把 Python 代码编译成 .Net 字节码，不存在 GIL</li>
+</ul>
+<p>虽然有这么多 Python 解释器，但使用最广泛的依旧是官方提供的 CPython，它默认是有 GIL 的。</p>
+<p>那么 GIL 会带来什么问题呢？为什么开发者总是抱怨 Python 多线程无法提高程序效率？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/04/26/python-advance-global-interpreter-lock/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/19/python-advance-metaclass/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/19/python-advance-metaclass/" class="post-title-link" itemprop="url">Python进阶——什么是元类？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-19 12:34:12" itemprop="dateCreated datePublished" datetime="2018-04-19T12:34:12+00:00">2018-04-19</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/19/python-advance-metaclass/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是元类？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/19/python-advance-metaclass/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/19/python-advance-metaclass/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.4k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>如果你看过比较优秀的 Python 开源框架，肯定见到过元类的身影。例如，在一个类中定义了类属性 <code>__metaclass__</code>，这就说明这个类使用了元类来创建。</p>
+<p>那元类的实现原理究竟是怎样的？使用元类能帮我们在开发中解决什么样的问题？</p>
+<p>这篇文章，我们就来看一下 Python 元类的来龙去脉。</p>
+<h1 id="什么是元类？"><a href="#什么是元类？" class="headerlink" title="什么是元类？"></a>什么是元类？</h1><p>我们都知道，定义一个类，然后调用它的构造方法，就可以初始化出一个实例出来，就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span><span class="params">(object)</span></span></span><br><span class="line"><span class="class"></span></span><br><span class="line"><span class="class">    <span class="title">def</span> <span class="title">__init__</span><span class="params">(name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p = Person(<span class="string">'zhangsan'</span>)</span><br></pre></td></tr></table></figure>
+
+<p>那你有没有想过，我们平时定义的类，它是如何创建出来的？</p>
+<p>别着急，我们先来看一个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">1</span>               <span class="comment"># 创建a的类是int a是int的实例</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__class__</span><br><span class="line">&lt;type <span class="string">'int'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="string">'abc'</span>           <span class="comment"># 创建b的类是str b是str的实例</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b.__class__</span><br><span class="line">&lt;type <span class="string">'str'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">c</span><span class="params">()</span>:</span>            <span class="comment"># 创建c的类是function 方法c是function的实例</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c.__class__</span><br><span class="line">&lt;type <span class="string">'function'</span>&gt;</span><br><span class="line"></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">D</span><span class="params">(object)</span>:</span>    <span class="comment"># 创建d的类是D d是D的实例</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d.__class__</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">__main__</span>.<span class="title">D</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们定义了 <code>int</code>、<code>str</code>、<code>function</code>、<code>class</code>，然后分别调用了它们的<code>__class__</code> 方法，这个 <code>__class__</code> 方法可以返回实例是如何创建出来的。</p>
+<p>从方法返回的结果我们可以看到：</p>
+<ul>
+<li>创建整数 <code>a</code> 的类是 <code>int</code>，也就是说 <code>a</code> 是 <code>int</code> 的一个实例</li>
+<li>创建字符串 <code>b</code> 的类是 <code>str</code>，也就是说 <code>b</code> 是 <code>str</code> 的一个实例</li>
+<li>创建函数 <code>c</code> 的类是 <code>function</code>，也就是说 <code>c</code> 是 <code>function</code> 的一个实例</li>
+<li>创建实例 <code>d</code> 的类是 <code>class</code>，也就是说 <code>d</code> 是 <code>class</code> 的一个实例</li>
+</ul>
+<p>除了这些之外，我们在开发中使用到的例如 <code>list</code>、<code>dict</code> 也类似，你可以测试观察一下结果。</p>
+<p>现在我们已经得知，创建这些实例的类是 <code>int</code>、<code>str</code>、<code>function</code>、<code>class</code>，那进一步思考一下，这些类又是怎么创建出来的呢？</p>
+<p>同样地，我们也调用这些类的 <code>__class__</code> 方法，观察结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = <span class="number">1</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b = <span class="string">'abc'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>b.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">c</span><span class="params">()</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>c.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="class"><span class="keyword">class</span> <span class="title">D</span><span class="params">(object)</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">pass</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d = D()</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>d.__class__.__class__</span><br><span class="line">&lt;type <span class="string">'type'</span>&gt;</span><br></pre></td></tr></table></figure>
+
+<p>从结果我们可以看到，创建这些类的类，都是 <code>type</code>，所以 <code>type</code> 就是创建所有类的「元类」。也就是说，<strong>元类的作用就是用来创建类的</strong>。</p>
+<p>你可以这样理解：</p>
+<ol>
+<li>元类 -&gt; 类 </li>
+<li>类 -&gt; 实例</li>
+</ol>
+<p>用伪代码表示，就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">klass = MetaClass()     <span class="comment"># 元类创建类</span></span><br><span class="line">obj = klass()           <span class="comment"># 类创建实例</span></span><br></pre></td></tr></table></figure>
+
+<p>是不是很有意思？</p>
+<p>在这里，你也可以感受一下这句话的含义：<strong>Python 中一切皆对象！</strong></p>
+<p>无论是普通类型、方法、实例，还是类，都可以统一看作对象，它们的起源就是元类。</p>
+<p>其实，在 Python 中，使用 <code>type</code> 方法，我们可就以创建出一个类，<code>type</code> 方法的语法如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type(class_name, (base_class, ...), &#123;attr_key: attr_value, ...&#125;)</span><br></pre></td></tr></table></figure>
+
+<p>例如，像下面这样，我们使用 <code>type</code> 方法创建 MyClass 类，并且让它继承 <code>object</code>：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span>A = type(<span class="string">'MyClass'</span>, (object, ), &#123;&#125;) <span class="comment"># type创建一个类，继承object</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>A</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">__main__</span>.<span class="title">MyClass</span>'&gt;</span></span><br><span class="line"><span class="class">&gt;&gt;&gt; <span class="title">A</span><span class="params">()</span></span></span><br><span class="line"><span class="class">&lt;<span class="title">__main__</span>.<span class="title">MyClass</span> <span class="title">object</span> <span class="title">at</span> 0<span class="title">x10d905950</span>&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>我们还可以使用 <code>type</code> 创建一个包含属性和方法的类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line"><span class="meta">... </span>    <span class="keyword">return</span> <span class="string">'foo'</span></span><br><span class="line">...</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>name = <span class="string">'zhangsan'</span></span><br><span class="line">&gt;&gt;&gt;</span><br><span class="line"><span class="comment"># type 创建类B 继承object 包含 name 属性和 foo 方法</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>B = type(<span class="string">'MyClass'</span>, (object, ), &#123;<span class="string">'name'</span>: name, <span class="string">'foo'</span>: foo&#125;) </span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>B.name          <span class="comment"># 打印 name 属性</span></span><br><span class="line"><span class="string">'zhangsan'</span></span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">print</span> B().foo() <span class="comment"># 调用 foo 方法</span></span><br><span class="line">foo</span><br></pre></td></tr></table></figure>
+
+<p>通过 <code>type</code> 方法创建的类，和我们自己定义一个类，在使用上没有任何区别。</p>
+<p>其实，除了使用 <code>type</code> 方法创建一个类之外，我们还可以使用类属性 <code>__metaclass__</code> 创建一个类，这就是下面要讲的「自定义元类」。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/04/19/python-advance-metaclass/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/18/python-advance-iterator-generator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/18/python-advance-iterator-generator/" class="post-title-link" itemprop="url">Python进阶——迭代器和可迭代对象有什么区别？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-18 11:33:10" itemprop="dateCreated datePublished" datetime="2018-04-18T11:33:10+00:00">2018-04-18</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/18/python-advance-iterator-generator/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——迭代器和可迭代对象有什么区别？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/18/python-advance-iterator-generator/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/18/python-advance-iterator-generator/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>10 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，我们经常听到有关「容器」、「迭代器」、「可迭代对象」、「生成器」的概念。</p>
+<p>我们经常把这些概念搞混淆，它们之间有哪些联系和区别呢？</p>
+<p>这篇文章，我们就来看一下它们之间的关系。</p>
+<h1 id="容器"><a href="#容器" class="headerlink" title="容器"></a>容器</h1><p>首先，我们先来看一下容器是如何定义的？</p>
+<p>简单来说，容器就是存储某些元素的统称，它最大的特性就是判断一个元素是否在这个容器内。</p>
+<p>怎么理解这句话？</p>
+<p>很简单，在 Python 中，我们通常使用 <code>in</code> 或 <code>not in</code> 来判断一个元素存在/不存在于一个容器内。</p>
+<p>例如下面这个例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">print(<span class="string">'x'</span> <span class="keyword">in</span> <span class="string">'xyz'</span>)  <span class="comment"># True</span></span><br><span class="line">print(<span class="string">'a'</span> <span class="keyword">not</span> <span class="keyword">in</span> <span class="string">'xyz'</span>)  <span class="comment"># True</span></span><br><span class="line">print(<span class="number">1</span> <span class="keyword">in</span> [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>])       <span class="comment"># True</span></span><br><span class="line">print(<span class="number">2</span> <span class="keyword">not</span> <span class="keyword">in</span> (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>))  <span class="comment"># False</span></span><br><span class="line">print(<span class="string">'x'</span> <span class="keyword">not</span> <span class="keyword">in</span> &#123;<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>&#125;) <span class="comment"># True</span></span><br><span class="line">print(<span class="string">'a'</span> <span class="keyword">in</span> &#123;<span class="string">'a'</span>: <span class="number">1</span>, <span class="string">'b'</span>: <span class="number">2</span>&#125;) <span class="comment"># True</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，我们可以看到 <code>str</code>、<code>list</code>、<code>tuple</code>、<code>set</code>、<code>dict</code> 都可以通过 <code>in</code> 或 <code>not in</code> 来判断一个元素是否在存在/不存在这个实例中，所以这些类型我们都可以称作「容器」。</p>
+<p>那为什么这些「容器」可以使用 <code>in</code> 或 <code>not in</code> 来判断呢？</p>
+<p>这是因为它们都实现了 <code>__contains__</code> 方法。</p>
+<p>如果我们也想自定义一个容器，只需像下面这样，在类中定义 <code>__contains__</code> 方法就可以了：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.items = [<span class="number">1</span>, <span class="number">2</span>]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__contains__</span><span class="params">(self, item)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> item <span class="keyword">in</span> self.items</span><br><span class="line"></span><br><span class="line">a = A()</span><br><span class="line">print(<span class="number">1</span> <span class="keyword">in</span> a)   <span class="comment"># True</span></span><br><span class="line">print(<span class="number">2</span> <span class="keyword">in</span> a)   <span class="comment"># True</span></span><br><span class="line">print(<span class="number">3</span> <span class="keyword">in</span> a)   <span class="comment"># False</span></span><br></pre></td></tr></table></figure>
+
+<p>在这个例子中，类 <code>A</code> 定义了 <code>__contains__</code> 方法，所以我们就可以使用 <code>1 in a</code> 的方式去判断这个元素是否在 <code>A</code> 这个容器内。</p>
+<p>换句话说，一个类只要实现了 <code>__contains__</code> 方法，那么它就是一个「容器」。</p>
+<p>我们在开发时，除了使用 <code>in</code> 判断元素是否在容器内之外，另外一个常用的功能是：输出容器内的所有元素。</p>
+<p>例如执行 <code>for x in [1, 2, 3]</code>，就可以迭代出容器内的所有元素。</p>
+<p>那使用这种方式输出元素，是如何实现的？这就跟「迭代器」有关了。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/04/18/python-advance-iterator-generator/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/17/python-advance-context-manager/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/17/python-advance-context-manager/" class="post-title-link" itemprop="url">Python进阶——什么是上下文管理器？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-17 11:33:10" itemprop="dateCreated datePublished" datetime="2018-04-17T11:33:10+00:00">2018-04-17</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/17/python-advance-context-manager/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是上下文管理器？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/17/python-advance-context-manager/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/17/python-advance-context-manager/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>7.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>12 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，我们经常会使用到 <code>with</code> 语法块，例如在读写文件时，保证文件描述符的正确关闭，避免资源泄露问题。</p>
+<p>你有没有思考过， <code>with</code> 背后是如何实现的？我们常常听到的上下文管理器究竟是什么？</p>
+<p>这篇文章我们就来学习一下 Python 上下文管理器，以及 <code>with</code> 的运行原理。</p>
+<h1 id="with语法块"><a href="#with语法块" class="headerlink" title="with语法块"></a>with语法块</h1><p>在讲解 <code>with</code> 语法之前，我们先来看一下不使用 <code>with</code> 的代码如何写？</p>
+<p>我们在操作一个文件时，代码可以这么写：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打开文件</span></span><br><span class="line">f = open(<span class="string">'file.txt'</span>)</span><br><span class="line"><span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">    <span class="comment"># 读取文件内容 执行其他操作</span></span><br><span class="line">    <span class="comment"># do_something...</span></span><br><span class="line"><span class="comment"># 关闭文件</span></span><br><span class="line">f.close()</span><br></pre></td></tr></table></figure>
+
+<p>这个例子非常简单，就是打开一个文件，然后读取文件中的内容，最后关闭文件释放资源。</p>
+<p>但是，代码这么写会有一个问题：在打开文件后，如果要对读取到的内容进行其他操作，在这操作期间发生了异常，这就会导致文件句柄无法被释放，进而导致资源的泄露。</p>
+<p>如何解决这个问题？</p>
+<p>也很简单，我们使用 <code>try ... finally</code> 来优化代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 打开文件</span></span><br><span class="line">f = open(<span class="string">'file.txt'</span>)</span><br><span class="line"><span class="keyword">try</span>:</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">        <span class="comment"># 读取文件内容 执行其他操作</span></span><br><span class="line">        <span class="comment"># do_something...</span></span><br><span class="line"><span class="keyword">finally</span>:</span><br><span class="line">    <span class="comment"># 保证关闭文件</span></span><br><span class="line">    f.close()</span><br></pre></td></tr></table></figure>
+
+<p>这么写的好处是，在读取文件内容和操作期间，无论是否发生异常，都可以保证最后能释放文件资源。</p>
+<p>但这么优化，代码结构会变得很繁琐，每次都要给代码逻辑增加 <code>try ... finally</code> 才可以，可读性变得很差。</p>
+<p>针对这种情况，我们就可以使用 <code>with</code> 语法块来解决这个问题：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> open(<span class="string">'file.txt'</span>) <span class="keyword">as</span> f:</span><br><span class="line">    <span class="keyword">for</span> line <span class="keyword">in</span> f:</span><br><span class="line">        <span class="comment"># do_something...</span></span><br></pre></td></tr></table></figure>
+
+<p>使用 <code>with</code> 语法块可以完成之前相同的功能，而且这么写的好处是，代码结构变得非常清晰，可读性也很好。</p>
+<p>明白了 <code>with</code> 的作用，那么 <code>with</code> 究竟是如何运行的呢？</p>
+<h1 id="上下文管理器"><a href="#上下文管理器" class="headerlink" title="上下文管理器"></a>上下文管理器</h1><p>首先，我们来看一下 <code>with</code> 的语法格式：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> context_expression [<span class="keyword">as</span> target(s)]:</span><br><span class="line">    <span class="keyword">with</span>-body</span><br></pre></td></tr></table></figure>
+
+<p><code>with</code> 语法非常简单，我们只需要 <code>with</code> 一个表达式，然后就可以执行自定义的业务逻辑。</p>
+<p>但是，<code>with</code> 后面的表达式是可以任意写的吗？</p>
+<p>答案是否定的。要想使用 <code>with</code> 语法块，<code>with</code> 后面的的对象需要实现「上下文管理器协议」。</p>
+<p>什么是「上下文管理器协议」？</p>
+<p>一个类在 Python 中，只要实现以下方法，就实现了「上下文管理器协议」：</p>
+<ul>
+<li><code>__enter__</code>：在进入 <code>with</code> 语法块之前调用，返回值会赋值给 <code>with</code> 的 <code>target</code></li>
+<li><code>__exit__</code>：在退出 <code>with</code> 语法块时调用，一般用作异常处理</li>
+</ul>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2018/04/17/python-advance-context-manager/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/16/python-advance-descriptor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2018/04/16/python-advance-descriptor/" class="post-title-link" itemprop="url">Python进阶——什么是描述符？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-16 09:42:51" itemprop="dateCreated datePublished" datetime="2018-04-16T09:42:51+00:00">2018-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/16/python-advance-descriptor/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是描述符？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/16/python-advance-descriptor/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/16/python-advance-descriptor/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <p>在 Python 开发中，你可能听说过「描述符」这个概念，由于我们很少直接使用它，所以大部分开发人员并不了解它的原理。</p>
+<p>但作为熟练使用 Python，想要进阶的你，建议还是了解一下描述符的原理，这也便于你更深层次地理解 Python 的设计思想。</p>
+<p>其实，在开发过程中，虽然我们没有直接使用到描述符，但是它在底层却无时不刻地被使用到，例如以下这些：</p>
+<ul>
+<li><code>function</code>、<code>bound method</code>、<code>unbound method</code></li>
+<li>装饰器<code>property</code>、<code>staticmethod</code>、<code>classmethod</code></li>
+</ul>
+<p>是不是都很熟悉？</p>
+<p>这些都与描述符有着千丝万缕的关系，这篇文章我们就来看一下描述符背后的工作原理。</p>
+<h1 id="什么是描述符？"><a href="#什么是描述符？" class="headerlink" title="什么是描述符？"></a>什么是描述符？</h1><p>在解释什么是「描述符」之前，我们先来看一个简单的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    x = <span class="number">10</span></span><br><span class="line">    </span><br><span class="line">print(A.x) <span class="comment"># 10</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子非常简单，我们在类 <code>A</code> 中定义了一个<strong>类属性</strong> <code>x</code>，然后打印它的值。</p>
+<p>其实，除了直接定类属性之外，我们还可以这样定义一个类属性：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Ten</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    x = Ten()   <span class="comment"># 属性换成了一个类</span></span><br><span class="line">    </span><br><span class="line">print(A.x) <span class="comment"># 10</span></span><br></pre></td></tr></table></figure>
+
+<p>仔细看，这次类属性 <code>x</code> 不再是一个具体的值，而是一个类 <code>Ten</code>。<code>Ten</code> 中定义了一个 <code>__get__</code> 方法，返回具体的值。</p>
+<p>在 Python 中，<strong>允许把一个类属性，托管给一个类，这个属性就是一个「描述符」。</strong></p>
+<p>换句话说，「描述符」是一个「绑定行为」的属性。</p>
+<p>怎么理解这句话？</p>
+<p>回忆一下，我们开发时，一般把「行为」叫做什么？是的，「行为」一般指的是一个方法。</p>
+<p>所以我们也可以把「描述符」理解为：对象的属性不再是一个具体的值，而是交给了一个方法去定义。</p>
+<p>可以想一下，如果我们用一个方法去定义一个属性，这么做的好处是什么？</p>
+<p>有了方法，我们就可以在方法内实现自己的逻辑，最简单的，我们可以根据不同的条件，在方法内给属性赋予不同的值，就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Age</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> obj.name == <span class="string">'zhangsan'</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">20</span></span><br><span class="line">        <span class="keyword">elif</span> obj.name == <span class="string">'lisi'</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">25</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> ValueError(<span class="string">"unknow"</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    age = Age()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>)</span><br><span class="line">print(p1.age)   <span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">p2 = Person(<span class="string">'lisi'</span>)</span><br><span class="line">print(p2.age)   <span class="comment"># 25</span></span><br><span class="line"></span><br><span class="line">p3 = Person(<span class="string">'wangwu'</span>)</span><br><span class="line">print(p3.age)   <span class="comment"># unknow</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子中，<code>age</code> 类属性被另一个类托管了，在这个类的 <code>__get__</code> 中，它会根据 <code>Person</code> 类的属性 <code>name</code>，决定 <code>age</code> 是什么值。</p>
+<p>这只是一个非常简单的例子，我们可以看到，通过描述符的使用，我们可以轻易地改变一个类属性的定义方式。</p>
+<h1 id="描述符协议"><a href="#描述符协议" class="headerlink" title="描述符协议"></a>描述符协议</h1><p>了解了描述符的定义，现在我们把重点放到托管属性的类上。</p>
+<p>其实，一个类属性想要托管给一个类，这个类内部实现的方法不能是随便定义的，它必须遵守「描述符协议」，也就是要实现以下几个方法：</p>
+<ul>
+<li><code>__get__(self, obj, type=None) -&gt; value</code></li>
+<li><code>__set__(self, obj, value) -&gt; None</code></li>
+<li><code>__delete__(self, obj) -&gt; None</code></li>
+</ul>
+<p>只要是实现了以上几个方法的<strong>其中一个</strong>，那么这个类属性就可以称作描述符。</p>
+<p>另外，描述符又可以分为「数据描述符」和「非数据描述符」：</p>
+<ul>
+<li>只定义了 <code>__get___</code>，叫做非数据描述符</li>
+<li>除了定义 <code>__get__</code> 之外，还定义了 <code>__set__</code> 或 <code>__delete__</code>，叫做数据描述符</li>
+</ul>
+<p>它们两者有什么区别，我会在下面详述。</p>
+<p>现在我们来看一个包含 <code>__get__</code> 和 <code>__set__</code> 方法的描述符例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Age</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value=<span class="number">20</span>)</span>:</span></span><br><span class="line">        self.value = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, type=None)</span>:</span></span><br><span class="line">        print(<span class="string">'call __get__: obj: %s type: %s'</span> % (obj, type))</span><br><span class="line">        <span class="keyword">return</span> self.value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> value &lt;= <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"age must be greater than 0"</span>)</span><br><span class="line">        print(<span class="string">'call __set__: obj: %s value: %s'</span> % (obj, value))</span><br><span class="line">        self.value = value</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    age = Age()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>)</span><br><span class="line">print(p1.age)</span><br><span class="line"><span class="comment"># call __get__: obj: &lt;__main__.Person object at 0x1055509e8&gt; type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">print(Person.age)</span><br><span class="line"><span class="comment"># call __get__: obj: None type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">p1.age = <span class="number">25</span></span><br><span class="line"><span class="comment"># call __set__: obj: &lt;__main__.Person object at 0x1055509e8&gt; value: 25</span></span><br><span class="line"></span><br><span class="line">print(p1.age)</span><br><span class="line"><span class="comment"># call __get__: obj: &lt;__main__.Person object at 0x1055509e8&gt; type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 25</span></span><br><span class="line"></span><br><span class="line">p1.age = <span class="number">-1</span></span><br><span class="line"><span class="comment"># ValueError: age must be greater than 0</span></span><br></pre></td></tr></table></figure>
+
+<p>在这例子中，类属性 <code>age</code> 是一个描述符，它的值取决于 <code>Age</code> 类。</p>
+<p>从输出结果来看，当我们获取或修改 <code>age</code> 属性时，调用了 <code>Age</code> 的 <code>__get__</code> 和 <code>__set__</code> 方法：</p>
+<ul>
+<li>当调用 <code>p1.age</code> 时，<code>__get__</code> 被调用，参数 <code>obj</code> 是 <code>Person</code> 实例，<code>type</code> 是 <code>type(Person)</code></li>
+<li>当调用 <code>Person.age</code> 时，<code>__get__</code> 被调用，参数 <code>obj</code> 是 <code>None</code>，<code>type</code> 是 <code>type(Person)</code></li>
+<li>当调用 <code>p1.age = 25</code>时，<code>__set__</code> 被调用，参数 <code>obj</code> 是 <code>Person</code> 实例，<code>value</code> 是25</li>
+<li>当调用 <code>p1.age = -1</code>时，<code>__set__</code> 没有通过校验，抛出 <code>ValueError</code></li>
+</ul>
+<p>其中，调用 <code>__set__</code> 传入的参数，我们比较容易理解，但是对于 <code>__get__</code> 方法，通过<strong>类或实例</strong>调用，传入的参数是不同的，这是为什么？</p>
+<p>这就需要我们了解一下描述符的工作原理。</p>
+<h1 id="描述符的工作原理"><a href="#描述符的工作原理" class="headerlink" title="描述符的工作原理"></a>描述符的工作原理</h1><p>要解释描述符的工作原理，首先我们需要先从属性的访问说起。</p>
+<p>在开发时，不知道你有没有想过这样一个问题：通常我们写这样的代码 <code>a.b</code>，其背后到底发生了什么？</p>
+<p>这里的 <code>a</code> 和 <code>b</code> 可能存在以下情况：</p>
+<ol>
+<li><code>a</code> 可能是一个类，也可能是一个实例，我们这里统称为对象</li>
+<li><code>b</code> 可能是一个属性，也可能是一个方法，方法其实也可以看做是类的属性</li>
+</ol>
+<p>其实，无论是以上哪种情况，在 Python 中，都有一个统一的调用逻辑：</p>
+<ol>
+<li>先调用 <code>__getattribute__</code> 尝试获得结果</li>
+<li>如果没有结果，调用 <code>__getattr__</code></li>
+</ol>
+<p>用代码表示就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getattr_hook</span><span class="params">(obj, name)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">return</span> obj.__getattribute__(name)</span><br><span class="line">    <span class="keyword">except</span> AttributeError:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(type(obj), <span class="string">'__getattr__'</span>):</span><br><span class="line">            <span class="keyword">raise</span></span><br><span class="line">    <span class="keyword">return</span> type(obj).__getattr__(obj, name)</span><br></pre></td></tr></table></figure>
+
+<p>我们这里需要重点关注一下 <code>__getattribute__</code>，因为它是所有属性查找的入口，它内部实现的属性查找顺序是这样的：</p>
+<ol>
+<li>要查找的属性，在类中是否是一个描述符</li>
+<li>如果是描述符，再检查它是否是一个数据描述符</li>
+<li>如果是数据描述符，则调用数据描述符的 <code>__get__</code></li>
+<li>如果不是数据描述符，则从 <code>__dict__</code> 中查找</li>
+<li>如果 <code>__dict__</code> 中查找不到，再看它是否是一个非数据描述符</li>
+<li>如果是非数据描述符，则调用非数据描述符的 <code>__get__</code></li>
+<li>如果也不是一个非数据描述符，则从类属性中查找</li>
+<li>如果类中也没有这个属性，抛出 <code>AttributeError</code> 异常</li>
+</ol>
+<p>写成代码就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取一个对象的属性</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__getattribute__</span><span class="params">(obj, name)</span>:</span></span><br><span class="line">    null = object()</span><br><span class="line">    <span class="comment"># 对象的类型 也就是实例的类</span></span><br><span class="line">    objtype = type(obj)</span><br><span class="line">    <span class="comment"># 从这个类中获取指定属性</span></span><br><span class="line">    cls_var = getattr(objtype, name, null)</span><br><span class="line">    <span class="comment"># 如果这个类实现了描述符协议</span></span><br><span class="line">    descr_get = getattr(type(cls_var), <span class="string">'__get__'</span>, null)</span><br><span class="line">    <span class="keyword">if</span> descr_get <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">if</span> (hasattr(type(cls_var), <span class="string">'__set__'</span>)</span><br><span class="line">            <span class="keyword">or</span> hasattr(type(cls_var), <span class="string">'__delete__'</span>)):</span><br><span class="line">            <span class="comment"># 优先从数据描述符中获取属性</span></span><br><span class="line">            <span class="keyword">return</span> descr_get(cls_var, obj, objtype)</span><br><span class="line">    <span class="comment"># 从实例中获取属性</span></span><br><span class="line">    <span class="keyword">if</span> hasattr(obj, <span class="string">'__dict__'</span>) <span class="keyword">and</span> name <span class="keyword">in</span> vars(obj):</span><br><span class="line">        <span class="keyword">return</span> vars(obj)[name]</span><br><span class="line">    <span class="comment"># 从非数据描述符获取属性</span></span><br><span class="line">    <span class="keyword">if</span> descr_get <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">return</span> descr_get(cls_var, obj, objtype)</span><br><span class="line">    <span class="comment"># 从类中获取属性</span></span><br><span class="line">    <span class="keyword">if</span> cls_var <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">return</span> cls_var</span><br><span class="line">    <span class="comment"># 抛出 AttributeError 会触发调用 __getattr__</span></span><br><span class="line">    <span class="keyword">raise</span> AttributeError(name)</span><br></pre></td></tr></table></figure>
+
+<p>如果不好理解，你最好写一个程序测试一下，观察各种情况下的属性的查找顺序。</p>
+<p>到这里我们可以看到，在一个对象中查找一个属性，都是先从 <code>__getattribute__</code> 开始的。</p>
+<p>在 <code>__getattribute__</code> 中，它会检查这个类属性是否是一个描述符，如果是一个描述符，那么就会调用它的 <code>__get__</code> 方法。但具体的调用细节和传入的参数是下面这样的：</p>
+<ul>
+<li>如果 <code>a</code> 是一个<strong>实例</strong>，调用细节为：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type(a).__dict__[<span class="string">'b'</span>].__get__(a, type(a))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果 <code>a</code> 是一个<strong>类</strong>，调用细节为：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a.__dict__[<span class="string">'b'</span>].__get__(<span class="literal">None</span>, a)</span><br></pre></td></tr></table></figure>
+
+<p>所以我们就能看到上面例子输出的结果。</p>
+<h1 id="数据描述符和非数据描述符"><a href="#数据描述符和非数据描述符" class="headerlink" title="数据描述符和非数据描述符"></a>数据描述符和非数据描述符</h1><p>了解了描述符的工作原理，我们继续来看数据描述符和非数据描述符的区别。</p>
+<p>从定义上来看，它们的区别是：</p>
+<ul>
+<li>只定义了 <code>__get___</code>，叫做非数据描述符</li>
+<li>除了定义 <code>__get__</code> 之外，还定义了 <code>__set__</code> 或 <code>__delete__</code>，叫做数据描述符</li>
+</ul>
+<p>此外，我们从上面描述符调用的顺序可以看到，在对象中查找属性时，数据描述符要优先于非数据描述符调用。</p>
+<p>在之前的例子中，我们定义了 <code>__get__</code> 和 <code>__set__</code>，所以那些类属性都是<strong>数据描述符</strong>。</p>
+<p>我们再来看一个<strong>非数据描述符</strong>的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.foo = <span class="string">'abc'</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'xyz'</span></span><br><span class="line"></span><br><span class="line">print(A().foo)  <span class="comment"># 输出什么？</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码，我们定义了一个相同名字的属性和方法 <code>foo</code>，如果现在执行 <code>A().foo</code>，你觉得会输出什么结果？</p>
+<p>答案是 <code>abc</code>。</p>
+<p>为什么打印的是实例属性 <code>foo</code> 的值，而不是方法 <code>foo</code> 呢？</p>
+<p>这就和非数据描述符有关系了。</p>
+<p>我们执行 <code>dir(A.foo)</code>，观察结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(dir(A.foo))</span><br><span class="line"><span class="comment"># [... '__get__', '__getattribute__', ...]</span></span><br></pre></td></tr></table></figure>
+
+<p>看到了吗？<code>A</code> 的 <code>foo</code> 方法其实实现了 <code>__get__</code>，我们在上面的分析已经得知：只定义 <code>__get__</code> 方法的对象，它其实是一个非数据描述符，也就是说，<strong>我们在类中定义的方法，其实本身就是一个非数据描述符。</strong></p>
+<p>所以，在一个类中，如果存在相同名字的属性和方法，按照上面所讲的 <code>__getattribute__</code> 中查找属性的顺序，这个属性就会优先从实例中获取，如果实例中不存在，才会从非数据描述符中获取，所以在这里优先查找的是实例属性 <code>foo</code> 的值。</p>
+<p>到这里我们可以总结一下关于描述符的相关知识点：</p>
+<ul>
+<li>描述符必须是一个类属性</li>
+<li><code>__getattribute__</code> 是查找一个属性（方法）的入口</li>
+<li><code>__getattribute__</code> 定义了一个属性（方法）的查找顺序：数据描述符、实例属性、非数据描述符、类属性</li>
+<li>如果我们重写了 <code>__getattribute__</code> 方法，会阻止描述符的调用</li>
+<li>所有方法其实都是一个非数据描述符，因为它定义了 <code>__get__</code></li>
+</ul>
+<h1 id="描述符的使用场景"><a href="#描述符的使用场景" class="headerlink" title="描述符的使用场景"></a>描述符的使用场景</h1><p>了解了描述符的工作原理，那描述符一般用在哪些业务场景中呢？</p>
+<p>在这里我用描述符实现了一个属性校验器，你可以参考这个例子，在类似的场景中去使用它。</p>
+<p>首先我们定义一个校验基类 <code>Validator</code>，在 <code>__set__</code> 方法中先调用 <code>validate</code> 方法校验属性是否符合要求，然后再对属性进行赋值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Validator</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.data = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.data[obj]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="comment"># 校验通过后再赋值</span></span><br><span class="line">        self.validate(value)</span><br><span class="line">        self.data[obj] = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们定义两个校验类，继承 <code>Validator</code>，然后实现自己的校验逻辑。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Number</span><span class="params">(Validator)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, minvalue=None, maxvalue=None)</span>:</span></span><br><span class="line">        super(Number, self).__init__()</span><br><span class="line">        self.minvalue = minvalue</span><br><span class="line">        self.maxvalue = maxvalue</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(value, (int, float)):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be an int or float'</span>)</span><br><span class="line">        <span class="keyword">if</span> self.minvalue <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> value &lt; self.minvalue:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be at least <span class="subst">&#123;self.minvalue!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">if</span> self.maxvalue <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> value &gt; self.maxvalue:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no more than <span class="subst">&#123;self.maxvalue!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">String</span><span class="params">(Validator)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, minsize=None, maxsize=None)</span>:</span></span><br><span class="line">        super(String, self).__init__()</span><br><span class="line">        self.minsize = minsize</span><br><span class="line">        self.maxsize = maxsize</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(value, str):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be an str'</span>)</span><br><span class="line">        <span class="keyword">if</span> self.minsize <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> len(value) &lt; self.minsize:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no smaller than <span class="subst">&#123;self.minsize!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">if</span> self.maxsize <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> len(value) &gt; self.maxsize:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no bigger than <span class="subst">&#123;self.maxsize!r&#125;</span>'</span></span><br><span class="line">            )</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们使用这个校验类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定义属性的校验规则 内部用描述符实现</span></span><br><span class="line">    name = String(minsize=<span class="number">3</span>, maxsize=<span class="number">10</span>)</span><br><span class="line">    age = Number(minvalue=<span class="number">1</span>, maxvalue=<span class="number">120</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, age)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line"></span><br><span class="line"><span class="comment"># 属性符合规则</span></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>, <span class="number">20</span>)</span><br><span class="line">print(p1.name, p1.age)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 属性不符合规则</span></span><br><span class="line">p2 = person(<span class="string">'a'</span>, <span class="number">20</span>)</span><br><span class="line"><span class="comment"># ValueError: Expected 'a' to be no smaller than 3</span></span><br><span class="line">p3 = Person(<span class="string">'zhangsan'</span>, <span class="number">-1</span>)</span><br><span class="line"><span class="comment"># ValueError: Expected -1 to be at least 1</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，当我们对 <code>Person</code> 实例进行初始化时，就可以校验这些属性是否符合预定义的规则了。</p>
+<h1 id="function与method"><a href="#function与method" class="headerlink" title="function与method"></a>function与method</h1><p>我们再来看一下，在开发时经常看到的 <code>function</code>、<code>unbound method</code>、<code>bound method</code> 它们之间到底有什么区别？</p>
+<p>来看下面这段代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'xyz'</span></span><br><span class="line"></span><br><span class="line">print(A.__dict__[<span class="string">'foo'</span>]) <span class="comment"># &lt;function foo at 0x10a790d70&gt;</span></span><br><span class="line">print(A.foo)     <span class="comment"># &lt;unbound method A.foo&gt;</span></span><br><span class="line">print(A().foo)   <span class="comment"># &lt;bound method A.foo of &lt;__main__.A object at 0x10a793050&gt;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>从结果我们可以看出它们的区别：</p>
+<ul>
+<li><code>function</code> 准确来说就是一个函数，并且它实现了 <code>__get__</code> 方法，因此每一个 <code>function</code> 都是一个非数据描述符，而在类中会把 <code>function</code> 放到 <code>__dict__</code> 中存储</li>
+<li>当 <code>function</code> 被实例调用时，它是一个 <code>bound method</code></li>
+<li>当 <code>function</code> 被类调用时， 它是一个 <code>unbound method</code></li>
+</ul>
+<p><code>function</code> 是一个非数据描述符，我们之前已经讲到了。</p>
+<p>而 <code>bound method</code> 和 <code>unbound method</code> 的区别就在于调用方的类型是什么，如果是一个实例，那么这个 <code>function</code> 就是一个 <code>bound method</code>，否则它是一个 <code>unbound method</code>。</p>
+<h1 id="property-staticmethod-classmethod"><a href="#property-staticmethod-classmethod" class="headerlink" title="property/staticmethod/classmethod"></a>property/staticmethod/classmethod</h1><p>我们再来看 <code>property</code>、<code>staticmethod</code>、<code>classmethod</code>。</p>
+<p>这些装饰器的实现，默认是 C 来实现的。</p>
+<p>其实，我们也可以直接利用 Python 描述符的特性来实现这些装饰器，</p>
+<p><code>property</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">property</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, fget=None, fset=None, fdel=None, doc=None)</span>:</span></span><br><span class="line">        self.fget = fget</span><br><span class="line">        self.fset = fset</span><br><span class="line">        self.fdel = fdel</span><br><span class="line">        self.__doc__ = doc</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> obj <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">return</span> self.fget</span><br><span class="line">        <span class="keyword">if</span> self.fget <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(), <span class="string">"unreadable attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fget(obj)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.fset <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError, <span class="string">"can't set attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fset(obj, value)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delete__</span><span class="params">(self, obj)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.fdel <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError, <span class="string">"can't delete attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fdel(obj)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">getter</span><span class="params">(self, fget)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(fget, self.fset, self.fdel, self.__doc__)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">setter</span><span class="params">(self, fset)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(self.fget, fset, self.fdel, self.__doc__)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">deleter</span><span class="params">(self, fdel)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(self.fget, self.fset, fdel, self.__doc__)</span><br></pre></td></tr></table></figure>
+
+<p><code>staticmethod</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">staticmethod</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func)</span>:</span></span><br><span class="line">        self.func = func</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.func</span><br></pre></td></tr></table></figure>
+
+<p><code>classmethod</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">classmethod</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func)</span>:</span></span><br><span class="line">        self.func = func</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, klass=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> klass <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            klass = type(obj)</span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">newfunc</span><span class="params">(*args)</span>:</span></span><br><span class="line">            <span class="keyword">return</span> self.func(klass, *args)</span><br><span class="line">        <span class="keyword">return</span> newfunc</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，你还可以实现其他功能强大的装饰器。</p>
+<p>由此可见，通过描述符我们可以实现强大而灵活的属性管理功能，对于一些要求属性控制比较复杂的场景，我们可以选择用描述符来实现。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这篇文章我们主要讲了 Python 描述符的工作原理。</p>
+<p>首先，我们从一个简单的例子了解到，一个类属性是可以托管给另外一个类的，这个类如果实现了描述符协议方法，那么这个类属性就是一个描述符。此外，描述符又可以分为数据描述符和非数据描述符。</p>
+<p>之后我们又分析了获取一个属性的过程，一切的入口都在 <code>__getattribute__</code> 中，这个方法定义了寻找属性的顺序，其中实例属性优先于数据描述符调用，数据描述符要优先于非数据描述符调用。</p>
+<p>另外我们又了解到，方法其实就是一个非数据描述符，如果我们在类中定义了相同名字的实例属性和方法，按照 <code>__getattribute__</code> 中的属性查找顺序，实例属性优先访问。</p>
+<p>最后我们分析了 <code>function</code> 和 <code>method</code> 的区别，以及使用 Python 描述符也可以实现 <code>property</code>、<code>staticmethod</code>、<code>classmethod</code> 装饰器。</p>
+<p>Python 描述符提供了强大的属性访问控制功能，我们可以在需要对属性进行复杂控制的场景中去使用它。</p>
+
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2017/08/31/spider-platform-build/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          
+            <a href="/2017/08/31/spider-platform-build/" class="post-title-link" itemprop="url">如何构建一个通用的垂直爬虫平台？</a>
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2017-08-31 09:19:26" itemprop="dateCreated datePublished" datetime="2017-08-31T09:19:26+00:00">2017-08-31</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E7%88%AC%E8%99%AB/" itemprop="url" rel="index"><span itemprop="name">爬虫</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2017/08/31/spider-platform-build/" class="post-meta-item leancloud_visitors" data-flag-title="如何构建一个通用的垂直爬虫平台？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2017/08/31/spider-platform-build/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2017/08/31/spider-platform-build/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.3k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>15 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+          <blockquote>
+<p>之前做爬虫时，在公司设计开发了一个通用的垂直爬虫平台，后来在公司做了内部的技术分享，这篇文章把整个爬虫平台的设计思路整理了一下，分享给大家。</p>
+</blockquote>
+<p>写一个爬虫很简单，写一个可持续稳定运行的爬虫也不难，但如何构建一个通用化的垂直爬虫平台？</p>
+<p>这篇文章，我就来和你分享一下，一个通用垂直爬虫平台的构建思路。</p>
+<h1 id="爬虫简介"><a href="#爬虫简介" class="headerlink" title="爬虫简介"></a>爬虫简介</h1><p>首先介绍一下，什么是爬虫？</p>
+<p>搜索引擎是这样定义的：</p>
+<blockquote>
+<p>网络爬虫（又被称为网页蜘蛛，网络机器人），是一种按照一定的规则，自动地抓取网页信息的程序或者脚本。</p>
+</blockquote>
+<p>很简单，爬虫就是指定规则自动采集数据的程序脚本，目的在于拿到想要的数据。</p>
+<p>而爬虫主要分为两大类：</p>
+<ul>
+<li>通用爬虫（搜索引擎）</li>
+<li>垂直爬虫（特定领域）</li>
+</ul>
+<p>由于第一类的开发成本较高，所以只有搜索引擎公司在做，如谷歌、百度等。</p>
+<p>而大多数企业在做的都是第二类，成本低、数据价值高。</p>
+<p>例如一家做电商的公司只需要电商领域有价值的数据，那开发一个只采集电商领域数据的爬虫平台，意义较大。</p>
+<p>我要和你分享的主要是针对第二类，垂直爬虫平台的设计思路。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2017/08/31/spider-platform-build/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
+      
+    </div>
+
+    
+    
+    
+      <footer class="post-footer">
+        <div class="post-eof"></div>
+      </footer>
+  </article>
+  
+  
+  
+
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/page/4/"><i class="fa fa-angle-left" aria-label="上一页"></i></a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/6/"><i class="fa fa-angle-right" aria-label="下一页"></i></a>
+  </nav>
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

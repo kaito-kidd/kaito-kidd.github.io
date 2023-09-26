@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="在 Python 开发中，你可能听说过「描述符」这个概念，由于我们很少直接使用它，所以大部分开发人员并不了解它的原理。 但作为熟练使用 Python，想要进阶的你，建议还是了解一下描述符的原理，这也便于你更深层次地理解 Python 的设计思想。 其实，在开发过程中，虽然我们没有直接使用到描述符，但是它在底层却无时不刻地被使用到，例如以下这些：  function、bound method、unb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python进阶——什么是描述符？">
+<meta property="og:url" content="http://kaito-kidd.com/2018/04/16/python-advance-descriptor/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="在 Python 开发中，你可能听说过「描述符」这个概念，由于我们很少直接使用它，所以大部分开发人员并不了解它的原理。 但作为熟练使用 Python，想要进阶的你，建议还是了解一下描述符的原理，这也便于你更深层次地理解 Python 的设计思想。 其实，在开发过程中，虽然我们没有直接使用到描述符，但是它在底层却无时不刻地被使用到，例如以下这些：  function、bound method、unb">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-04-16T09:42:51.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="python">
+<meta property="article:tag" content="描述符">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2018/04/16/python-advance-descriptor/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Python进阶——什么是描述符？ | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2018/04/16/python-advance-descriptor/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Python进阶——什么是描述符？
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-04-16 09:42:51" itemprop="dateCreated datePublished" datetime="2018-04-16T09:42:51+00:00">2018-04-16</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index"><span itemprop="name">Python</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2018/04/16/python-advance-descriptor/" class="post-meta-item leancloud_visitors" data-flag-title="Python进阶——什么是描述符？" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2018/04/16/python-advance-descriptor/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2018/04/16/python-advance-descriptor/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>9.7k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>16 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在 Python 开发中，你可能听说过「描述符」这个概念，由于我们很少直接使用它，所以大部分开发人员并不了解它的原理。</p>
+<p>但作为熟练使用 Python，想要进阶的你，建议还是了解一下描述符的原理，这也便于你更深层次地理解 Python 的设计思想。</p>
+<p>其实，在开发过程中，虽然我们没有直接使用到描述符，但是它在底层却无时不刻地被使用到，例如以下这些：</p>
+<ul>
+<li><code>function</code>、<code>bound method</code>、<code>unbound method</code></li>
+<li>装饰器<code>property</code>、<code>staticmethod</code>、<code>classmethod</code></li>
+</ul>
+<p>是不是都很熟悉？</p>
+<p>这些都与描述符有着千丝万缕的关系，这篇文章我们就来看一下描述符背后的工作原理。</p>
+<h1 id="什么是描述符？"><a href="#什么是描述符？" class="headerlink" title="什么是描述符？"></a>什么是描述符？</h1><p>在解释什么是「描述符」之前，我们先来看一个简单的例子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    x = <span class="number">10</span></span><br><span class="line">    </span><br><span class="line">print(A.x) <span class="comment"># 10</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子非常简单，我们在类 <code>A</code> 中定义了一个<strong>类属性</strong> <code>x</code>，然后打印它的值。</p>
+<p>其实，除了直接定类属性之外，我们还可以这样定义一个类属性：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Ten</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">10</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line">    x = Ten()   <span class="comment"># 属性换成了一个类</span></span><br><span class="line">    </span><br><span class="line">print(A.x) <span class="comment"># 10</span></span><br></pre></td></tr></table></figure>
+
+<p>仔细看，这次类属性 <code>x</code> 不再是一个具体的值，而是一个类 <code>Ten</code>。<code>Ten</code> 中定义了一个 <code>__get__</code> 方法，返回具体的值。</p>
+<p>在 Python 中，<strong>允许把一个类属性，托管给一个类，这个属性就是一个「描述符」。</strong></p>
+<p>换句话说，「描述符」是一个「绑定行为」的属性。</p>
+<p>怎么理解这句话？</p>
+<p>回忆一下，我们开发时，一般把「行为」叫做什么？是的，「行为」一般指的是一个方法。</p>
+<p>所以我们也可以把「描述符」理解为：对象的属性不再是一个具体的值，而是交给了一个方法去定义。</p>
+<p>可以想一下，如果我们用一个方法去定义一个属性，这么做的好处是什么？</p>
+<p>有了方法，我们就可以在方法内实现自己的逻辑，最简单的，我们可以根据不同的条件，在方法内给属性赋予不同的值，就像下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Age</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> obj.name == <span class="string">'zhangsan'</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">20</span></span><br><span class="line">        <span class="keyword">elif</span> obj.name == <span class="string">'lisi'</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="number">25</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> ValueError(<span class="string">"unknow"</span>)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    age = Age()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>)</span><br><span class="line">print(p1.age)   <span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">p2 = Person(<span class="string">'lisi'</span>)</span><br><span class="line">print(p2.age)   <span class="comment"># 25</span></span><br><span class="line"></span><br><span class="line">p3 = Person(<span class="string">'wangwu'</span>)</span><br><span class="line">print(p3.age)   <span class="comment"># unknow</span></span><br></pre></td></tr></table></figure>
+
+<p>这个例子中，<code>age</code> 类属性被另一个类托管了，在这个类的 <code>__get__</code> 中，它会根据 <code>Person</code> 类的属性 <code>name</code>，决定 <code>age</code> 是什么值。</p>
+<p>这只是一个非常简单的例子，我们可以看到，通过描述符的使用，我们可以轻易地改变一个类属性的定义方式。</p>
+<h1 id="描述符协议"><a href="#描述符协议" class="headerlink" title="描述符协议"></a>描述符协议</h1><p>了解了描述符的定义，现在我们把重点放到托管属性的类上。</p>
+<p>其实，一个类属性想要托管给一个类，这个类内部实现的方法不能是随便定义的，它必须遵守「描述符协议」，也就是要实现以下几个方法：</p>
+<ul>
+<li><code>__get__(self, obj, type=None) -&gt; value</code></li>
+<li><code>__set__(self, obj, value) -&gt; None</code></li>
+<li><code>__delete__(self, obj) -&gt; None</code></li>
+</ul>
+<p>只要是实现了以上几个方法的<strong>其中一个</strong>，那么这个类属性就可以称作描述符。</p>
+<p>另外，描述符又可以分为「数据描述符」和「非数据描述符」：</p>
+<ul>
+<li>只定义了 <code>__get___</code>，叫做非数据描述符</li>
+<li>除了定义 <code>__get__</code> 之外，还定义了 <code>__set__</code> 或 <code>__delete__</code>，叫做数据描述符</li>
+</ul>
+<p>它们两者有什么区别，我会在下面详述。</p>
+<p>现在我们来看一个包含 <code>__get__</code> 和 <code>__set__</code> 方法的描述符例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf8</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Age</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value=<span class="number">20</span>)</span>:</span></span><br><span class="line">        self.value = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, type=None)</span>:</span></span><br><span class="line">        print(<span class="string">'call __get__: obj: %s type: %s'</span> % (obj, type))</span><br><span class="line">        <span class="keyword">return</span> self.value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> value &lt;= <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"age must be greater than 0"</span>)</span><br><span class="line">        print(<span class="string">'call __set__: obj: %s value: %s'</span> % (obj, value))</span><br><span class="line">        self.value = value</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    age = Age()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line"></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>)</span><br><span class="line">print(p1.age)</span><br><span class="line"><span class="comment"># call __get__: obj: &lt;__main__.Person object at 0x1055509e8&gt; type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">print(Person.age)</span><br><span class="line"><span class="comment"># call __get__: obj: None type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 20</span></span><br><span class="line"></span><br><span class="line">p1.age = <span class="number">25</span></span><br><span class="line"><span class="comment"># call __set__: obj: &lt;__main__.Person object at 0x1055509e8&gt; value: 25</span></span><br><span class="line"></span><br><span class="line">print(p1.age)</span><br><span class="line"><span class="comment"># call __get__: obj: &lt;__main__.Person object at 0x1055509e8&gt; type: &lt;class '__main__.Person'&gt;</span></span><br><span class="line"><span class="comment"># 25</span></span><br><span class="line"></span><br><span class="line">p1.age = <span class="number">-1</span></span><br><span class="line"><span class="comment"># ValueError: age must be greater than 0</span></span><br></pre></td></tr></table></figure>
+
+<p>在这例子中，类属性 <code>age</code> 是一个描述符，它的值取决于 <code>Age</code> 类。</p>
+<p>从输出结果来看，当我们获取或修改 <code>age</code> 属性时，调用了 <code>Age</code> 的 <code>__get__</code> 和 <code>__set__</code> 方法：</p>
+<ul>
+<li>当调用 <code>p1.age</code> 时，<code>__get__</code> 被调用，参数 <code>obj</code> 是 <code>Person</code> 实例，<code>type</code> 是 <code>type(Person)</code></li>
+<li>当调用 <code>Person.age</code> 时，<code>__get__</code> 被调用，参数 <code>obj</code> 是 <code>None</code>，<code>type</code> 是 <code>type(Person)</code></li>
+<li>当调用 <code>p1.age = 25</code>时，<code>__set__</code> 被调用，参数 <code>obj</code> 是 <code>Person</code> 实例，<code>value</code> 是25</li>
+<li>当调用 <code>p1.age = -1</code>时，<code>__set__</code> 没有通过校验，抛出 <code>ValueError</code></li>
+</ul>
+<p>其中，调用 <code>__set__</code> 传入的参数，我们比较容易理解，但是对于 <code>__get__</code> 方法，通过<strong>类或实例</strong>调用，传入的参数是不同的，这是为什么？</p>
+<p>这就需要我们了解一下描述符的工作原理。</p>
+<h1 id="描述符的工作原理"><a href="#描述符的工作原理" class="headerlink" title="描述符的工作原理"></a>描述符的工作原理</h1><p>要解释描述符的工作原理，首先我们需要先从属性的访问说起。</p>
+<p>在开发时，不知道你有没有想过这样一个问题：通常我们写这样的代码 <code>a.b</code>，其背后到底发生了什么？</p>
+<p>这里的 <code>a</code> 和 <code>b</code> 可能存在以下情况：</p>
+<ol>
+<li><code>a</code> 可能是一个类，也可能是一个实例，我们这里统称为对象</li>
+<li><code>b</code> 可能是一个属性，也可能是一个方法，方法其实也可以看做是类的属性</li>
+</ol>
+<p>其实，无论是以上哪种情况，在 Python 中，都有一个统一的调用逻辑：</p>
+<ol>
+<li>先调用 <code>__getattribute__</code> 尝试获得结果</li>
+<li>如果没有结果，调用 <code>__getattr__</code></li>
+</ol>
+<p>用代码表示就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getattr_hook</span><span class="params">(obj, name)</span>:</span></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">return</span> obj.__getattribute__(name)</span><br><span class="line">    <span class="keyword">except</span> AttributeError:</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> hasattr(type(obj), <span class="string">'__getattr__'</span>):</span><br><span class="line">            <span class="keyword">raise</span></span><br><span class="line">    <span class="keyword">return</span> type(obj).__getattr__(obj, name)</span><br></pre></td></tr></table></figure>
+
+<p>我们这里需要重点关注一下 <code>__getattribute__</code>，因为它是所有属性查找的入口，它内部实现的属性查找顺序是这样的：</p>
+<ol>
+<li>要查找的属性，在类中是否是一个描述符</li>
+<li>如果是描述符，再检查它是否是一个数据描述符</li>
+<li>如果是数据描述符，则调用数据描述符的 <code>__get__</code></li>
+<li>如果不是数据描述符，则从 <code>__dict__</code> 中查找</li>
+<li>如果 <code>__dict__</code> 中查找不到，再看它是否是一个非数据描述符</li>
+<li>如果是非数据描述符，则调用非数据描述符的 <code>__get__</code></li>
+<li>如果也不是一个非数据描述符，则从类属性中查找</li>
+<li>如果类中也没有这个属性，抛出 <code>AttributeError</code> 异常</li>
+</ol>
+<p>写成代码就是下面这样：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取一个对象的属性</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__getattribute__</span><span class="params">(obj, name)</span>:</span></span><br><span class="line">    null = object()</span><br><span class="line">    <span class="comment"># 对象的类型 也就是实例的类</span></span><br><span class="line">    objtype = type(obj)</span><br><span class="line">    <span class="comment"># 从这个类中获取指定属性</span></span><br><span class="line">    cls_var = getattr(objtype, name, null)</span><br><span class="line">    <span class="comment"># 如果这个类实现了描述符协议</span></span><br><span class="line">    descr_get = getattr(type(cls_var), <span class="string">'__get__'</span>, null)</span><br><span class="line">    <span class="keyword">if</span> descr_get <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">if</span> (hasattr(type(cls_var), <span class="string">'__set__'</span>)</span><br><span class="line">            <span class="keyword">or</span> hasattr(type(cls_var), <span class="string">'__delete__'</span>)):</span><br><span class="line">            <span class="comment"># 优先从数据描述符中获取属性</span></span><br><span class="line">            <span class="keyword">return</span> descr_get(cls_var, obj, objtype)</span><br><span class="line">    <span class="comment"># 从实例中获取属性</span></span><br><span class="line">    <span class="keyword">if</span> hasattr(obj, <span class="string">'__dict__'</span>) <span class="keyword">and</span> name <span class="keyword">in</span> vars(obj):</span><br><span class="line">        <span class="keyword">return</span> vars(obj)[name]</span><br><span class="line">    <span class="comment"># 从非数据描述符获取属性</span></span><br><span class="line">    <span class="keyword">if</span> descr_get <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">return</span> descr_get(cls_var, obj, objtype)</span><br><span class="line">    <span class="comment"># 从类中获取属性</span></span><br><span class="line">    <span class="keyword">if</span> cls_var <span class="keyword">is</span> <span class="keyword">not</span> null:</span><br><span class="line">        <span class="keyword">return</span> cls_var</span><br><span class="line">    <span class="comment"># 抛出 AttributeError 会触发调用 __getattr__</span></span><br><span class="line">    <span class="keyword">raise</span> AttributeError(name)</span><br></pre></td></tr></table></figure>
+
+<p>如果不好理解，你最好写一个程序测试一下，观察各种情况下的属性的查找顺序。</p>
+<p>到这里我们可以看到，在一个对象中查找一个属性，都是先从 <code>__getattribute__</code> 开始的。</p>
+<p>在 <code>__getattribute__</code> 中，它会检查这个类属性是否是一个描述符，如果是一个描述符，那么就会调用它的 <code>__get__</code> 方法。但具体的调用细节和传入的参数是下面这样的：</p>
+<ul>
+<li>如果 <code>a</code> 是一个<strong>实例</strong>，调用细节为：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type(a).__dict__[<span class="string">'b'</span>].__get__(a, type(a))</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>如果 <code>a</code> 是一个<strong>类</strong>，调用细节为：</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">a.__dict__[<span class="string">'b'</span>].__get__(<span class="literal">None</span>, a)</span><br></pre></td></tr></table></figure>
+
+<p>所以我们就能看到上面例子输出的结果。</p>
+<h1 id="数据描述符和非数据描述符"><a href="#数据描述符和非数据描述符" class="headerlink" title="数据描述符和非数据描述符"></a>数据描述符和非数据描述符</h1><p>了解了描述符的工作原理，我们继续来看数据描述符和非数据描述符的区别。</p>
+<p>从定义上来看，它们的区别是：</p>
+<ul>
+<li>只定义了 <code>__get___</code>，叫做非数据描述符</li>
+<li>除了定义 <code>__get__</code> 之外，还定义了 <code>__set__</code> 或 <code>__delete__</code>，叫做数据描述符</li>
+</ul>
+<p>此外，我们从上面描述符调用的顺序可以看到，在对象中查找属性时，数据描述符要优先于非数据描述符调用。</p>
+<p>在之前的例子中，我们定义了 <code>__get__</code> 和 <code>__set__</code>，所以那些类属性都是<strong>数据描述符</strong>。</p>
+<p>我们再来看一个<strong>非数据描述符</strong>的例子：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.foo = <span class="string">'abc'</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'xyz'</span></span><br><span class="line"></span><br><span class="line">print(A().foo)  <span class="comment"># 输出什么？</span></span><br></pre></td></tr></table></figure>
+
+<p>这段代码，我们定义了一个相同名字的属性和方法 <code>foo</code>，如果现在执行 <code>A().foo</code>，你觉得会输出什么结果？</p>
+<p>答案是 <code>abc</code>。</p>
+<p>为什么打印的是实例属性 <code>foo</code> 的值，而不是方法 <code>foo</code> 呢？</p>
+<p>这就和非数据描述符有关系了。</p>
+<p>我们执行 <code>dir(A.foo)</code>，观察结果：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">print(dir(A.foo))</span><br><span class="line"><span class="comment"># [... '__get__', '__getattribute__', ...]</span></span><br></pre></td></tr></table></figure>
+
+<p>看到了吗？<code>A</code> 的 <code>foo</code> 方法其实实现了 <code>__get__</code>，我们在上面的分析已经得知：只定义 <code>__get__</code> 方法的对象，它其实是一个非数据描述符，也就是说，<strong>我们在类中定义的方法，其实本身就是一个非数据描述符。</strong></p>
+<p>所以，在一个类中，如果存在相同名字的属性和方法，按照上面所讲的 <code>__getattribute__</code> 中查找属性的顺序，这个属性就会优先从实例中获取，如果实例中不存在，才会从非数据描述符中获取，所以在这里优先查找的是实例属性 <code>foo</code> 的值。</p>
+<p>到这里我们可以总结一下关于描述符的相关知识点：</p>
+<ul>
+<li>描述符必须是一个类属性</li>
+<li><code>__getattribute__</code> 是查找一个属性（方法）的入口</li>
+<li><code>__getattribute__</code> 定义了一个属性（方法）的查找顺序：数据描述符、实例属性、非数据描述符、类属性</li>
+<li>如果我们重写了 <code>__getattribute__</code> 方法，会阻止描述符的调用</li>
+<li>所有方法其实都是一个非数据描述符，因为它定义了 <code>__get__</code></li>
+</ul>
+<h1 id="描述符的使用场景"><a href="#描述符的使用场景" class="headerlink" title="描述符的使用场景"></a>描述符的使用场景</h1><p>了解了描述符的工作原理，那描述符一般用在哪些业务场景中呢？</p>
+<p>在这里我用描述符实现了一个属性校验器，你可以参考这个例子，在类似的场景中去使用它。</p>
+<p>首先我们定义一个校验基类 <code>Validator</code>，在 <code>__set__</code> 方法中先调用 <code>validate</code> 方法校验属性是否符合要求，然后再对属性进行赋值。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Validator</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self.data = &#123;&#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.data[obj]</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="comment"># 校验通过后再赋值</span></span><br><span class="line">        self.validate(value)</span><br><span class="line">        self.data[obj] = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+
+<p>接下来，我们定义两个校验类，继承 <code>Validator</code>，然后实现自己的校验逻辑。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Number</span><span class="params">(Validator)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, minvalue=None, maxvalue=None)</span>:</span></span><br><span class="line">        super(Number, self).__init__()</span><br><span class="line">        self.minvalue = minvalue</span><br><span class="line">        self.maxvalue = maxvalue</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(value, (int, float)):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be an int or float'</span>)</span><br><span class="line">        <span class="keyword">if</span> self.minvalue <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> value &lt; self.minvalue:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be at least <span class="subst">&#123;self.minvalue!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">if</span> self.maxvalue <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> value &gt; self.maxvalue:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no more than <span class="subst">&#123;self.maxvalue!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">String</span><span class="params">(Validator)</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, minsize=None, maxsize=None)</span>:</span></span><br><span class="line">        super(String, self).__init__()</span><br><span class="line">        self.minsize = minsize</span><br><span class="line">        self.maxsize = maxsize</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">validate</span><span class="params">(self, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> isinstance(value, str):</span><br><span class="line">            <span class="keyword">raise</span> TypeError(<span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be an str'</span>)</span><br><span class="line">        <span class="keyword">if</span> self.minsize <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> len(value) &lt; self.minsize:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no smaller than <span class="subst">&#123;self.minsize!r&#125;</span>'</span></span><br><span class="line">            )</span><br><span class="line">        <span class="keyword">if</span> self.maxsize <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span> <span class="keyword">and</span> len(value) &gt; self.maxsize:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(</span><br><span class="line">                <span class="string">f'Expected <span class="subst">&#123;value!r&#125;</span> to be no bigger than <span class="subst">&#123;self.maxsize!r&#125;</span>'</span></span><br><span class="line">            )</span><br></pre></td></tr></table></figure>
+
+<p>最后，我们使用这个校验类：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># 定义属性的校验规则 内部用描述符实现</span></span><br><span class="line">    name = String(minsize=<span class="number">3</span>, maxsize=<span class="number">10</span>)</span><br><span class="line">    age = Number(minvalue=<span class="number">1</span>, maxvalue=<span class="number">120</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name, age)</span>:</span></span><br><span class="line">        self.name = name</span><br><span class="line">        self.age = age</span><br><span class="line"></span><br><span class="line"><span class="comment"># 属性符合规则</span></span><br><span class="line">p1 = Person(<span class="string">'zhangsan'</span>, <span class="number">20</span>)</span><br><span class="line">print(p1.name, p1.age)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 属性不符合规则</span></span><br><span class="line">p2 = person(<span class="string">'a'</span>, <span class="number">20</span>)</span><br><span class="line"><span class="comment"># ValueError: Expected 'a' to be no smaller than 3</span></span><br><span class="line">p3 = Person(<span class="string">'zhangsan'</span>, <span class="number">-1</span>)</span><br><span class="line"><span class="comment"># ValueError: Expected -1 to be at least 1</span></span><br></pre></td></tr></table></figure>
+
+<p>现在，当我们对 <code>Person</code> 实例进行初始化时，就可以校验这些属性是否符合预定义的规则了。</p>
+<h1 id="function与method"><a href="#function与method" class="headerlink" title="function与method"></a>function与method</h1><p>我们再来看一下，在开发时经常看到的 <code>function</code>、<code>unbound method</code>、<code>bound method</code> 它们之间到底有什么区别？</p>
+<p>来看下面这段代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">A</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">foo</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> <span class="string">'xyz'</span></span><br><span class="line"></span><br><span class="line">print(A.__dict__[<span class="string">'foo'</span>]) <span class="comment"># &lt;function foo at 0x10a790d70&gt;</span></span><br><span class="line">print(A.foo)     <span class="comment"># &lt;unbound method A.foo&gt;</span></span><br><span class="line">print(A().foo)   <span class="comment"># &lt;bound method A.foo of &lt;__main__.A object at 0x10a793050&gt;&gt;</span></span><br></pre></td></tr></table></figure>
+
+<p>从结果我们可以看出它们的区别：</p>
+<ul>
+<li><code>function</code> 准确来说就是一个函数，并且它实现了 <code>__get__</code> 方法，因此每一个 <code>function</code> 都是一个非数据描述符，而在类中会把 <code>function</code> 放到 <code>__dict__</code> 中存储</li>
+<li>当 <code>function</code> 被实例调用时，它是一个 <code>bound method</code></li>
+<li>当 <code>function</code> 被类调用时， 它是一个 <code>unbound method</code></li>
+</ul>
+<p><code>function</code> 是一个非数据描述符，我们之前已经讲到了。</p>
+<p>而 <code>bound method</code> 和 <code>unbound method</code> 的区别就在于调用方的类型是什么，如果是一个实例，那么这个 <code>function</code> 就是一个 <code>bound method</code>，否则它是一个 <code>unbound method</code>。</p>
+<h1 id="property-staticmethod-classmethod"><a href="#property-staticmethod-classmethod" class="headerlink" title="property/staticmethod/classmethod"></a>property/staticmethod/classmethod</h1><p>我们再来看 <code>property</code>、<code>staticmethod</code>、<code>classmethod</code>。</p>
+<p>这些装饰器的实现，默认是 C 来实现的。</p>
+<p>其实，我们也可以直接利用 Python 描述符的特性来实现这些装饰器，</p>
+<p><code>property</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">property</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, fget=None, fset=None, fdel=None, doc=None)</span>:</span></span><br><span class="line">        self.fget = fget</span><br><span class="line">        self.fset = fset</span><br><span class="line">        self.fdel = fdel</span><br><span class="line">        self.__doc__ = doc</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> obj <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">return</span> self.fget</span><br><span class="line">        <span class="keyword">if</span> self.fget <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError(), <span class="string">"unreadable attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fget(obj)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__set__</span><span class="params">(self, obj, value)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.fset <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError, <span class="string">"can't set attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fset(obj, value)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__delete__</span><span class="params">(self, obj)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self.fdel <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> AttributeError, <span class="string">"can't delete attribute"</span></span><br><span class="line">        <span class="keyword">return</span> self.fdel(obj)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">getter</span><span class="params">(self, fget)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(fget, self.fset, self.fdel, self.__doc__)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">setter</span><span class="params">(self, fset)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(self.fget, fset, self.fdel, self.__doc__)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">deleter</span><span class="params">(self, fdel)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> type(self)(self.fget, self.fset, fdel, self.__doc__)</span><br></pre></td></tr></table></figure>
+
+<p><code>staticmethod</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">staticmethod</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func)</span>:</span></span><br><span class="line">        self.func = func</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, objtype=None)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self.func</span><br></pre></td></tr></table></figure>
+
+<p><code>classmethod</code> 的 Python 版实现：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">classmethod</span>:</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, func)</span>:</span></span><br><span class="line">        self.func = func</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__get__</span><span class="params">(self, obj, klass=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> klass <span class="keyword">is</span> <span class="literal">None</span>:</span><br><span class="line">            klass = type(obj)</span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">newfunc</span><span class="params">(*args)</span>:</span></span><br><span class="line">            <span class="keyword">return</span> self.func(klass, *args)</span><br><span class="line">        <span class="keyword">return</span> newfunc</span><br></pre></td></tr></table></figure>
+
+<p>除此之外，你还可以实现其他功能强大的装饰器。</p>
+<p>由此可见，通过描述符我们可以实现强大而灵活的属性管理功能，对于一些要求属性控制比较复杂的场景，我们可以选择用描述符来实现。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>这篇文章我们主要讲了 Python 描述符的工作原理。</p>
+<p>首先，我们从一个简单的例子了解到，一个类属性是可以托管给另外一个类的，这个类如果实现了描述符协议方法，那么这个类属性就是一个描述符。此外，描述符又可以分为数据描述符和非数据描述符。</p>
+<p>之后我们又分析了获取一个属性的过程，一切的入口都在 <code>__getattribute__</code> 中，这个方法定义了寻找属性的顺序，其中实例属性优先于数据描述符调用，数据描述符要优先于非数据描述符调用。</p>
+<p>另外我们又了解到，方法其实就是一个非数据描述符，如果我们在类中定义了相同名字的实例属性和方法，按照 <code>__getattribute__</code> 中的属性查找顺序，实例属性优先访问。</p>
+<p>最后我们分析了 <code>function</code> 和 <code>method</code> 的区别，以及使用 Python 描述符也可以实现 <code>property</code>、<code>staticmethod</code>、<code>classmethod</code> 装饰器。</p>
+<p>Python 描述符提供了强大的属性访问控制功能，我们可以在需要对属性进行复杂控制的场景中去使用它。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2018/04/16/python-advance-descriptor/" title="Python进阶——什么是描述符？">http://kaito-kidd.com/2018/04/16/python-advance-descriptor/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/python/" rel="tag"><i class="fa fa-tag"></i> python</a>
+              <a href="/tags/%E6%8F%8F%E8%BF%B0%E7%AC%A6/" rel="tag"><i class="fa fa-tag"></i> 描述符</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2017/08/31/spider-platform-build/" rel="prev" title="如何构建一个通用的垂直爬虫平台？">
+      <i class="fa fa-chevron-left"></i> 如何构建一个通用的垂直爬虫平台？
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2018/04/17/python-advance-context-manager/" rel="next" title="Python进阶——什么是上下文管理器？">
+      Python进阶——什么是上下文管理器？ <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#什么是描述符？"><span class="nav-number">1.</span> <span class="nav-text">什么是描述符？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#描述符协议"><span class="nav-number">2.</span> <span class="nav-text">描述符协议</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#描述符的工作原理"><span class="nav-number">3.</span> <span class="nav-text">描述符的工作原理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据描述符和非数据描述符"><span class="nav-number">4.</span> <span class="nav-text">数据描述符和非数据描述符</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#描述符的使用场景"><span class="nav-number">5.</span> <span class="nav-text">描述符的使用场景</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#function与method"><span class="nav-number">6.</span> <span class="nav-text">function与method</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#property-staticmethod-classmethod"><span class="nav-number">7.</span> <span class="nav-text">property&#x2F;staticmethod&#x2F;classmethod</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="1、中断CPU具有一种能力，可以在执行完当前指令之后，检测从内部产生或外部发来的特殊信息，并立即对其进行处理，这种特殊的信息，叫做中断信息。 中断即CPU不再接着刚执行完的指令向下执行，而是转去处理特殊信息。 中断分为：  内中断，CPU内部产生的特殊信息 外中断，CPU外部产生的特殊信息  1.1、内中断中断信息必须包含标识来源的编码，叫做中断类型码。中断类型码为一个字节型数据，可表示256种中">
+<meta property="og:type" content="article">
+<meta property="og:title" content="汇编总结(2)：中断、端口、直接定址表">
+<meta property="og:url" content="http://kaito-kidd.com/2016/06/20/assembly-note-2/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="1、中断CPU具有一种能力，可以在执行完当前指令之后，检测从内部产生或外部发来的特殊信息，并立即对其进行处理，这种特殊的信息，叫做中断信息。 中断即CPU不再接着刚执行完的指令向下执行，而是转去处理特殊信息。 中断分为：  内中断，CPU内部产生的特殊信息 外中断，CPU外部产生的特殊信息  1.1、内中断中断信息必须包含标识来源的编码，叫做中断类型码。中断类型码为一个字节型数据，可表示256种中">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2016-06-20T22:13:27.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="图书">
+<meta property="article:tag" content="汇编">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2016/06/20/assembly-note-2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>汇编总结(2)：中断、端口、直接定址表 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2016/06/20/assembly-note-2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          汇编总结(2)：中断、端口、直接定址表
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2016-06-20 22:13:27" itemprop="dateCreated datePublished" datetime="2016-06-20T22:13:27+00:00">2016-06-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E6%B1%87%E7%BC%96/" itemprop="url" rel="index"><span itemprop="name">汇编</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2016/06/20/assembly-note-2/" class="post-meta-item leancloud_visitors" data-flag-title="汇编总结(2)：中断、端口、直接定址表" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2016/06/20/assembly-note-2/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2016/06/20/assembly-note-2/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>2.6k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>4 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="1、中断"><a href="#1、中断" class="headerlink" title="1、中断"></a>1、中断</h2><p>CPU具有一种能力，可以在执行完当前指令之后，检测从内部产生或外部发来的特殊信息，并立即对其进行处理，这种特殊的信息，叫做<strong>中断信息</strong>。</p>
+<p><strong>中断</strong>即CPU不再接着刚执行完的指令向下执行，而是转去处理特殊信息。</p>
+<p>中断分为：</p>
+<ul>
+<li>内中断，CPU内部产生的特殊信息</li>
+<li>外中断，CPU外部产生的特殊信息</li>
+</ul>
+<h3 id="1-1、内中断"><a href="#1-1、内中断" class="headerlink" title="1.1、内中断"></a>1.1、内中断</h3><p>中断信息必须包含标识来源的编码，叫做<strong>中断类型码</strong>。中断类型码为一个字节型数据，可表示256种中断信息来源。</p>
+<p>产生中断信息的事件，即中断信息的来源，叫做<strong>中断源</strong>。</p>
+<p>内中断分类：</p>
+<ul>
+<li>除法错误，类型码0，如div指令产生溢出</li>
+<li>单步执行，类型码1，即单步调试</li>
+<li>into指令，类型码4</li>
+<li>int指令，指令格式为<code>int n</code>，类型码为n</li>
+</ul>
+<p>CPU在收到中断信息后，需要对中断信息进行处理，这可以由我们编程来决定，我们编写的处理中断信息的程序叫做<strong>中断处理程序</strong>。</p>
+<p>CPU要想执行中断处理程序，则必须知道这个程序的入口，即CS:IP指向这个入口，CPU用8位中断类型码通过<strong>中断向量表</strong>找到对应中断程序的入口地址。</p>
+<p><strong>中断向量表</strong>在内存中保存，对于8086CPU机，其必须存放在0000:0000~0000:03FF处，这是规定好的。</p>
+<p>中断向量表中每个中断类型码对应中断程序的<strong>段地址和偏移地址</strong>，共占2个字节。</p>
+<p>CPU通过中断类型码，然后在中断向量表中找到中断处理程序的段地址和偏移地址，设置CS和IP，CPU开始执行中断处理程序。这个操作是CPU自动完成的，这个过程叫做<strong>中断过程</strong>。</p>
+<p>具体过程如下：</p>
+<ul>
+<li>从中断信息中取得中断类型码N</li>
+<li><code>pushf</code>：标志寄存器的值入栈(中断过程中会改变标志寄存器的值，所以先保存之前的值)</li>
+<li><code>TF=0,IF=0</code>：设置标志寄存器<code>第8位TF</code>和<code>第9位IF</code>的值为0</li>
+<li><code>PUSH CS</code>：<code>CS</code>内容入栈</li>
+<li><code>PUSH IP</code>：<code>IP</code>内容入栈</li>
+<li><code>(IP)=(N*4),(CS)=(N*4+2)</code>：从内存地址为<code>中断类型码*4</code>和<code>中断类型码*4+2</code>的两个字中读取中断处理程序入口地址，设置CS和IP</li>
+<li>执行中断处理程序</li>
+</ul>
+<p><strong>中断处理程序编写步骤</strong>：</p>
+<ul>
+<li>保存用到的寄存器</li>
+<li>处理中断</li>
+<li>恢复用到的寄存器</li>
+<li>用<code>iret</code>指令返回</li>
+</ul>
+<p><strong><code>iret</code>指令功能：</strong></p>
+<ul>
+<li><code>pop IP</code></li>
+<li><code>pop CS</code></li>
+<li><code>popf</code></li>
+</ul>
+<p>引发中断的具体事件：</p>
+<ul>
+<li>除法错误：如果在执行<code>div</code>指令时，发生溢出错误，将产生中断类型码为0的中断信息，CPU检测到此信息然后引发中断过程，转去执行0号中断所对应的中断处理程序；</li>
+<li>单步中断：CPU执行完一条指令后，如果检测到<code>TF</code>位是1，则产生单步中断，转去执行1号中断处理程序，<strong>CPU提供单步中断功能，为单步跟踪程序执行过程提供了实现机制；</strong></li>
+</ul>
+<ul>
+<li>int指令引发中断：可自定义调用中断处理程序，例如<code>int n</code>将调用n号中断处理程序；</li>
+</ul>
+<p>在主板的ROM中存放的程序，叫做<code>BIOS</code>(基本输入输出系统)，主要包含以下内容：</p>
+<ul>
+<li>硬件系统的检测和初始化程序；</li>
+<li>外部中断和内部中断的中断例程；</li>
+<li>用于对硬件设备进行I/O操作的中断例程；</li>
+<li>其他和硬件系统相关的中断例程；</li>
+</ul>
+<p>操作系统DOS也提供了中断例程，DOS中断例程就是操作系统向程序员提供的编程资源。<code>int 21h</code>中断例程就是DOS提供的，即程序返回功能。</p>
+<blockquote>
+<p>在执行完向<code>ss</code>寄存器传送数据指令后，即使发生中断，CPU也不会响应。因为<code>ss:sp</code>联合指向栈顶，应该持续完成，否则将发生错误。</p>
+</blockquote>
+<h3 id="1-2、外中断"><a href="#1-2、外中断" class="headerlink" title="1.2、外中断"></a>1.2、外中断</h3><p>CPU能响应外设的输入，并向它们进行输出，这个过程叫做<strong>外中断</strong>。</p>
+<p>外设的输入不直接送入内存和CPU，而是送入相关的接口芯片端口中。CPU向外设输出也不是直接送入外设，而是先送入端口，再由芯片送到外设。CPU通过端口和外设进行联系。</p>
+<p>外中断源分为2类：</p>
+<ul>
+<li>可屏蔽中断：CPU可以不响应的外中断，由标志寄存器<code>IF</code>决定，如果<code>IF=1</code>则响应，否则屏蔽中断；<ul>
+<li>中断过程将IF设置为0，就是保证在进入中断处理程序后，禁止其他的可屏蔽中断</li>
+<li>8086CPU提供修改IF的指令：<code>sti</code>：IF=1， <code>cli</code>：IF=0</li>
+</ul>
+</li>
+<li>不可屏蔽中断：<ul>
+<li>CPU必须响应的外中断</li>
+<li>中断类型码固定为2</li>
+</ul>
+</li>
+</ul>
+<p><strong>几乎所有由外设引发的外中断，都是可屏蔽中断。</strong></p>
+<a id="more"></a>
+
+<h2 id="2、端口"><a href="#2、端口" class="headerlink" title="2、端口"></a>2、端口</h2><p>在计算机中，各种存储器和CPU的地址总线、数据总线、控制总线相连，CPU控制它们时，都把它们当做内存来对待。除了各种存储器之外，还与很多芯片相连：</p>
+<ul>
+<li>各种接口卡(网卡、显卡)上的接口芯片，它们控制接口卡工作；</li>
+<li>主板上的接口芯片，CPU通过它们对部分外设进行访问；</li>
+<li>其他芯片，存储相关系统信息，或进行相关的输入输出处理；</li>
+</ul>
+<p>这些芯片中，都有一组可以由CPU读写的寄存器，CPU把这些寄存器都当做端口，对它们进行统一编址，从而建立一个统一的端口地址空间。</p>
+<p>访问端口：</p>
+<ul>
+<li><code>in al 60h</code>：从60h号端口读入一个字节</li>
+<li><code>out 20h,al</code>：往20h端口写入一个字节</li>
+</ul>
+<p>PC机中，有一个CMOS RAM芯片，一般称为<strong>CMOS</strong>，特征如下：</p>
+<ul>
+<li>包含一个实时钟和一个有128个存储单元的RAM存储器；</li>
+<li>此芯片靠电池供电，可保证实时钟持续工作，RAM中信息不丢失；</li>
+<li>128个字节的RAM中，内部实时钟占用0~0dh保存时间信息，其他单元保存系统配合信息，供系统启动时BIOS程序读取，也可通过BIOS配置CMOS RAM中的系统信息；</li>
+<li>此芯片内部有2个端口：70h和71h，CPU通过这2个端口读写CMOS RAM；</li>
+<li>70h为地址端口，存放要访问CMOS RAM单元的地址；71h为数据端口，存放从选定CMOS RAM单元中读取的数据，或要写入其中的数据；</li>
+</ul>
+<p>在CMOS RAM中，存放着当前的时间：年、月、日、时、分、秒。每个长度为1个字节，这些数据以<strong>BCD码</strong>方式存放。</p>
+<p><strong>BCD码</strong>是以4位二进制数表示十进制数的编码方法。</p>
+<h2 id="3、直接定址表"><a href="#3、直接定址表" class="headerlink" title="3、直接定址表"></a>3、直接定址表</h2><p>假如<code>a、b</code>标号代表2组数据空间，那么有如下写法<strong>既可以标记存储数据的单元地址，还可以标记其长度</strong>：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">指令：mov ax,b</span><br><span class="line">相当于：mov ax,cs:[8]</span><br><span class="line"></span><br><span class="line">指令：mov b,2</span><br><span class="line">相当于：mov word ptr cs:[8],2</span><br><span class="line"></span><br><span class="line">指令：inc b</span><br><span class="line">相当于：inc word ptr cs:[8]</span><br><span class="line"></span><br><span class="line">指令：mov al,a[si]</span><br><span class="line">相当于：mov al,cs:0[si]</span><br><span class="line"></span><br><span class="line">指令：mov al,a[3]</span><br><span class="line">相当于：mov al,cs:0[3]</span><br><span class="line"></span><br><span class="line">指令：mov al,a[bx+si+3]</span><br><span class="line">相当于：mov al,cs:0[bx+si+3]</span><br></pre></td></tr></table></figure>
+
+<p>通过数据能直接计算出所要找的元素的位置的表，叫做<strong>直接定址表</strong>。</p>
+<p>直接定址表的好处：</p>
+<ul>
+<li>使算法清晰简洁</li>
+<li>加快运算速度</li>
+<li>程序易于扩展</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2016/06/20/assembly-note-2/" title="汇编总结(2)：中断、端口、直接定址表">http://kaito-kidd.com/2016/06/20/assembly-note-2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/%E5%9B%BE%E4%B9%A6/" rel="tag"><i class="fa fa-tag"></i> 图书</a>
+              <a href="/tags/%E6%B1%87%E7%BC%96/" rel="tag"><i class="fa fa-tag"></i> 汇编</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2016/06/03/assembly-note-1/" rel="prev" title="汇编总结(1)：基础、存储器、寄存器、汇编程序">
+      <i class="fa fa-chevron-left"></i> 汇编总结(1)：基础、存储器、寄存器、汇编程序
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2016/06/24/code-note-18-25/" rel="next" title="《编码：隐匿在计算机软硬件背后的语言》读书笔记18-25">
+      《编码：隐匿在计算机软硬件背后的语言》读书笔记18-25 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1、中断"><span class="nav-number">1.</span> <span class="nav-text">1、中断</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1、内中断"><span class="nav-number">1.1.</span> <span class="nav-text">1.1、内中断</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2、外中断"><span class="nav-number">1.2.</span> <span class="nav-text">1.2、外中断</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2、端口"><span class="nav-number">2.</span> <span class="nav-text">2、端口</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3、直接定址表"><span class="nav-number">3.</span> <span class="nav-text">3、直接定址表</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

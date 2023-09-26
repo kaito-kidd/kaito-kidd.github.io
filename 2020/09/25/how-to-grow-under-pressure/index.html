@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="这篇文章首发在极客时间App《Redis核心技术与实战》专栏。 写这篇文章的背景： 在极客时间App学习《Redis核心技术与实战》专栏时，由于我在评论区持续输出了高质量的内容，之后被此专栏邀请，为专栏供稿加餐内容。这是一篇帮助专栏读者如何高效学习的方法论分享。 另外一篇发表在此专栏的文章：《我是如何学习Redis的？高效学习Redis的路径和方法分享》  你好，我是Kaito。 上一次，我分享">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何在压力中成长？我的学习方法论分享">
+<meta property="og:url" content="http://kaito-kidd.com/2020/09/25/how-to-grow-under-pressure/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="这篇文章首发在极客时间App《Redis核心技术与实战》专栏。 写这篇文章的背景： 在极客时间App学习《Redis核心技术与实战》专栏时，由于我在评论区持续输出了高质量的内容，之后被此专栏邀请，为专栏供稿加餐内容。这是一篇帮助专栏读者如何高效学习的方法论分享。 另外一篇发表在此专栏的文章：《我是如何学习Redis的？高效学习Redis的路径和方法分享》  你好，我是Kaito。 上一次，我分享">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-09-25T19:56:44.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.554Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="成长">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/09/25/how-to-grow-under-pressure/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>如何在压力中成长？我的学习方法论分享 | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/09/25/how-to-grow-under-pressure/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          如何在压力中成长？我的学习方法论分享
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-25 19:56:44" itemprop="dateCreated datePublished" datetime="2020-09-25T19:56:44+00:00">2020-09-25</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E4%B8%AA%E4%BA%BA%E6%88%90%E9%95%BF/" itemprop="url" rel="index"><span itemprop="name">个人成长</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/09/25/how-to-grow-under-pressure/" class="post-meta-item leancloud_visitors" data-flag-title="如何在压力中成长？我的学习方法论分享" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/09/25/how-to-grow-under-pressure/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/09/25/how-to-grow-under-pressure/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>4.2k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>7 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <blockquote>
+<p>这篇文章首发在<strong>极客时间App<a href="https://time.geekbang.org/column/intro/329" target="_blank" rel="noopener">《Redis核心技术与实战》</a>专栏</strong>。</p>
+<p>写这篇文章的背景：</p>
+<p><strong>在极客时间App学习《Redis核心技术与实战》专栏时，由于我在评论区持续输出了高质量的内容，之后被此专栏邀请，为专栏供稿加餐内容。这是一篇帮助专栏读者如何高效学习的方法论分享。</strong></p>
+<p><strong>另外一篇发表在此专栏的文章：<a href="http://kaito-kidd.com/2020/09/09/how-i-learned-redis/">《我是如何学习Redis的？高效学习Redis的路径和方法分享》</a></strong></p>
+</blockquote>
+<p>你好，我是Kaito。</p>
+<p>上一次，我分享了我总结的<a href="http://kaito-kidd.com/2020/09/09/how-i-learned-redis/">Redis学习路径</a>，在留言区的交流和互动中，我有了很多新的收获。今天，我想再分享一下我对学习这件事儿的认识以及我的学习方法，包括领先一步的心理建设、事半功倍的学习方法以及提升效率的小技巧。</p>
+<h1 id="领先一步：保持好奇-不设限"><a href="#领先一步：保持好奇-不设限" class="headerlink" title="领先一步：保持好奇+不设限"></a>领先一步：保持好奇+不设限</h1><p>我认为，任何领域的学习，在研究具体的方法之前，我们都需要先在心理上领先别人一步。什么意思呢？其实就是要建立并保持好奇心，并且不给自己设限。</p>
+<p>我发现，很多人是缺乏好奇心的，突出表现在只知其然，不知其所以然，不善于思考和挖掘问题。</p>
+<p>给你举个小例子。刚开始接触Redis时，你肯定听说过一句话，<strong>Redis是单线程，高性能</strong>。很多人听完也就过去了，但是有好奇心的人，会进一步思考：“单线程如何处理多个客户端的网络请求呢？采用单线程的话，只能用到一个CPU核心，怎么达到高性能呢？”</p>
+<p>顺着这个思路去学习的话，你就会发现，Redis虽然采用了单线程，但是它使用了多路复用技术，可以处理多个客户端的网络请求。而且，它的数据都存储在内存中，再加上高效的数据结构，所以处理每个请求的速度极快。</p>
+<p>你看，带着好奇心去看问题，最终我们得到的远远超出想象。所以，我们要<strong>永远保持好奇心和深入探究的精神</strong>，它是我们不断进步的核心驱动力。</p>
+<a id="more"></a>
+
+<p>我要说的第二点，就是<strong>不要给自己设限</strong>。</p>
+<p><strong>不要没有做任何尝试，就先去说“我做不到”。</strong>如果你这样做，相当于提前把让自己成长的机会放弃了。我特别喜欢的一个心态是：“我现在虽然不会，但是只要给我时间，我就能学会它。”</p>
+<p>说到这儿，我想给你分享一个我的小故事。</p>
+<p>之前我在业务部门做开发时，大部分时间都在写业务代码，对Redis也只停留在“会用”的层面，并不了解它的原理，更别说分析和定位性能问题了。</p>
+<p>后来一个偶然的机会，我可以去公司的基础架构部门做数据库中间件相关的工作。我当时非常犹豫：一方面，我知道，这个工作要求熟练掌握Redis的方方面面，难度非常高，我觉得我可能无法胜任；但另一方面，我也非常想踏出舒适区，突破一下自己。最终，我还是选择了接受挑战。</p>
+<p>刚开始时，我确实遭遇了难以想象的困难，比如说不熟悉Redis的运行原理、看Redis源码时一头雾水、在系统发生问题时不知所措等等。还好，面对压力，我的斗志被激发了，于是就疯狂地恶补数据结构、网络协议、操作系统等知识，一行行地去啃源码……</p>
+<p>真正走出舒适区之后，我看到了自己的飞速成长和进步，不仅很快就胜任了新工作，而且，我越来越自信了。之后每次遇到的新问题的时候，我再也不会害怕了，因为我知道，只要花时间去研究，就可以搞定一切。</p>
+<p>所以，我真的想和你说，面对任何可以让自己成长的机会，都不要轻易错过，一定不要给自己设限。你要相信，你的潜能会随着你面临的压力而被激发出来，而且它的威力巨大！</p>
+<h1 id="事半功倍：行之有效的学习方法"><a href="#事半功倍：行之有效的学习方法" class="headerlink" title="事半功倍：行之有效的学习方法"></a>事半功倍：行之有效的学习方法</h1><p>有了强烈的学习意愿还不够，我们还要快速地找到科学有效的学习方法，这样才能事半功倍。接下来，我就聊聊我的学习方法。</p>
+<p>首先，我们要学会快速地搜集自己需要的资料。在搜索的时候，我们要尽量简化检索的内容，避免无用的关键词，例如，如果想要搜索“Redis哨兵集群在选举时是如何达成共识的”这个问题，我一般会搜索“Redis sentinel raft”，这样只搜索重点词汇，得到的结果会更多，也更符合我们想要的结果。</p>
+<p>如果在查资料时，遇到了细节问题，找不到答案，不要犹豫，<strong>一定要去看源码</strong>。源码是客观的，是最细节的表现，<strong>不要只会从别人那里获取东西，要学着自己动手觅食</strong>，而源码，往往能够给我们提供清晰易懂的答案。</p>
+<p>比如说，Redis的String数据类型底层是由SDS实现的，当要修改的value长度发生变更时，如果原来的内存空间不足以存储新内容，SDS就需要重新申请内存空间，进行扩容，那么，每次扩容时，会申请多大的内存呢？</p>
+<p>如果你看到了<code>sds.c</code>中的<code>sdsMakeRoomFor</code>函数，就会知道，当需要申请的内存空间小于1MB时，SDS会申请1倍的内存空间，这样就可以避免后面频繁申请内存而导致的性能开销；当需要申请的内存空间大于1MB时，为了避免内存浪费，每次扩容时就只申请1MB的内存空间。类似于这样的问题，我们都能很快地从源码中找到答案。</p>
+<p>很多人都觉得看源码很难，不愿意走出这一步，刚开始我也是这样的，但是后来有一天，我突然想到了“二八定律”。80%的人甘于平庸，遇到稍微难一点的问题就会停下脚步；而另外20%的人，一直不愿意停留在舒适区，只要确定了目标，就会一直向前走。我当然希望自己是那20%的人。所以，每次我觉得有压力、有难度的时候，我就会告诉自己，得坚持下去，这样才能超越80%的人。不得不说，这招儿还挺有用的。</p>
+<p>另外，我还想说，掌握新知识最好的方式，就是把它讲给别人听，或者是写成文章。</p>
+<p>尤其是在写文章的时候，我们需要确定文章的结构，梳理知识点的脉络，还要组织语言，在这个过程中，我们会把一些零碎的内容转化为体系化、结构化的知识。那些散乱的点，会形成一棵“知识树”，这不仅方便我们记忆，而且，在复习的时候，只需要找到“树干”，就能延伸到”枝叶”，举一反三。</p>
+<p>而且，在梳理的过程中，我们往往还能发现自己的知识漏洞，或者是对某些内容有了新的认识和见解。</p>
+<p>例如，我在写《Redis如何持久化数据》这篇文章的时候，就已经知道了RDB+AOF两种方式，但在写的过程中，我发现自己并不清楚具体的细节，比如，为什么生成的RDB文件这么小，这是如何做到的？RDB和AOF分别适合用在什么场景中呢？</p>
+<p>翻阅源码之后，我才发现，RDB文件之所以很小，一方面是因为它存储的是二进制数据，另一方面，Redis针对不同的数据类型做了进一步的压缩处理（例如数字采用int编码存储），这就进一步节省了存储空间。所以，RDB更适合做定时的快照备份和主从全量数据同步，而AOF是实时记录的每个变更操作，更适合用在对数据完整性和安全性要求更高的业务场景中。</p>
+<p>这种用输出反哺输入的方式，也是强化收获的一种有效手段，我真心建议你也试试看看。</p>
+<h1 id="持续精进：做好精力管理"><a href="#持续精进：做好精力管理" class="headerlink" title="持续精进：做好精力管理"></a>持续精进：做好精力管理</h1><p>拥有了好奇心，也找到了合适的方法，也并不是万事大吉了。我们可能还会面临一个问题：“我非常想把某个技术学好，但是我总是被一些事情打断，而且有的时候总想犯懒，这该怎么办呢？”</p>
+<p>其实这是一个效率问题。人天生是有惰性的，所以我们需要借助一些东西去督促我们前进。想一下，工作时，什么时候效率最高？是不是接近deadline的时候呢？</p>
+<p>这就说明，当我们有目标、有压力的时候，才会有动力、有效率地去执行。所以，我常用的一个方法是，在学习某个领域的知识时，我会先按照从易到难的顺序，把它拆解成一个个大的模块，确定大框架的学习目标；接着，我会继续细化每个模块，细化到看到这个任务就知道立马应该做什么的程度。同时，我还会给每项任务制定一个deadline。</p>
+<p>简单举个例子。我在学习Redis的基础数据类型时，首先确定了<code>String</code>、<code>List</code>、<code>Hash</code>、<code>Set</code>、<code>Sorted Set</code>这五大模块。接着，我又对每个模块继续进行拆分，例如，Hash类型底层实现可以拆分成“压缩列表+哈希表”这两种数据结构实现，接下来，我就继续细化这两个模块的内容，最终确定一个个小目标。</p>
+<p>怎么完成这些小目标呢？我采用的方式是用<strong>番茄工作法</strong>。</p>
+<p>我会把这些细化的目标加入到番茄任务中，并且排列好优先级。随后，我会在工作日晚上或者周末，抽出一整块的时间去完成这些小目标。在开启番茄钟时，我会迅速集中精力去完成这些任务。同时，我会把把手机静音，放在自己够不到的地方。等一个番茄钟（25分钟）结束后，休息5分钟，调整下状态，然后再投入到一个番茄任务中。</p>
+<p>在实施的过程中，我们可能会遇到一些阻碍，比如说某个任务比想象中的难。这个时候，我会尝试多用几个番茄钟去攻克它，或者是把它的优先级向后放，先完成其他的番茄任务，最后再花时间去解决比较难的问题。</p>
+<p>长时间使用这种方法，我发现，我的效率非常高，而且，把番茄任务一个个划掉之后，也会有小有成就感，这种成就感会激励持续学习。</p>
+<p>最后，我还想再说一点，就是要投入足够多的时间。不要总是抱怨想要的总是得不到，在抱怨之前，你要先想一想，有没有远超出他人的投入和付出。想要走在别人的前面，就要准备好投入足够多的时间。</p>
+<p>有时候，可能你会觉得，学习某一个领域的技术感觉很枯燥，因为细节很多、很繁琐，但这都是很正常的。现在我们所看到的每一项技术，都是开发者多年的总结和提炼的成果，它本身就是严肃的，你必须花足够多的时间去分析、研究、思考，没有捷径。</p>
+<p>千万不要指望着借助碎片化学习，搞懂某个领域的知识。我所说的碎片化有两层含义：一是指内容碎片化，二是指时间碎片化。</p>
+<p>不知道你没有遇到这种情况，当你看完一篇技术文章时，可能以为自己已经掌握了这些知识点，但是，如果别人稍微问一下相关的知识点，你可能就答不上来了。这就是因为，你学到的东西是碎片化，并没有形成知识体系。</p>
+<p>但是，只有系统化学习，你才能看到这项技术的全貌，会更清晰边界，知道它适合做什么，不适合做什么，为什么会这样去设计。这样才能真正做到举一反三。</p>
+<p>另一方面，不要幻想着只在地铁上，就能把它学会，这样就有点太高估自己了。因为在很短的时间内，我们没有办法深入地去思考，去深入了解这个知识点的前因后果。你必须在晚上或者周末抽出一整块时间，去理清每个知识点之间的关系和边界，必要时还需要动手实践。</p>
+<p>因此，如果真正想去要握某项技术，就必须需要付出整块的时间去学习，而且，必须是系统化的学习。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好了，小结一下。今天，我跟你分享了我的一些学习总结，包括领先别人一步的心理建设，事半功倍的学习方法，以及持续精进的精力管理方法。</p>
+<p><strong>这些道理其实很简单，也很容易理解，但是能真正做到的，也只有20%的人，甚至是更少。所以，希望我们都能真正地行动起来，进步的路很长，我们一定要让自己在路上。</strong></p>
+<p>最后，希望这些内容对你有所帮助，我也很期待你在留言区聊一聊你的学习方法或习惯，我们一起交流和进步。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/09/25/how-to-grow-under-pressure/" title="如何在压力中成长？我的学习方法论分享">http://kaito-kidd.com/2020/09/25/how-to-grow-under-pressure/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+              <a href="/tags/%E6%88%90%E9%95%BF/" rel="tag"><i class="fa fa-tag"></i> 成长</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/09/09/how-i-learned-redis/" rel="prev" title="我是如何学习Redis的？高效学习Redis的路径和方法分享">
+      <i class="fa fa-chevron-left"></i> 我是如何学习Redis的？高效学习Redis的路径和方法分享
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/01/23/redis-slow-latency-analysis/" rel="next" title="Redis为什么变慢了？一文讲透如何排查Redis性能问题 | 万字长文">
+      Redis为什么变慢了？一文讲透如何排查Redis性能问题 | 万字长文 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#领先一步：保持好奇-不设限"><span class="nav-number">1.</span> <span class="nav-text">领先一步：保持好奇+不设限</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#事半功倍：行之有效的学习方法"><span class="nav-number">2.</span> <span class="nav-text">事半功倍：行之有效的学习方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#持续精进：做好精力管理"><span class="nav-number">3.</span> <span class="nav-text">持续精进：做好精力管理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>

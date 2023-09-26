@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"kaito-kidd.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"right","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="之前我们提到，为了保证Redis的高可用，主要需要以下几个方面：  数据持久化 主从复制 自动故障恢复 集群化  我们简单理一下这几个方案的特点，以及它们之间的联系。 数据持久化本质上是为了做数据备份，有了数据持久化，当Redis宕机时，我们可以把数据从磁盘上恢复回来，但在数据恢复之前，服务是不可用的，而且数据恢复的时间取决于实例的大小，数据量越大，恢复起来越慢。Redis的持久化过程可以参考Re">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis集群化方案对比：Codis、Twemproxy、Redis Cluster">
+<meta property="og:url" content="http://kaito-kidd.com/2020/07/07/redis-cluster-codis-twemproxy/index.html">
+<meta property="og:site_name" content="Kaito&#39;s Blog">
+<meta property="og:description" content="之前我们提到，为了保证Redis的高可用，主要需要以下几个方面：  数据持久化 主从复制 自动故障恢复 集群化  我们简单理一下这几个方案的特点，以及它们之间的联系。 数据持久化本质上是为了做数据备份，有了数据持久化，当Redis宕机时，我们可以把数据从磁盘上恢复回来，但在数据恢复之前，服务是不可用的，而且数据恢复的时间取决于实例的大小，数据量越大，恢复起来越慢。Redis的持久化过程可以参考Re">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303742.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303751.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303756.png">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303761.jpg">
+<meta property="og:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303764.jpg">
+<meta property="article:published_time" content="2020-07-07T19:18:30.000Z">
+<meta property="article:modified_time" content="2023-09-26T17:05:17.558Z">
+<meta property="article:author" content="Kaito">
+<meta property="article:tag" content="redis">
+<meta property="article:tag" content="高可用">
+<meta property="article:tag" content="codis">
+<meta property="article:tag" content="twemproxy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303742.jpg">
+
+<link rel="canonical" href="http://kaito-kidd.com/2020/07/07/redis-cluster-codis-twemproxy/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Redis集群化方案对比：Codis、Twemproxy、Redis Cluster | Kaito's Blog</title>
+  
+
+
+  <script>
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "https://hm.baidu.com/hm.js?ac0da3d41844c2dea65fd550d38fa4c1";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Kaito's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">致力成为一枚silver bullet.</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://kaito-kidd.com/2020/07/07/redis-cluster-codis-twemproxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+      <meta itemprop="name" content="Kaito">
+      <meta itemprop="description" content="坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Kaito's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Redis集群化方案对比：Codis、Twemproxy、Redis Cluster
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-07 19:18:30" itemprop="dateCreated datePublished" datetime="2020-07-07T19:18:30+00:00">2020-07-07</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index"><span itemprop="name">Redis</span></a>
+                </span>
+            </span>
+
+          
+            <span id="/2020/07/07/redis-cluster-codis-twemproxy/" class="post-meta-item leancloud_visitors" data-flag-title="Redis集群化方案对比：Codis、Twemproxy、Redis Cluster" title="阅读次数">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span class="leancloud-visitors-count"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="far fa-comment"></i>
+      </span>
+      <span class="post-meta-item-text">Valine：</span>
+    
+    <a title="valine" href="/2020/07/07/redis-cluster-codis-twemproxy/#valine-comments" itemprop="discussionUrl">
+      <span class="post-comments-count valine-comment-count" data-xid="/2020/07/07/redis-cluster-codis-twemproxy/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="本文字数">
+              <span class="post-meta-item-icon">
+                <i class="far fa-file-word"></i>
+              </span>
+                <span class="post-meta-item-text">本文字数：</span>
+              <span>5.5k</span>
+            </span>
+            <span class="post-meta-item" title="阅读时长">
+              <span class="post-meta-item-icon">
+                <i class="far fa-clock"></i>
+              </span>
+                <span class="post-meta-item-text">阅读时长 &asymp;</span>
+              <span>9 分钟</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>之前我们提到，为了保证Redis的高可用，主要需要以下几个方面：</p>
+<ul>
+<li>数据持久化</li>
+<li>主从复制</li>
+<li>自动故障恢复</li>
+<li>集群化</li>
+</ul>
+<p>我们简单理一下这几个方案的特点，以及它们之间的联系。</p>
+<p>数据持久化本质上是为了做数据备份，有了数据持久化，当Redis宕机时，我们可以把数据从磁盘上恢复回来，但在数据恢复之前，服务是不可用的，而且数据恢复的时间取决于实例的大小，数据量越大，恢复起来越慢。Redis的持久化过程可以参考<a href="http://kaito-kidd.com/2020/06/29/redis-persistence-rdb-aof/">Redis持久化是如何做的？RDB和AOF对比分析</a>。</p>
+<p>而主从复制则是部署多个副本节点，多个副本节点实时复制主节点的数据，当主节点宕机时，我们有完整的副本节点可以使用。另一方面，如果我们业务的读请求量很大，主节点无法承受所有的读请求，多个副本节点可以分担读请求，实现读写分离，这样可以提高Redis的访问性能。Redis主从复制的原理可以参考<a href="http://kaito-kidd.com/2020/06/30/redis-replication/">Redis的主从复制是如何做的？复制过程中也会产生各种问题？</a>。</p>
+<p>但有个问题是，当主节点宕机时，我们虽然有完整的副本节点，但需要手动操作把从节点提升为主节点继续提供服务，如果每次主节点故障，都需要人工操作，这个过程既耗时耗力，也无法保证及时性，高可用的程度将大打折扣。如何优化呢？</p>
+<a id="more"></a>
+
+<p>此时我们就需要有自动故障恢复机制，当主节点故障时，可以自动把从节点提上来，这个过程是完全自动化的，无需人工干预，这样才能最大程度保证服务的可用性，降低不可用时间。Redis的故障自动恢复是通过哨兵实现的，具体的故障恢复原理，可以参考<a href="http://kaito-kidd.com/2020/07/02/redis-sentinel/">Redis如何实现故障自动恢复？浅析哨兵的工作原理</a>。</p>
+<p>有了<strong>数据持久化、主从复制、故障自动恢复</strong>这些功能，我们在使用Redis时是不是就可以高枕无忧了？</p>
+<p>答案是否定的，如果我们的业务大部分都是读请求，可以使用读写分离提升性能。但如果<strong>写请求量</strong>也很大呢？现在是大数据时代，像阿里、腾讯这些大体量的公司，每时每刻都拥有非常大的写入量，此时如果只有一个主节点是无法承受的，那如何处理呢？</p>
+<p>这就需要<strong>集群化</strong>！简单来说实现方式就是，<strong>多个主从节点构成一个集群，每个节点存储一部分数据，这样写请求也可以分散到多个主节点上，解决写压力大的问题。同时，集群化可以在节点容量不足和性能不够时，动态增加新的节点，对进群进行扩容，提升性能。</strong></p>
+<p>从这篇文章开始，我们就开始介绍Redis的集群化方案。当然，集群化也意味着Redis部署架构更复杂，管理和维护起来成本也更高。而且在使用过程中，也会遇到很多问题，这也衍生出了不同的集群化解决方案，它们的侧重点各不相同。</p>
+<p>这篇文章我们先来整体介绍一下Redis集群化比较流行的几个解决方案，先对它们有整体的认识，后面我会专门针对我比较熟悉的集群方案进行详细的分析。</p>
+<h1 id="集群化方案"><a href="#集群化方案" class="headerlink" title="集群化方案"></a>集群化方案</h1><p>要想实现集群化，就必须部署多个主节点，每个主节点还有可能有多个从节点，以这样的部署结构组成的集群，才能更好地承担更大的流量请求和存储更多的数据。</p>
+<p>可以承担更大的流量是集群最基础的功能，一般集群化方案还包括了上面提到了数据持久化、数据复制、故障自动恢复功能，利用这些技术，来保证集群的高性能和高可用。</p>
+<p>另外，优秀的集群化方案还实现了<strong>在线水平扩容</strong>功能，当节点数量不够时，可以动态增加新的节点来提升整个集群的性能，而且这个过程是在线完成的，业务无感知。</p>
+<p>业界主流的Redis集群化方案主要包括以下几个：</p>
+<ul>
+<li>客户端分片</li>
+<li>Codis</li>
+<li>Twemproxy</li>
+<li>Redis Cluster</li>
+</ul>
+<p>它们还可以用<strong>是否中心化</strong>来划分，其中<strong>客户端分片、Redis Cluster属于无中心化的集群方案，Codis、Tweproxy属于中心化的集群方案。</strong></p>
+<p>是否中心化是指客户端访问多个Redis节点时，是<strong>直接访问</strong>还是通过一个<strong>中间层Proxy</strong>来进行操作，直接访问的就属于无中心化的方案，通过中间层Proxy访问的就属于中心化的方案，它们有各自的优劣，下面分别来介绍。</p>
+<h1 id="客户端分片"><a href="#客户端分片" class="headerlink" title="客户端分片"></a>客户端分片</h1><p>客户端分片主要是说，我们只需要部署多个Redis节点，具体如何使用这些节点，主要工作在客户端。</p>
+<p>客户端通过固定的Hash算法，针对不同的key计算对应的Hash值，然后对不同的Redis节点进行读写。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303742.jpg" alt="客户端分片集群模式"></p>
+<p>客户端分片需要业务开发人员事先评估业务的<strong>请求量和数据量</strong>，然后让DBA部署足够的节点交给开发人员使用即可。</p>
+<p>这个方案的优点是部署非常方便，业务需要多少个节点DBA直接部署交付即可，剩下的事情就需要业务开发人员根据节点数量来编写key的<strong>请求路由逻辑</strong>，制定一个规则，一般采用固定的Hash算法，把不同的key写入到不同的节点上，然后再根据这个规则进行数据读取。</p>
+<p>可见，它的缺点是业务开发人员<strong>使用Redis的成本较高</strong>，需要编写路由规则的代码来使用多个节点，而且如果事先对业务的数据量评估不准确，后期的<strong>扩容和迁移成本非常高</strong>，因为节点数量发生变更后，Hash算法对应的节点也就不再是之前的节点了。</p>
+<p>所以后来又衍生出了<strong>一致性哈希算法</strong>，就是为了解决当节点数量变更时，尽量减少数据的迁移和性能问题。</p>
+<p>这种客户端分片的方案一般用于业务数据量比较稳定，后期不会有大幅度增长的业务场景下使用，只需要前期评估好业务数据量即可。</p>
+<h1 id="Codis"><a href="#Codis" class="headerlink" title="Codis"></a>Codis</h1><p>随着业务和技术的发展，人们越发觉得，当我需要使用Redis时，我们<strong>不想关心集群后面有多少个节点</strong>，我们希望我们使用的Redis是一个大集群，当我们的业务量增加时，这个大集群可以<strong>增加新的节点来解决容量不够用和性能问题</strong>。</p>
+<p>这种方式就是<strong>服务端分片方案</strong>，客户端不需要关心集群后面有多少个Redis节点，只需要像使用一个Redis的方式去操作这个集群，这种方案将大大降低开发人员的使用成本，开发人员可以只需要关注业务逻辑即可，不需要关心Redis的资源问题。</p>
+<p>多个节点组成的集群，如何让开发人员像操作一个Redis时那样来使用呢？这就涉及到多个节点是如何组织起来提供服务的，一般我们会在客户端和服务端中间增加一个<strong>代理层</strong>，客户端只需要操作这个代理层，代理层实现了具体的请求转发规则，然后转发请求到后面的多个节点上，因此这种方式也叫做<strong>中心化</strong>方式的集群方案，<a href="https://github.com/CodisLabs/codis" target="_blank" rel="noopener">Codis</a>就是以这种方式实现的集群化方案。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303751.jpg" alt="Proxy集群模式"></p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303756.png" alt="Codis架构图"></p>
+<p>Codis是由国人前豌豆荚大神开发的，采用中心化方式的集群方案。因为需要代理层Proxy来进行所有请求的转发，所以对Proxy的性能要求很高，Codis采用Go语言开发，兼容了开发效率和性能。</p>
+<p>Codis包含了多个组件：</p>
+<ul>
+<li>codis-proxy：主要负责对请求的读写进行转发</li>
+<li>codis-dashbaord：统一的控制中心，整合了数据转发规则、故障自动恢复、数据在线迁移、节点扩容缩容、自动化运维API等功能</li>
+<li>codis-group：基于Redis 3.2.8版本二次开发的Redis Server，增加了异步数据迁移功能</li>
+<li>codis-fe：管理多个集群的UI界面</li>
+</ul>
+<p>可见Codis的组件还是挺多的，它的功能非常全，<strong>除了请求转发功能之外，还实现了在线数据迁移、节点扩容缩容、故障自动恢复等功能</strong>。</p>
+<p>Codis的Proxy就是负责请求转发的组件，它内部维护了请求转发的具体规则，Codis把整个集群划分为1024个槽位，在处理读写请求时，采用<code>crc32</code>Hash算法计算key的Hash值，然后再根据Hash值对1024个槽位取模，最终找到具体的Redis节点。</p>
+<p>Codis最大的特点就是可以在线扩容，在扩容期间不影响客户端的访问，也就是不需要停机。这对业务使用方是极大的便利，当集群性能不够时，就可以动态增加节点来提升集群的性能。</p>
+<p>为了实现在线扩容，保证数据在迁移过程中还有可靠的性能，Codis针对Redis进行了修改，增加了针对<strong>异步迁移数据</strong>相关命令，它基于Redis 3.2.8进行开发，上层配合Dashboard和Proxy组件，完成对业务无损的数据迁移和扩容功能。</p>
+<p>因此，要想使用Codis，必须使用它内置的Redis，这也就意味着Codis中的Redis是否能跟上官方最新版的功能特性，可能无法得到保障，这取决于Codis的维护方，目前Codis已经不再维护，所以使用Codis时只能使用3.2.8版的Redis，这是一个痛点。</p>
+<p>另外，由于集群化都需要部署多个节点，因此操作集群并不能完全像操作单个Redis一样实现所有功能，主要是对于<strong>操作多个节点可能产生问题的命令进行了禁用或限制</strong>，具体可参考<a href="https://github.com/CodisLabs/codis/blob/release3.2/doc/unsupported_cmds.md" target="_blank" rel="noopener">Codis不支持的命令列表</a>。</p>
+<p>但这不影响它是一个优秀的集群化方案，由于我司使用Redis集群方案较早，那时Redis Cluster还不够成熟，所以我司使用的Redis集群方案就是Codis。目前我的工作主要是围绕Codis展开的，我们公司对Codis进行了定制开发，还对Redis进行了一些改造，让Codis支持了跨多个数据中心的数据同步，因此我对Codis的代码比较熟悉，后面会专门写一些文章来剖析Codis的实现原理，学习它的原理，这对我们理解分布式存储有很大的帮助！</p>
+<h1 id="Twemproxy"><a href="#Twemproxy" class="headerlink" title="Twemproxy"></a>Twemproxy</h1><p><a href="https://github.com/twitter/twemproxy" target="_blank" rel="noopener">Twemproxy</a>是由Twitter开源的集群化方案，它既可以做Redis Proxy，还可以做Memcached Proxy。</p>
+<p>它的功能比较单一，只实现了请求路由转发，没有像Codis那么全面有在线扩容的功能，它解决的重点就是把客户端分片的逻辑统一放到了Proxy层而已，其他功能没有做任何处理。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303761.jpg" alt="Twemproxy架构图"></p>
+<p>Tweproxy推出的时间最久，在早期没有好的服务端分片集群方案时，应用范围很广，而且性能也极其稳定。</p>
+<p>但它的痛点就是<strong>无法在线扩容、缩容</strong>，这就导致运维非常不方便，而且也没有友好的运维UI可以使用。Codis就是因为在这种背景下才衍生出来的。</p>
+<h1 id="Redis-Cluster"><a href="#Redis-Cluster" class="headerlink" title="Redis Cluster"></a>Redis Cluster</h1><p>采用中间加一层Proxy的中心化模式时，这就对Proxy的要求很高，因为它一旦出现故障，那么操作这个Proxy的所有客户端都无法处理，要想实现Proxy的高可用，还需要另外的机制来实现，例如Keepalive。</p>
+<p>而且增加一层Proxy进行转发，必然会有一定的<strong>性能损耗</strong>，那么除了客户端分片和上面提到的中心化的方案之外，还有比较好的解决方案么？</p>
+<p>Redis官方推出的Redis Cluster另辟蹊径，它没有采用中心化模式的Proxy方案，而是把请求转发逻辑一部分放在客户端，一部分放在了服务端，它们之间互相配合完成请求的处理。</p>
+<p>Redis Cluster是在Redis 3.0推出的，早起的Redis Cluster由于没有经过严格的测试和生产验证，所以并没有广泛推广开来。也正是在这样的背景下，业界衍生了出了上面所说的中心化集群方案：Codis和Tweproxy。</p>
+<p>但随着Redis的版本迭代，Redis官方的Cluster也越来越稳定，更多人开始采用官方的集群化方案。也正是因为它是官方推出的，所以它的持续维护性可以得到保障，这就比那些第三方的开源方案更有优势。</p>
+<p>Redis Cluster没有了中间的Proxy代理层，那么是如何进行请求的转发呢？</p>
+<p>Redis把请求转发的逻辑放在了Smart Client中，要想使用Redis Cluster，必须升级Client SDK，这个SDK中内置了请求转发的逻辑，所以业务开发人员同样不需要自己编写转发规则，Redis Cluster采用16384个槽位进行路由规则的转发。</p>
+<p><img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/2020/07/15941324303764.jpg" alt="Redis Cluster"></p>
+<p>没有了Proxy层进行转发，客户端可以直接操作对应的Redis节点，这样就少了Proxy层转发的性能损耗。</p>
+<p>Redis Cluster也提供了<strong>在线数据迁移、节点扩容缩容</strong>等功能，内部还<strong>内置了哨兵完成故障自动恢复功能</strong>，可见它是一个集成所有功能于一体的Cluster。因此它在部署时非常简单，不需要部署过多的组件，对于运维极其友好。</p>
+<p>Redis Cluster在节点数据迁移、扩容缩容时，对于客户端的请求处理也做了相应的处理。当客户端访问的数据正好在迁移过程中时，服务端与客户端制定了一些协议，来告知客户端去正确的节点上访问，帮助客户端订正自己的路由规则。</p>
+<p>虽然Redis Cluster提供了在线数据迁移的功能，但它的迁移性能并不高，迁移过程中遇到大key时还有可能长时间阻塞迁移的两个节点，这个功能相较于Codis来说，Codis数据迁移性能更好。这里先了解一个大概就好，后面我会专门针对Codis和Redis Cluster在线迁移功能的性能对比写一些文章。</p>
+<p>现在越来越多的公司开始采用Redis Cluster，有能力的公司还在它的基础上进行了二次开发和定制，来解决Redis Cluster存在的一些问题，我们期待Redis Cluster未来有更好的发展。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>比较完了这些集群化方案，下面我们来总结一下。</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>客户端分片</th>
+<th>Codis</th>
+<th>Tweproxy</th>
+<th>Redis Cluster</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>集群模式</td>
+<td>无中心化</td>
+<td>中心化</td>
+<td>中心化</td>
+<td>无中心化</td>
+</tr>
+<tr>
+<td>使用方式</td>
+<td>客户端编写路由规则代码，直连Redis</td>
+<td>通过Proxy访问</td>
+<td>通过Proxy访问</td>
+<td>使用Smart Client直连Redis，Smart Client内置路由规则</td>
+</tr>
+<tr>
+<td>性能</td>
+<td>高</td>
+<td>有性能损耗</td>
+<td>有性能损耗</td>
+<td>高</td>
+</tr>
+<tr>
+<td>支持的数据库数量</td>
+<td>多个</td>
+<td>多个</td>
+<td>多个</td>
+<td>一个</td>
+</tr>
+<tr>
+<td>Pipeline</td>
+<td>支持</td>
+<td>支持</td>
+<td>支持</td>
+<td>仅支持单个节点Pipeline，不支持跨节点</td>
+</tr>
+<tr>
+<td>需升级客户端SDK？</td>
+<td>否</td>
+<td>否</td>
+<td>否</td>
+<td>是</td>
+</tr>
+<tr>
+<td>支持在线水平扩容？</td>
+<td>不支持</td>
+<td>支持</td>
+<td>不支持</td>
+<td>支持</td>
+</tr>
+<tr>
+<td>Redis版本</td>
+<td>支持最新版</td>
+<td>仅支持3.2.8，升级困难</td>
+<td>支持最新版</td>
+<td>支持最新版</td>
+</tr>
+<tr>
+<td>可维护性</td>
+<td>运维简单，开发人员使用成本高</td>
+<td>组件较多，部署复杂</td>
+<td>只有Proxy组件，部署简单</td>
+<td>运维简单，官方持续维护</td>
+</tr>
+<tr>
+<td>故障自动恢复</td>
+<td>需部署哨兵</td>
+<td>需部署哨兵</td>
+<td>需部署哨兵</td>
+<td>内置哨兵逻辑，无需额外部署</td>
+</tr>
+</tbody></table>
+<p>业界主流的集群化方案就是以上这些，并对它们的特点和区别做了简单的介绍，我们在开发过程中选择自己合适的集群方案即可，但最好是理解它们的实现原理，在使用过程中遇到问题才可以更从容地去解决。</p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div>如果此文章能给您带来小小的工作效率提升，不妨小额赞助我一下，以鼓励我写出更好的文章！</div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    打赏
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/wx-qr-code.png" alt="Kaito 微信支付">
+        <p>微信支付</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+<div>
+<ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者： </strong>Kaito
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://kaito-kidd.com/2020/07/07/redis-cluster-codis-twemproxy/" title="Redis集群化方案对比：Codis、Twemproxy、Redis Cluster">http://kaito-kidd.com/2020/07/07/redis-cluster-codis-twemproxy/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>本博客所有文章未经允许禁止转载！如需转载，请联系作者或关注微信公众号「水滴与银弹」申请授权。
+  </li>
+</ul>
+</div>
+
+        
+
+  <div class="followme">
+    <div class="social-list">
+
+        <div class="social-item">
+            <img src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/qr_block.jpg" width="200" height="200">
+            <center><strong>关注「水滴与银弹」公众号，看更多硬核技术文章。</strong></center>
+        </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/redis/" rel="tag"><i class="fa fa-tag"></i> redis</a>
+              <a href="/tags/%E9%AB%98%E5%8F%AF%E7%94%A8/" rel="tag"><i class="fa fa-tag"></i> 高可用</a>
+              <a href="/tags/codis/" rel="tag"><i class="fa fa-tag"></i> codis</a>
+              <a href="/tags/twemproxy/" rel="tag"><i class="fa fa-tag"></i> twemproxy</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/07/04/redis-best-practices/" rel="prev" title="Redis最佳实践：业务层面和运维层面优化">
+      <i class="fa fa-chevron-left"></i> Redis最佳实践：业务层面和运维层面优化
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/09/09/how-i-learned-redis/" rel="next" title="我是如何学习Redis的？高效学习Redis的路径和方法分享">
+      我是如何学习Redis的？高效学习Redis的路径和方法分享 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+    <div class="comments" id="valine-comments"></div>
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#集群化方案"><span class="nav-number">1.</span> <span class="nav-text">集群化方案</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端分片"><span class="nav-number">2.</span> <span class="nav-text">客户端分片</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Codis"><span class="nav-number">3.</span> <span class="nav-text">Codis</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Twemproxy"><span class="nav-number">4.</span> <span class="nav-text">Twemproxy</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Redis-Cluster"><span class="nav-number">5.</span> <span class="nav-text">Redis Cluster</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="Kaito"
+      src="https://kaito-blog-1253469779.cos.ap-beijing.myqcloud.com/15584.jpg">
+  <p class="site-author-name" itemprop="name">Kaito</p>
+  <div class="site-description" itemprop="description">坐标北京，9年+工作经验，做过UGC高并发后端服务研发，目前从事基础架构&云原生方向，涉及领域包括：Redis、中间件、基础架构、异地多活、K8s、云原生。追求技术，关注互联网动态。工具控、电影迷！</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">85</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">13</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">62</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="cc-license motion-element" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="/images/cc-by-nc-sa.svg" alt="Creative Commons"></a>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Kaito</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-chart-area"></i>
+    </span>
+      <span class="post-meta-item-text">站点总字数：</span>
+    <span title="站点总字数">435k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+      <span class="post-meta-item-text">站点阅读时长 &asymp;</span>
+    <span title="站点阅读时长">12:05</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+
+<script>
+NexT.utils.loadComments(document.querySelector('#valine-comments'), () => {
+  NexT.utils.getScript('//unpkg.com/valine/dist/Valine.min.js', () => {
+    var GUEST = ['nick', 'mail', 'link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item => {
+      return GUEST.includes(item);
+    });
+    new Valine({
+      el         : '#valine-comments',
+      verify     : false,
+      notify     : true,
+      appId      : 'hk0NEMkBFXhLXkpBOAkmNgK1-gzGzoHsz',
+      appKey     : 'ex6vIdRYs7yCbA7x21gaNCeu',
+      placeholder: "欢迎和我一起交流！(支持markdown语法)",
+      avatar     : 'mm',
+      meta       : guest,
+      pageSize   : '10' || 10,
+      visitor    : true,
+      lang       : 'zh-cn' || 'zh-cn',
+      path       : location.pathname,
+      recordIP   : true,
+      serverURLs : ''
+    });
+  }, window.Valine);
+});
+</script>
+
+</body>
+</html>
